@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pedon"
+dynamic = ["version"]
+authors = [{ name = "Martin Vonk", email = "vonk.mart@gmail.com" }]
+description = "Python package for (unsaturated) soil properties including pedotransfer functions"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = ["numpy", "matplotlib", "pandas", "latexify-py"]
+classifiers = [
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Topic :: Scientific/Engineering :: Hydrology',
+        'Intended Audience :: Science/Research',
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+]
+
+[project.urls]
+homepage = "https://github.com/martinvonk/pedon"
+repository = "https://github.com/martinvonk/pedon"
+
+[project.optional-dependencies]
+linting = ["flake8"]
+formatting = ["black[jupyter]", "isort"]
+typing = ["mypy", "pandas-stubs"]
+pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar"]
+coveraging = ["coverage"]
+dev = ["pedon[linting,formatting,typing,pytesting,coveraging]"]
+
+[tool.setuptools.dynamic]
+version = { attr = "pedon._version.__version__" }
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ['matplotlib.*', 'latexify.*']
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    requires = tox>=4
+    env_list = format, type, lint, py{310,311}
+
+    [testenv]
+    description = run unit tests
+    extras = pytesting
+    commands =
+            pytest tests
+
+    [testenv:format]
+    description = run formatters
+    basepython = python3.10
+    extras = formatting
+    commands =
+            black src
+            isort src
+
+    [testenv:type]
+    description = run type checks
+    basepython = python3.10
+    extras = typing
+    commands =
+            mypy src
+
+    [testenv:lint]
+    description = run linters
+    basepython = python3.10
+    extras = linting
+    commands =
+            flake8 src --max-line-length=88
+
+    [testenv:coverage]
+    description = get coverage report xml
+    basepython = 3.10
+    extras = coveraging,pytesting
+    commands =
+            coverage run -m pytest tests
+            coverage xml
+"""
