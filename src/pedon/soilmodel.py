@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from numpy import abs as npabs
-from numpy import full, log, e
-from traitlets import Float
+from numpy import full, log, e, exp
 
 from ._typing import FloatArray
 
@@ -91,10 +90,9 @@ class Gardner:
         return 1 / (1 + npabs(h / self.a) ** self.b)
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
-        if s is None:
-            return self.a / self.b + npabs(h) ** self.m
-        else:
-            return self.a * self.theta_r + s * (self.theta_s - self.theta_r) ** self.m
+        if s is not None:
+            raise NotImplementedError("")
+        return self.k_s * exp(-self.a * h)
 
 
 @dataclass
@@ -104,15 +102,18 @@ class Sorab:
     beta: float  # n
     k_s: float
     brook: float  # brooks-corey l
+    theta_s: float | None = None
 
     def __post_init__(self):
         self.gamma = 1 - 1 / self.beta  # m
 
-    def theta(self, h: FloatArray, theta_s: FloatArray) -> FloatArray:
-        return (self.sr + self.s(h) * (1 - self.sr)) * theta_s
+    def theta(self, h: FloatArray) -> FloatArray:
+        if self.theta_s is not None:
+            return (self.sr + self.s(h) * (1 - self.sr)) * self.theta_s
+        raise ValueError("theta_s must not be none")
 
     def s(self, h: FloatArray) -> FloatArray:
-        return (1 + self.alpha * h**self.beta) ** -self.gamma
+        return (1 + self.alpha * npabs(h)**self.beta) ** -self.gamma
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is None:
