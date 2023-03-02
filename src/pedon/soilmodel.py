@@ -85,38 +85,16 @@ class Gardner:
     k_s: float
 
     def theta(self, h: FloatArray) -> FloatArray:
-        return self.a * npabs(h) ** -self.b
+        return self.theta_r + (self.theta_s - self.theta_r) * self.s(h)
 
     def s(self, h: FloatArray) -> FloatArray:
-        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+        return 1 / (1 + npabs(h / self.a) ** self.b)
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is None:
             return self.a / self.b + npabs(h) ** self.m
         else:
             return self.a * self.theta_r + s * (self.theta_s - self.theta_r) ** self.m
-
-
-@dataclass
-class Haverkamp:
-    theta_r: float
-    theta_s: float
-    alpha: float
-    beta: float
-    A: float
-    B: float
-    k_s: float
-
-    def theta(self, h: FloatArray) -> FloatArray:
-        return self.theta_r + (self.theta_s - self.theta_r) * self.s(h)
-
-    def s(self, h: FloatArray) -> FloatArray:
-        return 1 / (1 + npabs(h / self.alpha) ** self.beta)
-
-    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
-        if s is not None:
-            raise NotImplementedError("k can only be calcuated from h")
-        return self.k_s / (1 + (h / self.A) ** self.B)
 
 
 @dataclass
