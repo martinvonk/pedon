@@ -1,6 +1,7 @@
-from numpy.typing import NDArray
-from numpy import float64
 from typing import Protocol
+
+from numpy import float64
+from numpy.typing import NDArray
 
 FloatArray = float | NDArray[float64]
 
