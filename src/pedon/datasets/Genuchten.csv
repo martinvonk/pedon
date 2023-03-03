@@ -11,42 +11,42 @@ HYDRUS_Silty Clay Loam,HYDRUS,,Silty Clay Loam,1.68,0.089,0.43,0.01,1.23,0.5
 HYDRUS_Sandy Clay,HYDRUS,,Sandy Clay,2.88,0.1,0.38,0.027,1.23,0.5
 HYDRUS_Silty Clay,HYDRUS,,Silty Clay,0.48,0.07,0.36,0.005,1.09,0.5
 HYDRUS_Clay,HYDRUS,,Clay,4.8,0.068,0.38,0.008,1.09,0.5
-B01,Staring,leemarm zeer fijn tot matig fijn zand,Sand,31.23,0.02,0.427,0.0217,1735,0.981
-B02,Staring,zwak lemig zeer fijn tot matig fijn zand,Sand,83.24,0.02,0.434,0.0216,1349,7.202
-B03,Staring,sterk lemig zeer fijn tot matig fijn zand,Sand,19.08,0.02,0.443,0.015,1505,0.139
-B04,Staring,zeer sterk lemig zeer fijn tot matig fijn zand,Sand,34.88,0.02,0.462,0.0149,1397,0.295
-B05,Staring,grof zand,Sand,63.65,0.01,0.381,0.0428,1808,0.024
-B06,Staring,keileem,Sand,104.1,0.01,0.385,0.0209,1242,-1.2
-B07,Staring,zeer lichte zavel,Sand,14.58,0,0.401,0.0183,1248,0.952
-B08,Staring,matig lichte zavel,Sand,3,0.01,0.433,0.0105,1278,-1.919
-B09,Staring,zware zavel,Sand,1.75,0,0.43,0.007,1267,-2.387
-B10,Staring,lichte klei,Clay,3.83,0.01,0.448,0.0128,1135,4.581
-B11,Staring,matig zware klei,Clay,6.31,0.01,0.591,0.0216,1107,-5.549
-B12,Staring,zeer zware klei,Clay,2.25,0.01,0.53,0.0166,1091,-4.494
-B13,Staring,zandige leem,Sandy Loam � � �,29.83,0.01,0.416,0.0084,1437,-1.357
-B14,Staring,siltige leem,Silt Loam,0.9,0.01,0.417,0.0054,1302,-0.335
-B15,Staring,venig zand,Peat,87.45,0.01,0.528,0.0237,1282,-1478
-B16,Staring,zandig veen en veen,Peat,12.36,0.01,0.786,0.0211,1279,-1221
-B17,Staring,venige klei,Peat,4.48,0,0.719,0.0191,1137,0
-B18,Staring,kleiig veen,Peat,13.14,0,0.765,0.0205,1151,0
-O01,Staring,leemarm zeer fijn tot matig fijn zand,Sand,22.32,0.01,0.366,0.016,2163,2.868
-O02,Staring,zwak lemig zeer fijn tot matig fijn zand,Sand,22.76,0.02,0.387,0.0161,1524,2.44
-O03,Staring,sterk lemig zeer fijn tot matig fijn zand,Sand,12.37,0.01,0.34,0.0172,1703,0
-O04,Staring,zeer sterk lemig zeer fijn tot matig fijn zand,Sand,25.81,0.01,0.364,0.0136,1488,2.179
-O05,Staring,grof zand,Sand,17.42,0.01,0.337,0.0303,2888,0.074
-O06,Staring,keileem,Sand,32.83,0.01,0.333,0.016,1289,-1.01
-O07,Staring,beekleem,Sand,37.55,0.01,0.513,0.012,1153,-2.013
-O08,Staring,zeer lichte zavel,Sand,8.64,0,0.454,0.0113,1346,-0.904
-O09,Staring,matig lichte zavel,Sand,3.77,0,0.458,0.0097,1376,-1.013
-O10,Staring,zware zavel,Sand,2.3,0.01,0.472,0.01,1246,-0.793
-O11,Staring,lichte klei,Clay,2.12,0,0.444,0.0143,1126,2.357
-O12,Staring,matig zware klei,Clay,1.08,0.01,0.561,0.0088,1158,-3.172
+B01,Staring,leemarm zeer fijn tot matig fijn zand,Sand,31.23,0.02,0.427,0.0217,1.735,0.981
+B02,Staring,zwak lemig zeer fijn tot matig fijn zand,Sand,83.24,0.02,0.434,0.0216,1.349,7.202
+B03,Staring,sterk lemig zeer fijn tot matig fijn zand,Sand,19.08,0.02,0.443,0.015,1.505,0.139
+B04,Staring,zeer sterk lemig zeer fijn tot matig fijn zand,Sand,34.88,0.02,0.462,0.0149,1.397,0.295
+B05,Staring,grof zand,Sand,63.65,0.01,0.381,0.0428,1.808,0.024
+B06,Staring,keileem,Sand,104.1,0.01,0.385,0.0209,1.242,-1.2
+B07,Staring,zeer lichte zavel,Sand,14.58,0,0.401,0.0183,1.248,0.952
+B08,Staring,matig lichte zavel,Sand,3,0.01,0.433,0.0105,1.278,-1.919
+B09,Staring,zware zavel,Sand,1.75,0,0.43,0.007,1.267,-2.387
+B10,Staring,lichte klei,Clay,3.83,0.01,0.448,0.0128,1.135,4.581
+B11,Staring,matig zware klei,Clay,6.31,0.01,0.591,0.0216,1.107,-5.549
+B12,Staring,zeer zware klei,Clay,2.25,0.01,0.53,0.0166,1.091,-4.494
+B13,Staring,zandige leem,Sandy Loam,29.83,0.01,0.416,0.0084,1.437,-1.357
+B14,Staring,siltige leem,Silt Loam,0.9,0.01,0.417,0.0054,1.302,-0.335
+B15,Staring,venig zand,Peat,87.45,0.01,0.528,0.0237,1.282,-1478
+B16,Staring,zandig veen en veen,Peat,12.36,0.01,0.786,0.0211,1.279,-1221
+B17,Staring,venige klei,Peat,4.48,0,0.719,0.0191,1.137,0
+B18,Staring,kleiig veen,Peat,13.14,0,0.765,0.0205,1.151,0
+O01,Staring,leemarm zeer fijn tot matig fijn zand,Sand,22.32,0.01,0.366,0.016,2.163,2.868
+O02,Staring,zwak lemig zeer fijn tot matig fijn zand,Sand,22.76,0.02,0.387,0.0161,1.524,2.44
+O03,Staring,sterk lemig zeer fijn tot matig fijn zand,Sand,12.37,0.01,0.34,0.0172,1.703,0
+O04,Staring,zeer sterk lemig zeer fijn tot matig fijn zand,Sand,25.81,0.01,0.364,0.0136,1.488,2.179
+O05,Staring,grof zand,Sand,17.42,0.01,0.337,0.0303,2.888,0.074
+O06,Staring,keileem,Sand,32.83,0.01,0.333,0.016,1.289,-1.01
+O07,Staring,beekleem,Sand,37.55,0.01,0.513,0.012,1.153,-2.013
+O08,Staring,zeer lichte zavel,Sand,8.64,0,0.454,0.0113,1.346,-0.904
+O09,Staring,matig lichte zavel,Sand,3.77,0,0.458,0.0097,1.376,-1.013
+O10,Staring,zware zavel,Sand,2.3,0.01,0.472,0.01,1.246,-0.793
+O11,Staring,lichte klei,Clay,2.12,0,0.444,0.0143,1.126,2.357
+O12,Staring,matig zware klei,Clay,1.08,0.01,0.561,0.0088,1.158,-3.172
 O13,Staring,zeer zware klei,Clay,9.69,0.01,0.573,0.0279,1.08,-6.091
-O14,Staring,zandige leem,Sandy Loam,2.5,0.01,0.394,0.0033,1617,0.514
-O15,Staring,siltige leem,Silt Loam,2.79,0.01,0.41,0.0078,1287,0
-O16,Staring,oligotroof veen,Peat,1.46,0,0.889,0.0097,1364,-0.665
-O17,Staring,mesotroof en eutroof veen,Peat,3.4,0.01,0.849,0.0119,1272,-1.249
-O18,Staring,moerige tussenlaag,Peat,35.95,0.01,0.58,0.0127,1316,-0.786
+O14,Staring,zandige leem,Sandy Loam,2.5,0.01,0.394,0.0033,1.617,0.514
+O15,Staring,siltige leem,Silt Loam,2.79,0.01,0.41,0.0078,1.287,0
+O16,Staring,oligotroof veen,Peat,1.46,0,0.889,0.0097,1.364,-0.665
+O17,Staring,mesotroof en eutroof veen,Peat,3.4,0.01,0.849,0.0119,1.272,-1.249
+O18,Staring,moerige tussenlaag,Peat,35.95,0.01,0.58,0.0127,1.316,-0.786
 VS2D_Medium Sand,VS2D,,Medium Sand,40000,0.02,0.375,0.0431,3.1,0.5
 VS2D_Sandy Loam,VS2D,,Sandy Loam,70,0.15,0.496,0.00847,4.8,0.5
 VS2D_Silt Loam,VS2D,,Silt Loam,22.5,0.17,0.43,0.00505,7.0,0.5
