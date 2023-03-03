@@ -17,3 +17,7 @@ class SoilModel(Protocol):
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         """Method to calcualte the permeability from the pressure head h"""
         ...
+
+    def plot(self):
+        """Method to plot the soil water retention curve"""
+        ...

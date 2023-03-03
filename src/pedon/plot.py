@@ -4,7 +4,10 @@ from ._typing import SoilModel
 
 
 def swrc(
-    sm: SoilModel, saturation: bool = False, ax: plt.Axes | None = None, **kwargs: dict
+    sm: SoilModel,
+    saturation: bool = False,
+    ax: plt.Axes | None = None,
+    **kwargs: dict,
 ) -> plt.Axes:
     """Plot soil water retention curve"""
 
@@ -16,7 +19,7 @@ def swrc(
 
     if saturation:
         sw = sm.s(h=h)
-        # ax.set_xlim(-0.01, 1.01)
+        ax.set_xlim(-0.01, 1.01)
     else:
         sw = sm.theta(h=h)
 
