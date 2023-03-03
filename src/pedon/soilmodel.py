@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from numpy import abs as npabs
 from numpy import exp, full, linspace, log, logspace
 
-from ._typing import FloatArray, SoilModel
+from ._typing import FloatArray
 
 
 class SoilModel(Protocol):

@@ -3,8 +3,7 @@ from pathlib import Path
 
 from pandas import read_csv
 
-from ._typing import SoilModel
-from .soilmodel import Brooks, Fredlund, Gardner, Genuchten, Sorab
+from .soilmodel import SoilModel, Brooks, Fredlund, Gardner, Genuchten, Sorab
 
 
 @dataclass
