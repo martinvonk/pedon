@@ -1,0 +1,12 @@
+name,source,description,soil type,k_s,theta_r,theta_s,h_b,l
+VS2D_Del Monte Sand,VS2D,20 mesh,Sand,700000,0.011,0.36,0.00112,2.5
+VS2D_Fresno Medium Sand,VS2D,,Sand,40000,0,0.375,0.00149,0.84
+VS2D_Unconsolidated Sand,VS2D,,Sand,850,0.09,0.424,0.00114,4.4
+VS2D_Sand,VS2D,,Sand,820,0,0.435,0.00196,0.84
+VS2D_Fine Sand,VS2D,"G.E. 13, alpha 0.0104 in VS2DRTI",Sand,210,0.063,0.377,0.0082,3.7
+VS2D_Columbia Sandy Loam,VS2D,,Sandy Loam,70,0.11,0.496,0.0085,1.6
+VS2D_Touchet Silt Loam,VS2D,G.E. 3,Silt Loam,22,0.095,0.43,0.0145,1.7
+VS2D_Hygiene Sandstone,VS2D,,Sand,15,0.13,0.25,0.0106,2.9
+VS2D_Adelanto Loam,VS2D,,Loam,3.9,0.13,0.42,0.0141,0.51
+VS2D_Limon Silt,VS2D,imbibition data,Silt,1.3,0,0.449,0.00338,0.22
+VS2D_Yolo Light Clay,VS2D,alpha 0.0249 in VS2DRTI,Clay,1.1,0.055,0.495,0.00181,0.25
