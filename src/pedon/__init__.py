@@ -1,2 +1,2 @@
-from . import plot, soilmodel
-from .soilmodel import Brooks, Fredlund, Gardner, Genuchten, Soil, Sorab
+from . import plot, soilmodel, soil
+from .soilmodel import Brooks, Fredlund, Gardner, Genuchten, Sorab
