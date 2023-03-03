@@ -24,7 +24,7 @@ def get_soil(name: str, soilmodelname: str = "Genuchten") -> Soil:
         "Sorab": Sorab,
         "Fredlund": Fredlund,
     }
-    path = Path(f"src/pedon/datasets/{soilmodelname}.csv")
+    path = Path(__file__).parent / f"datasets/{soilmodelname}.csv"
     ser = read_csv(path, index_col=["name"]).loc[name].to_dict()
     soil = Soil(
         name=name,
