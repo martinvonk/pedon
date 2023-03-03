@@ -15,7 +15,7 @@ class SoilSample:
     om_p: float  # organic matter %
 
 
-def wosten(sm: SoilSample, ts: bool = False):
+def wosten(sm: SoilSample, ts: bool = False) -> Genuchten:
     topsoil = 1.0 * ts
 
     theta_s = (
@@ -93,18 +93,25 @@ def wosten(sm: SoilSample, ts: bool = False):
         - 0.03305 * topsoil * sm.silt_p
     )
     theta_r = 0.01
-    return theta_r, theta_s, exp(ks_), exp(alpha_), exp(n_), exp(l_)
+    return Genuchten(
+        k_s=exp(ks_),
+        theta_r=theta_r,
+        theta_s=theta_s,
+        alpha=exp(alpha_),
+        n=exp(n_),
+        l=exp(l_),
+    )
 
 
-def cosby(sm: SoilSample):
+def cosby(sm: SoilSample) -> Brooks:
     c = sm.clay_p / 100
     s = sm.sand_p / 100
     b = 3.100 + 15.70 * c - 0.300 * s
     theta_s = 0.505 - 0.037 * c - 0.142 * s
     psi_s = 0.01 * 10 ** (2.170 - 0.630 * c - 1.580 * s)
-    ks = 10 ** (-0.600 - 0.640 * c + 1.260 * s) * 25.2 / 3600
+    k_s = 10 ** (-0.600 - 0.640 * c + 1.260 * s) * 25.2 / 3600
     theta_r = 0.0
     labda = 1 / b
-    ks = ks * 8640000 / 1000  # kg/m2/s to cm/d
+    k_s = k_s * 8640000 / 1000  # kg/m2/s to cm/d
     psi_s = psi_s * 100  # m to cm
-    return theta_r, theta_s, ks, psi_s, labda
+    return Brooks(k_s=k_s, theta_r=theta_r, theta_s=theta_s, h_b=psi_s, l=labda)
