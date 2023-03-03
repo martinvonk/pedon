@@ -1,12 +1,14 @@
 from dataclasses import dataclass
+
 from numpy import abs as npabs
-from numpy import full, log, exp, linspace
+from numpy import exp, full, linspace, log
+
+from ._typing import FloatArray, SoilModel
 from .plot import swrc
-from ._typing import FloatArray
 
 
 @dataclass
-class Genuchten:
+class Genuchten(SoilModel):
     k_s: float
     theta_r: float
     theta_s: float
@@ -38,7 +40,7 @@ class Genuchten:
 
 
 @dataclass
-class Brooks:
+class Brooks(SoilModel):
     k_s: float
     theta_r: float
     theta_s: float
@@ -81,7 +83,7 @@ class Brooks:
 
 
 @dataclass
-class Gardner:
+class Gardner(SoilModel):
     k_s: float
     theta_r: float
     theta_s: float
@@ -107,7 +109,7 @@ class Gardner:
 
 
 @dataclass
-class Sorab:
+class Sorab(SoilModel):
     k_s: float
     sr: float  # theta_r / theta_s
     alpha: float  # alpha
@@ -136,7 +138,7 @@ class Sorab:
 
 
 @dataclass
-class Fredlund:
+class Fredlund(SoilModel):
     k_s: float
     theta_s: float
     a: float
