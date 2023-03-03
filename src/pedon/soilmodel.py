@@ -1,14 +1,33 @@
 from dataclasses import dataclass
+from typing import Protocol
 
+import matplotlib.pyplot as plt
 from numpy import abs as npabs
-from numpy import exp, full, linspace, log
+from numpy import exp, full, linspace, log, logspace
 
 from ._typing import FloatArray, SoilModel
-from .plot import swrc
+
+
+class SoilModel(Protocol):
+    def theta(self, h: FloatArray) -> FloatArray:
+        """Method to calculate the soil moisture content from the pressure head h"""
+        ...
+
+    def s(self, h: FloatArray) -> FloatArray:
+        """Method to calculate the effective saturation from the pressure head h"""
+        ...
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        """Method to calcualte the permeability from the pressure head h"""
+        ...
+
+    def plot(self):
+        """Method to plot the soil water retention curve"""
+        ...
 
 
 @dataclass
-class Genuchten(SoilModel):
+class Genuchten:
     k_s: float
     theta_r: float
     theta_s: float
@@ -36,11 +55,11 @@ class Genuchten(SoilModel):
         return self.k_s * s**self.l * (1 - (1 - s ** (1 / self.m)) ** self.m) ** 2
 
     def plot(self):
-        return swrc(self)
+        return plot_swrc(self)
 
 
 @dataclass
-class Brooks(SoilModel):
+class Brooks:
     k_s: float
     theta_r: float
     theta_s: float
@@ -79,11 +98,11 @@ class Brooks(SoilModel):
         return self.k_s * s ** (3 + 2 / self.l)
 
     def plot(self):
-        return swrc(self)
+        return plot_swrc(self)
 
 
 @dataclass
-class Gardner(SoilModel):
+class Gardner:
     k_s: float
     theta_r: float
     theta_s: float
@@ -105,11 +124,11 @@ class Gardner(SoilModel):
         return self.k_s * exp(-self.a * h)
 
     def plot(self):
-        return swrc(self)
+        return plot_swrc(self)
 
 
 @dataclass
-class Sorab(SoilModel):
+class Sorab:
     k_s: float
     sr: float  # theta_r / theta_s
     alpha: float  # alpha
@@ -134,11 +153,11 @@ class Sorab(SoilModel):
         return self.k_s * s**self.brook
 
     def plot(self):
-        return swrc(self)
+        return plot_swrc(self)
 
 
 @dataclass
-class Fredlund(SoilModel):
+class Fredlund:
     k_s: float
     theta_s: float
     a: float
@@ -191,4 +210,51 @@ class Fredlund(SoilModel):
         return self.k_s * (teller / noemer)
 
     def plot(self):
-        return swrc(self)
+        return plot_swrc(self)
+
+
+def plot_swrc(
+    sm: SoilModel,
+    saturation: bool = False,
+    ax: plt.Axes | None = None,
+    **kwargs: dict,
+) -> plt.Axes:
+    """Plot soil water retention curve"""
+
+    if ax is None:
+        _, ax = plt.subplots(1, 1, figsize=(3, 6))
+        ax.set_yscale("log")
+
+    h = -logspace(-6, 10, num=1000)
+
+    if saturation:
+        sw = sm.s(h=h)
+        ax.set_xlim(-0.01, 1.01)
+    else:
+        sw = sm.theta(h=h)
+
+    ax.plot(sw, -h, label=sm.__class__.__name__, **kwargs)
+    ax.set_ylim(1e-3, 1e6)
+    ax.grid(True)
+    return ax
+
+
+def plot_hcf(
+    sm: SoilModel,
+    ax: plt.Axes | None = None,
+    **kwargs: dict,
+) -> plt.Axes:
+    """Plot the hydraulic conductivity function"""
+
+    if ax is None:
+        _, ax = plt.subplots(1, 1, figsize=(3, 6))
+        ax.set_yscale("log")
+
+    h = logspace(-6, 10, num=1000)
+
+    k = sm.k(h=h)
+
+    ax.plot(k, h, label=sm.__class__.__name__, **kwargs)
+    ax.set_ylim(1e-3, 1e6)
+    ax.grid(True)
+    return ax
