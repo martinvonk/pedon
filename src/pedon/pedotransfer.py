@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from numpy import log, exp
 
-from .soilmodel import Genuchten, Brooks
+from numpy import exp, log
+
+from .soilmodel import Brooks, Genuchten
 
 
 @dataclass
