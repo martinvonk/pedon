@@ -36,6 +36,9 @@ dev = ["pedon[linting,formatting,typing,pytesting,coveraging]"]
 [tool.setuptools.dynamic]
 version = { attr = "pedon._version.__version__" }
 
+[tool.setuptools.package-data]
+myModule = ["*.csv"]
+
 [tool.black]
 line-length = 88
 
