@@ -37,7 +37,7 @@ dev = ["pedon[linting,formatting,typing,pytesting,coveraging]"]
 version = { attr = "pedon._version.__version__" }
 
 [tool.setuptools.package-data]
-myModule = ["*.csv"]
+myModule = ["*.csv", "*.xlsx"]
 
 [tool.black]
 line-length = 88
