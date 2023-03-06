@@ -249,6 +249,7 @@ def plot_hcf(
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=(3, 6))
         ax.set_yscale("log")
+        ax.set_xscale("log")
 
     h = logspace(-6, 10, num=1000)
 
@@ -256,5 +257,6 @@ def plot_hcf(
 
     ax.plot(k, h, label=sm.__class__.__name__, **kwargs)
     ax.set_ylim(1e-3, 1e6)
+    ax.set_xlim()
     ax.grid(True)
     return ax
