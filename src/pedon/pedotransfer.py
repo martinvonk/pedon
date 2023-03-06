@@ -1,10 +1,10 @@
 #  type: ignore
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Type
 
 from numpy import exp, log
-from numpy import max as npmax
-from pandas import DataFrame
+from pandas import DataFrame, read_excel
 from scipy.optimize import least_squares
 
 from ._params import get_params
@@ -22,9 +22,29 @@ class SoilSample:
     th1500: float | None = None  # cm
     om_p: float | None = None  # organic matter %
     m50: float | None = None  # median sand fraction
-    h: FloatArray | None = None  # pressure head measurement
-    k: FloatArray | None = None  # hydraulic conductivity measurement
-    theta: FloatArray | None = None  # moisture content measurement
+    h: FloatArray | None = field(default=None, repr=False)  # pressure head measurement
+    k: FloatArray | None = field(
+        default=None, repr=False
+    )  # hydraulic conductivity measurement
+    theta: FloatArray | None = field(
+        default=None, repr=False
+    )  # moisture content measurement
+
+    def from_staring(self, name: str, year: str = "2018") -> "SoilSample":
+        path = Path(__file__).parent / f"datasets/Staring_{year}.xlsx"
+        properties = read_excel(path, sheet_name="properties", index_col=0)
+        measurements = read_excel(path, sheet_name="measurements", index_col=[0, 1])
+        self.h = measurements.columns.astype(float).values
+        self.k = measurements.loc[name, "k"].astype(float).values
+        self.theta = measurements.loc[name, "theta"].astype(float).values
+
+        self.silt_p = properties.loc[name, "silt_p"]
+        self.clay_p = properties.loc[name, "clay_p"]
+        self.om_p = properties.loc[name, "om_p"]
+        self.m50 = properties.loc[name, "m50"]
+        if year == "2001":
+            self.rho = properties.loc[name, "rho"]
+        return self
 
     def fit(
         self,
@@ -34,8 +54,8 @@ class SoilSample:
     ) -> SoilModel:
         if pbounds is None:
             pbounds = get_params(sm.__name__)
-            pbounds.loc["k_s", "p_i"] = npmax(self.k)
-            pbounds.loc["theta_s", "p_i"] = npmax(self.theta)
+            pbounds.loc["k_s", "p_i"] = max(self.k)
+            pbounds.loc["theta_s", "p_i"] = max(self.theta)
 
         sml = sm(**dict(zip(pbounds.index, pbounds.loc[:, "p_i"])))
 
@@ -181,7 +201,7 @@ class SoilSample:
             + 7.56 * log(self.m50)
         )
 
-        k_s = (
+        k_s = exp(
             45.8
             - 14.34 * self.rho
             + 0.001481 * self.silt_p**2
@@ -190,7 +210,7 @@ class SoilSample:
             - 0.34 * log(self.om_p)
         )
 
-        alpha = (
+        alpha = exp(
             13.66
             - 5.91 * self.rho
             - 0.172 * topsoil
@@ -200,18 +220,22 @@ class SoilSample:
             - 0.3742 * log(self.silt_p)
         )
 
-        n = (
-            -1.057
-            + 0.1003 * self.om_p
-            + 1.119 * self.rho
-            + 0.000764 * self.silt_p**2
-            - 0.1397 * self.om_p**-1
-            - 57.2 * self.m50**-1
-            - 0.557 * log(self.om_p)
-            - 0.02997 * self.rho * self.silt_p
+        n = max(
+            exp(
+                -1.057
+                + 0.1003 * self.om_p
+                + 1.119 * self.rho
+                + 0.000764 * self.silt_p**2
+                - 0.1397 * self.om_p**-1
+                - 57.2 * self.m50**-1
+                - 0.557 * log(self.om_p)
+                - 0.02997 * self.rho * self.silt_p
+            )
+            + 1,
+            1.0,
         )
 
-        l = (
+        l_ = (
             -76.4
             - 0.097 * self.silt_p
             + 59.6 * self.rho
@@ -224,8 +248,16 @@ class SoilSample:
             + 2.364 * self.silt_p**-1
             + 1.014 * log(self.silt_p)
         )
+        l = min(max(2 * (exp(l_) - 1) / (exp(l_) + 1), -2.0), 2.0)
 
-        return Genuchten(k_s=k_s, theta_r=0.01, theta_s=theta_s, alpha=alpha, n=n, l=l)
+        return Genuchten(
+            k_s=round(k_s, 4),
+            theta_r=0.01,
+            theta_s=round(theta_s, 4),
+            alpha=round(alpha, 7),
+            n=round(n, 4),
+            l=round(l, 4),
+        )
 
     def wosten_clay(self) -> Brooks:
         """Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
@@ -238,7 +270,7 @@ class SoilSample:
             - 0.00204 * self.rho * self.clay_p
         )
 
-        k_s = (
+        k_s = exp(
             -42.6
             + 8.71 * self.om_p
             + 61.9 * self.rho
@@ -248,7 +280,7 @@ class SoilSample:
             - 5.382 * self.rho * self.om_p
         )
 
-        alpha = (
+        alpha = exp(
             -19.13
             + 0.812 * self.om_p
             + 23.4 * self.rho
@@ -258,17 +290,28 @@ class SoilSample:
             - 1.338 * self.rho * self.om_p
         )
 
-        n = (
-            -0.235
-            + 0.972 * self.rho**-1
-            - 0.7743 * log(self.clay_p)
-            - 0.3154 * log(self.om_p)
-            + 0.0678 * self.rho_p * self.om_p
+        n = max(
+            exp(
+                -0.235
+                + 0.972 * self.rho**-1
+                - 0.7743 * log(self.clay_p)
+                - 0.3154 * log(self.om_p)
+                + 0.0678 * self.rho_p * self.om_p
+            )
+            + 1.0,
+            1.0,
         )
 
-        l = 0.102 + 0.0222 * self.clay_p - 0.043 * self.rho * self.clay_p
-
-        return Genuchten(k_s=k_s, theta_r=0.01, theta_s=theta_s, alpha=alpha, n=n, l=l)
+        l_ = 0.102 + 0.0222 * self.clay_p - 0.043 * self.rho * self.clay_p
+        l = min(max(10.0 * (exp(l_) - 1) / (exp(l_) + 1), -10.0), 10.0)
+        return Genuchten(
+            k_s=round(k_s, 4),
+            theta_r=0.01,
+            theta_s=round(theta_s, 4),
+            alpha=round(alpha, 7),
+            n=round(n, 4),
+            l=round(l, 4),
+        )
 
     def cosby(self) -> Brooks:
         """Cooper (2021) - Using data assimilation to optimize pedotransfer
@@ -279,8 +322,13 @@ class SoilSample:
         theta_s = 0.505 - 0.037 * c - 0.142 * s
         psi_s = 0.01 * 10 ** (2.170 - 0.630 * c - 1.580 * s)
         k_s = 10 ** (-0.600 - 0.640 * c + 1.260 * s) * 25.2 / 3600
-        theta_r = 0.0
         labda = 1 / b
         k_s = k_s * 8640000 / 1000  # kg/m2/s to cm/d
         psi_s = psi_s * 100  # m to cm
-        return Brooks(k_s=k_s, theta_r=theta_r, theta_s=theta_s, h_b=psi_s, l=labda)
+        return Brooks(
+            k_s=round(k_s, 4),
+            theta_r=0.0,
+            theta_s=round(theta_s, 4),
+            h_b=round(psi_s, 5),
+            l=round(labda, 5),
+        )
