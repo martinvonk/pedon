@@ -130,19 +130,18 @@ class Gardner:
 @dataclass
 class Sorab:
     k_s: float
-    sr: float  # theta_r / theta_s
+    theta_r: float
+    theta_s: float
     alpha: float  # alpha
     beta: float  # n
     brook: float  # brooks-corey l
-    theta_s: float | None = None
 
     def __post_init__(self):
         self.gamma = 1 - 1 / self.beta  # m
+        self.sr = self.theta_r / self.theta_s  # theta_r / theta_s
 
     def theta(self, h: FloatArray) -> FloatArray:
-        if self.theta_s is not None:
-            return (self.sr + self.s(h) * (1 - self.sr)) * self.theta_s
-        raise ValueError("theta_s must not be none")
+        return (self.sr + self.s(h) * (1 - self.sr)) * self.theta_s
 
     def s(self, h: FloatArray) -> FloatArray:
         return (1 + self.alpha * npabs(h) ** self.beta) ** -self.gamma
