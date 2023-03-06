@@ -66,7 +66,48 @@ pBrooks.loc[:, ["p_i", "p_min", "p_max"]] = pBrooks.loc[
 ].astype(float)
 pBrooks.loc[:, "swrc"] = pBrooks.loc[:, "swrc"].astype(bool)
 
+pSorab = DataFrame(
+    data={
+        "p_i": {
+            "k_s": 50.0,
+            "theta_r": 0.02,
+            "theta_s": 0.4,
+            "alpha": 0.02,
+            "beta": 2.3,
+            "brook": 0.5,
+        },
+        "p_min": {
+            "k_s": 0.001,
+            "theta_r": 0.0,
+            "theta_s": 0.2,
+            "alpha": 0.001,
+            "beta": 1.0,
+            "brook": -7,
+        },
+        "p_max": {
+            "k_s": 100000.0,
+            "theta_r": 0.2,
+            "theta_s": 0.9,
+            "alpha": 0.15,
+            "beta": 12,
+            "brook": 8,
+        },
+        "swrc": {
+            "k_s": False,
+            "theta_r": True,
+            "theta_s": True,
+            "alpha": True,
+            "beta": True,
+            "brook": False,
+        },
+    },
+)
+pSorab.loc[:, ["p_i", "p_min", "p_max"]] = pSorab.loc[
+    :, ["p_i", "p_min", "p_max"]
+].astype(float)
+pSorab.loc[:, "swrc"] = pSorab.loc[:, "swrc"].astype(bool)
+
 
 def get_params(sm_name: str) -> DataFrame:
-    params = {"Genuchten": pGenuchten, "Brooks": pBrooks}
+    params = {"Genuchten": pGenuchten, "Brooks": pBrooks, "Sorab": pSorab}
     return params[sm_name]
