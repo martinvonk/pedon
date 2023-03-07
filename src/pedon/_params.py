@@ -3,11 +3,11 @@ from pandas import DataFrame
 pGenuchten = DataFrame(
     data={
         "p_i": {
-            "k_s": 50.0,
-            "theta_r": 0.02,
-            "theta_s": 0.4,
+            "k_s": 10.0,
+            "theta_r": 0.01,
+            "theta_s": 0.40,
             "alpha": 0.02,
-            "n": 2.3,
+            "n": 2.0,
             "l": 0.5,
         },
         "p_min": {
@@ -87,7 +87,7 @@ pSorab = DataFrame(
         "p_max": {
             "k_s": 100000.0,
             "theta_r": 0.2,
-            "theta_s": 0.9,
+            "theta_s": 0.5,
             "alpha": 0.15,
             "beta": 12,
             "brook": 8,
