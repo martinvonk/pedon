@@ -46,28 +46,35 @@ class SoilSample:
             self.rho = properties.loc[name, "rho"]
         return self
 
-    def fit(
+    def fit_seperate(
         self,
         sm: Type[SoilModel],
         pbounds: DataFrame | None = None,
+        weights: FloatArray | None, = None,
         return_res: bool = False,
     ) -> SoilModel:
         if pbounds is None:
             pbounds = get_params(sm.__name__)
             pbounds.loc["k_s", "p_i"] = max(self.k)
             pbounds.loc["theta_s", "p_i"] = max(self.theta)
+            pbounds.loc["theta_s", "p_max"] = max(self.theta) + 0.01
+
+        if weights is None:
+            weights = np.ones(self.h.shape)
 
         sml = sm(**dict(zip(pbounds.index, pbounds.loc[:, "p_i"])))
 
         def fit_swrc(p: FloatArray) -> FloatArray:
             for pname, pv in zip(pbounds.index[pbounds.loc[:, "swrc"]], p):
                 sml.__setattr__(pname, pv)
-            return sml.theta(h=self.h) - self.theta
+                diff = weights * (sml.theta(h=self.h) - self.theta)
+            return diff
 
         def fit_k(p: FloatArray) -> FloatArray:
             for pname, pv in zip(pbounds.index[~pbounds.loc[:, "swrc"]], p):
                 sml.__setattr__(pname, pv)
-            return sml.k(h=self.h) - self.k
+                diff = weights * (log(sml.k(h=self.h)) - log(self.k))
+            return diff
 
         res_swrc = least_squares(
             fit_swrc,
@@ -92,6 +99,44 @@ class SoilSample:
         opt_sm = sm(**opt_pars)
         if return_res:
             return opt_sm, {"res_swrc": res_swrc, "res_k": res_k}
+        return opt_sm
+
+    def fit(
+        self,
+        sm: Type[SoilModel],
+        pbounds: DataFrame | None = None,
+        weights: FloatArray | None = None,
+        return_res: bool = False,
+    ) -> SoilModel:
+        """Method from Wosten et al 2018 using RETC."""
+        if pbounds is None:
+            pbounds = get_params(sm.__name__)
+            pbounds.loc["k_s", "p_i"] = max(self.k)
+            pbounds.loc["theta_s", "p_i"] = max(self.theta)
+            pbounds.loc["theta_s", "p_max"] = max(self.theta) + 0.01
+
+        if weights is None:
+            weights = np.ones(self.h.shape)
+
+        def fit_staring(p: FloatArray) -> FloatArray:
+            sml = sm(**dict(zip(pbounds.index, p)))
+            theta_diff = sml.theta(h=self.h) - self.theta
+            k_diff = log(sml.k(h=self.h)) - log(self.k)
+            diff = weights * (theta_diff + 0.1 * k_diff)
+            return diff
+
+        res = least_squares(
+            fit_staring,
+            x0=pbounds.loc[:, "p_i"],
+            bounds=(
+                pbounds.loc[:, "p_min"],
+                pbounds.loc[:, "p_max"],
+            ),
+        )
+        opt_pars = dict(zip(pbounds.index, res.x))
+        opt_sm = sm(**opt_pars)
+        if return_res:
+            return opt_sm, {"res": res}
         return opt_sm
 
     def wosten(self, ts: bool = False) -> Genuchten:
