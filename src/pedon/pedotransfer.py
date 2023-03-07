@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Type
 
-from numpy import exp, log
+from numpy import exp, log, ones
 from pandas import DataFrame, read_excel
 from scipy.optimize import least_squares
 
@@ -50,19 +50,19 @@ class SoilSample:
         self,
         sm: Type[SoilModel],
         pbounds: DataFrame | None = None,
-        weights: FloatArray | None, = None,
+        weights: FloatArray | None = None,
         return_res: bool = False,
     ) -> SoilModel:
         if pbounds is None:
             pbounds = get_params(sm.__name__)
-            pbounds.loc["k_s", "p_i"] = max(self.k)
-            pbounds.loc["theta_s", "p_i"] = max(self.theta)
+            pbounds.loc["k_s", "p_ini"] = max(self.k)
+            pbounds.loc["theta_s", "p_ini"] = max(self.theta)
             pbounds.loc["theta_s", "p_max"] = max(self.theta) + 0.01
 
         if weights is None:
-            weights = np.ones(self.h.shape)
+            weights = ones(self.h.shape)
 
-        sml = sm(**dict(zip(pbounds.index, pbounds.loc[:, "p_i"])))
+        sml = sm(**dict(zip(pbounds.index, pbounds.loc[:, "p_ini"])))
 
         def fit_swrc(p: FloatArray) -> FloatArray:
             for pname, pv in zip(pbounds.index[pbounds.loc[:, "swrc"]], p):
@@ -78,7 +78,7 @@ class SoilSample:
 
         res_swrc = least_squares(
             fit_swrc,
-            x0=pbounds.loc[pbounds.swrc, "p_i"],
+            x0=pbounds.loc[pbounds.swrc, "p_ini"],
             bounds=(
                 pbounds.loc[pbounds.swrc, "p_min"],
                 pbounds.loc[pbounds.swrc, "p_max"],
@@ -87,7 +87,7 @@ class SoilSample:
 
         res_k = least_squares(
             fit_k,
-            x0=pbounds.loc[~pbounds.swrc, "p_i"],
+            x0=pbounds.loc[~pbounds.swrc, "p_ini"],
             bounds=(
                 pbounds.loc[~pbounds.swrc, "p_min"],
                 pbounds.loc[~pbounds.swrc, "p_max"],
@@ -106,28 +106,38 @@ class SoilSample:
         sm: Type[SoilModel],
         pbounds: DataFrame | None = None,
         weights: FloatArray | None = None,
+        W1: float | None = None,
+        W2: float | None = None,
         return_res: bool = False,
     ) -> SoilModel:
         """Method from Wosten et al 2018 using RETC."""
         if pbounds is None:
             pbounds = get_params(sm.__name__)
-            pbounds.loc["k_s", "p_i"] = max(self.k)
-            pbounds.loc["theta_s", "p_i"] = max(self.theta)
+            pbounds.loc["k_s", "p_ini"] = max(self.k)
+            pbounds.loc["theta_s", "p_ini"] = max(self.theta)
             pbounds.loc["theta_s", "p_max"] = max(self.theta) + 0.01
 
         if weights is None:
-            weights = np.ones(self.h.shape)
+            weights = ones(self.h.shape)
+
+        if W1 is None:
+            W1 = 0.1
+
+        if W2 is None:
+            M = len(self.k) + len(self.theta)
+            N = len(self.theta)
+            W2 = (M - N) * sum(weights * self.theta) / (N * sum(weights * self.k))
 
         def fit_staring(p: FloatArray) -> FloatArray:
             sml = sm(**dict(zip(pbounds.index, p)))
             theta_diff = sml.theta(h=self.h) - self.theta
             k_diff = log(sml.k(h=self.h)) - log(self.k)
-            diff = weights * (theta_diff + 0.1 * k_diff)
+            diff = weights * (theta_diff + W1 * W2 * k_diff)
             return diff
 
         res = least_squares(
             fit_staring,
-            x0=pbounds.loc[:, "p_i"],
+            x0=pbounds.loc[:, "p_ini"],
             bounds=(
                 pbounds.loc[:, "p_min"],
                 pbounds.loc[:, "p_max"],
