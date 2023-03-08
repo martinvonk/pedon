@@ -33,11 +33,17 @@ pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar"]
 coveraging = ["coverage"]
 dev = ["pedon[linting,formatting,typing,pytesting]", "tox"]
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.dynamic]
 version = { attr = "pedon._version.__version__" }
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.setuptools.package-data]
-myModule = ["*.xlsx"]
+"pedon.datasets" = ["*.xlsx"]
 
 [tool.black]
 line-length = 88
