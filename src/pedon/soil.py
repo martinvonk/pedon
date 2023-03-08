@@ -1,11 +1,10 @@
-#  type: ignore
+# type: ignore
 from dataclasses import dataclass, field
-from multiprocessing.sharedctypes import Value
 from pathlib import Path
 from typing import Type
 
 from numpy import append, exp, log, ones
-from pandas import DataFrame, read_csv, read_excel
+from pandas import DataFrame, read_excel
 from scipy.optimize import least_squares
 
 from ._params import get_params
@@ -35,7 +34,8 @@ class SoilSample:
         """Get properties and measurements from Staring series"""
         if year not in ("2001", "2018"):
             raise ValueError(
-                f"No Staring series available for year '{year}', please use either '2001' or '2018'"
+                f"No Staring series available for year '{year}'"
+                "please use either '2001' or '2018'"
             )
         path = Path(__file__).parent / f"datasets/Staring_{year}.xlsx"
         properties = read_excel(path, sheet_name="properties", index_col=0)
@@ -311,7 +311,7 @@ class SoilSample:
             + 2.364 * self.silt_p**-1
             + 1.014 * log(self.silt_p)
         )
-        l = min(max(2 * (exp(l_) - 1) / (exp(l_) + 1), -2.0), 2.0)
+        l = min(max(2 * (exp(l_) - 1) / (exp(l_) + 1), -2.0), 2.0)  # noqa: E741
 
         return Genuchten(
             k_s=round(k_s, 4),
@@ -359,14 +359,14 @@ class SoilSample:
                 + 0.972 * self.rho**-1
                 - 0.7743 * log(self.clay_p)
                 - 0.3154 * log(self.om_p)
-                + 0.0678 * self.rho_p * self.om_p
+                + 0.0678 * self.rho * self.om_p
             )
             + 1.0,
             1.0,
         )
 
         l_ = 0.102 + 0.0222 * self.clay_p - 0.043 * self.rho * self.clay_p
-        l = min(max(10.0 * (exp(l_) - 1) / (exp(l_) + 1), -10.0), 10.0)
+        l = min(max(10.0 * (exp(l_) - 1) / (exp(l_) + 1), -10.0), 10.0)  # noqa: E741
         return Genuchten(
             k_s=round(k_s, 4),
             theta_r=0.01,
@@ -407,7 +407,7 @@ class Soil:
     description: str | None = None
 
     def from_name(self, sm: Type[SoilModel]) -> "Soil":
-        path = Path(__file__).parent / f"datasets/Soil_Parameters.xlsx"
+        path = Path(__file__).parent / "datasets/Soil_Parameters.xlsx"
         ser = (
             read_excel(path, sheet_name=sm.__name__, index_col=0)
             .loc[self.name]

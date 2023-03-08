@@ -10,7 +10,7 @@ description = "Python package for (unsaturated) soil properties including pedotr
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
-dependencies = ["numpy", "matplotlib", "pandas", "scipy"]
+dependencies = ["numpy", "matplotlib", "pandas", "scipy", "openpyxl"]
 classifiers = [
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.10',
@@ -26,18 +26,18 @@ homepage = "https://github.com/martinvonk/pedon"
 repository = "https://github.com/martinvonk/pedon"
 
 [project.optional-dependencies]
-linting = ["flake8"]
+linting = ["flake8", "ruff"]
 formatting = ["black[jupyter]", "isort"]
 typing = ["mypy", "pandas-stubs"]
 pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar"]
 coveraging = ["coverage"]
-dev = ["pedon[linting,formatting,typing,pytesting,coveraging]"]
+dev = ["pedon[linting,formatting,typing,pytesting]", "tox"]
 
 [tool.setuptools.dynamic]
 version = { attr = "pedon._version.__version__" }
 
 [tool.setuptools.package-data]
-myModule = ["*.csv", "*.xlsx"]
+myModule = ["*.xlsx"]
 
 [tool.black]
 line-length = 88
@@ -47,6 +47,10 @@ profile = "black"
 
 [tool.mypy]
 mypy_path = "src"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
 
 [[tool.mypy.overrides]]
 module = ['matplotlib.*', 'scipy.*']
@@ -87,13 +91,7 @@ legacy_tox_ini = """
     basepython = python3.10
     extras = linting
     commands =
-            flake8 src --max-line-length=88
+            flake8 src --max-line-length=88 --ignore=E741,W503
+            ruff check src
 
-    [testenv:coverage]
-    description = get coverage report xml
-    basepython = 3.10
-    extras = coveraging,pytesting
-    commands =
-            coverage run -m pytest tests
-            coverage xml
 """

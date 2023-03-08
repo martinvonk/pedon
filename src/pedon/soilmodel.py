@@ -33,7 +33,7 @@ class Genuchten:
     theta_s: float
     alpha: float
     n: float
-    l: float = 0.5
+    l: float = 0.5  # noqa: E741
 
     def __post_init__(self):
         self.m = 1 - 1 / self.n
@@ -64,7 +64,7 @@ class Brooks:
     theta_r: float
     theta_s: float
     h_b: float
-    l: float
+    l: float  # noqa: E741
 
     def theta(self, h: FloatArray) -> FloatArray:
         h = npabs(h)
@@ -119,7 +119,8 @@ class Gardner:
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is not None:
             raise NotImplementedError(
-                "Can only calculate the hydraulic conductivity using the pressure head, not the saturation"
+                "Can only calculate the hydraulic conductivity"
+                "using the pressure head, not the saturation"
             )
         return self.k_s * exp(-self.a * h)
 
@@ -172,7 +173,8 @@ class Fredlund:
     def k(self, h: FloatArray, s: FloatArray | None = None):
         if s is not None:
             raise NotImplementedError(
-                "Can only calculate the hydraulic conductivity using the pressure head, not the saturation"
+                "Can only calculate the hydraulic conductivity"
+                "using the pressure head, not the saturation"
             )
 
         def theta_d(
