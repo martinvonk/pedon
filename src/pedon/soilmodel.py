@@ -144,7 +144,7 @@ class Sorab:
         return (self.sr + self.s(h) * (1 - self.sr)) * self.theta_s
 
     def s(self, h: FloatArray) -> FloatArray:
-        return (1 + self.alpha * npabs(h) ** self.beta) ** -self.gamma
+        return (1 + npabs(self.alpha * h) ** self.beta) ** -self.gamma
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is None:
