@@ -1,2 +1,7 @@
 
 *.pyc
+
+doc/examples/fig/
+.tox/*
+src/pedon.egg-info/
+
