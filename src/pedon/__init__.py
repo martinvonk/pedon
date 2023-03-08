@@ -1,4 +1,5 @@
-from . import pedotransfer, soil, soilmodel
-from .soil import Soil
+from . import soil, soilmodel, _params
+from .soil import Soil, SoilSample
 from .soilmodel import Brooks, Fredlund, Gardner, Genuchten, Sorab, plot_hcf, plot_swrc
-from .pedotransfer import SoilSample
+
+from ._version import __version__
