@@ -111,18 +111,16 @@ class Gardner:
     m: float
 
     def theta(self, h: FloatArray) -> FloatArray:
-        return self.theta_r + (self.theta_s - self.theta_r) * self.s(h)
+        return self.a * npabs(h) ** -self.b
 
     def s(self, h: FloatArray) -> FloatArray:
-        return 1 / (1 + npabs(h / self.a) ** self.b)
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is not None:
-            raise NotImplementedError(
-                "Can only calculate the hydraulic conductivity"
-                "using the pressure head, not the saturation"
-            )
-        return self.k_s * exp(-self.a * h)
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            return self.k_s * self.a * theta**self.m
+        return self.k_s * (self.a / (self.b + npabs(h) ** self.m))
 
     def plot(self):
         return plot_swrc(self)
