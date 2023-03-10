@@ -66,7 +66,7 @@ pBrooks.loc[:, ["p_ini", "p_min", "p_max"]] = pBrooks.loc[
 ].astype(float)
 pBrooks.loc[:, "swrc"] = pBrooks.loc[:, "swrc"].astype(bool)
 
-pSorab = DataFrame(
+pPanday = DataFrame(
     data={
         "p_ini": {
             "k_s": 50.0,
@@ -102,12 +102,12 @@ pSorab = DataFrame(
         },
     },
 )
-pSorab.loc[:, ["p_ini", "p_min", "p_max"]] = pSorab.loc[
+pPanday.loc[:, ["p_ini", "p_min", "p_max"]] = pPanday.loc[
     :, ["p_ini", "p_min", "p_max"]
 ].astype(float)
-pSorab.loc[:, "swrc"] = pSorab.loc[:, "swrc"].astype(bool)
+pPanday.loc[:, "swrc"] = pPanday.loc[:, "swrc"].astype(bool)
 
 
 def get_params(sm_name: str) -> DataFrame:
-    params = {"Genuchten": pGenuchten, "Brooks": pBrooks, "Sorab": pSorab}
+    params = {"Genuchten": pGenuchten, "Brooks": pBrooks, "Panday": pPanday}
     return params[sm_name].copy()

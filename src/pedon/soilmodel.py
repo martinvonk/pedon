@@ -28,6 +28,12 @@ class SoilModel(Protocol):
 
 @dataclass
 class Genuchten:
+    """Mualem- van Genuchten Soil Model
+
+    van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
+    Hydraulic Conductivity of Unsaturated Soil
+    """
+
     k_s: float
     theta_r: float
     theta_s: float
@@ -60,6 +66,11 @@ class Genuchten:
 
 @dataclass
 class Brooks:
+    """Brooks and Corey Soil Model
+
+    Brooks, R.H. and Corey, A.T. (1964) - Hydraulic Properties of Porous Media
+    """
+
     k_s: float
     theta_r: float
     theta_s: float
@@ -103,6 +114,11 @@ class Brooks:
 
 @dataclass
 class Gardner:
+    """Gardner Soil Model
+
+    Gardner et al (1970) - Post-irrigation movement of soil water
+    """
+
     k_s: float
     theta_r: float
     theta_s: float
@@ -127,7 +143,12 @@ class Gardner:
 
 
 @dataclass
-class Sorab:
+class Panday:
+    """Panday Soil Model (MODFLOW-USG)
+
+    Panday, S. - USG-Transport: Transport and other Enhancements to MODFLOW-USG
+    """
+
     k_s: float
     theta_r: float
     theta_s: float
@@ -156,6 +177,12 @@ class Sorab:
 
 @dataclass
 class Fredlund:
+    """Fredlund and Xing Soil Model
+
+    Fredlund, D.G. and Xing, A. (1994) - Equations for the soil-water
+    characteristic curve
+    """
+
     k_s: float
     theta_s: float
     a: float

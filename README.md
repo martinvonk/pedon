@@ -7,4 +7,4 @@ Python package for (unsaturated) soil properties including pedotransfer function
 - Brooks - Corey
 - Fredlund & Xing
 - Gardner
-- Sorab Panday (Modflow-USG)
+- Panday (Modflow-USG)
