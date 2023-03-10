@@ -1,7 +1,13 @@
-
 *.pyc
 
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.tox/
+
 doc/examples/fig/
-.tox/*
-src/pedon.egg-info/
+doc/literature/
 dist/
+src/pedon.egg-info/
+
+
