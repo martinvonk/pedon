@@ -1,5 +1,6 @@
-from numpy import array
 import pytest
+from numpy import array
+
 import pedon as pe
 
 

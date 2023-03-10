@@ -28,6 +28,12 @@ class SoilModel(Protocol):
 
 @dataclass
 class Genuchten:
+    """Mualem- van Genuchten Soil Model
+
+    van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
+    Hydraulic Conductivity of Unsaturated Soil
+    """
+
     k_s: float
     theta_r: float
     theta_s: float
@@ -60,6 +66,11 @@ class Genuchten:
 
 @dataclass
 class Brooks:
+    """Brooks and Corey Soil Model
+
+    Brooks, R.H. and Corey, A.T. (1964) - Hydraulic Properties of Porous Media
+    """
+
     k_s: float
     theta_r: float
     theta_s: float
@@ -103,6 +114,11 @@ class Brooks:
 
 @dataclass
 class Gardner:
+    """Gardner Soil Model
+
+    Gardner et al (1970) - Post-irrigation movement of soil water
+    """
+
     k_s: float
     theta_r: float
     theta_s: float
@@ -111,25 +127,28 @@ class Gardner:
     m: float
 
     def theta(self, h: FloatArray) -> FloatArray:
-        return self.theta_r + (self.theta_s - self.theta_r) * self.s(h)
+        return self.a * npabs(h) ** -self.b
 
     def s(self, h: FloatArray) -> FloatArray:
-        return 1 / (1 + npabs(h / self.a) ** self.b)
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is not None:
-            raise NotImplementedError(
-                "Can only calculate the hydraulic conductivity"
-                "using the pressure head, not the saturation"
-            )
-        return self.k_s * exp(-self.a * h)
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            return self.k_s * self.a * theta**self.m
+        return self.k_s * (self.a / (self.b + npabs(h) ** self.m))
 
     def plot(self):
         return plot_swrc(self)
 
 
 @dataclass
-class Sorab:
+class Panday:
+    """Panday Soil Model (MODFLOW-USG)
+
+    Panday, S. - USG-Transport: Transport and other Enhancements to MODFLOW-USG
+    """
+
     k_s: float
     theta_r: float
     theta_s: float
@@ -158,6 +177,12 @@ class Sorab:
 
 @dataclass
 class Fredlund:
+    """Fredlund and Xing Soil Model
+
+    Fredlund, D.G. and Xing, A. (1994) - Equations for the soil-water
+    characteristic curve
+    """
+
     k_s: float
     theta_s: float
     a: float
