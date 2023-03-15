@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
@@ -7,7 +7,7 @@ from numpy import exp, full, linspace, log, logspace
 
 from ._typing import FloatArray
 
-
+@runtime_checkable
 class SoilModel(Protocol):
     def theta(self, h: FloatArray) -> FloatArray:
         """Method to calculate the soil moisture content from the pressure head h"""
