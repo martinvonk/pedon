@@ -1,11 +1,12 @@
 from dataclasses import dataclass, field
-from typing import Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable, Type
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
 from numpy import exp, full, linspace, log, logspace
 
 from ._typing import FloatArray
+
 
 @runtime_checkable
 class SoilModel(Protocol):
@@ -241,6 +242,17 @@ class Fredlund:
 
     def plot(self):
         return plot_swrc(self)
+
+
+def get_soilmodel(soilmodel_name: str) -> Type[SoilModel]:
+    sms = {
+        "Genuchten": Genuchten,
+        "Brooks": Brooks,
+        "Gardner": Gardner,
+        "Panday": Panday,
+        "Fredlund": Fredlund,
+    }
+    return sms[soilmodel_name]
 
 
 def plot_swrc(

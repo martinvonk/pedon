@@ -9,7 +9,7 @@ from scipy.optimize import least_squares
 
 from ._params import get_params
 from ._typing import FloatArray
-from .soilmodel import Brooks, Genuchten, SoilModel
+from .soilmodel import Brooks, Genuchten, SoilModel, get_soilmodel
 
 
 @dataclass
@@ -406,13 +406,23 @@ class Soil:
     source: str | None = None
     description: str | None = None
 
-    def from_name(self, sm: Type[SoilModel]) -> "Soil":
+    def from_name(self, sm: Type[SoilModel] | SoilModel | str) -> "Soil":
+        if isinstance(sm, SoilModel):
+            smn = sm.__class__.name
+            sm = type(sm)
+        elif isinstance(sm, str):
+            smn = sm
+            sm = get_soilmodel(smn)
+        elif issubclass(sm, SoilModel):
+            smn = sm.__name__
+        else:
+            raise ValueError(
+                f"Argument must either be Type[SoilModel] | SoilModel | str,"
+                f"not {type(sm)}"
+            )
+
         path = Path(__file__).parent / "datasets/Soil_Parameters.xlsx"
-        ser = (
-            read_excel(path, sheet_name=sm.__name__, index_col=0)
-            .loc[self.name]
-            .to_dict()
-        )
+        ser = read_excel(path, sheet_name=smn, index_col=0).loc[self.name].to_dict()
         # path = Path(__file__).parent / f"datasets/{sm.__name__}.csv"
         # ser = read_csv(path, index_col=["name"]).loc[self.name].to_dict()
         self.__setattr__("type", ser.pop("soil type"))
@@ -422,12 +432,26 @@ class Soil:
         return self
 
     @staticmethod
-    def list_names(sm: Type[SoilModel]) -> list[str]:
+    def list_names(sm: Type[SoilModel] | SoilModel | str) -> list[str]:
+        if isinstance(sm, SoilModel):
+            smn = sm.__class__.name
+        elif isinstance(sm, str):
+            smn = sm
+        elif issubclass(sm, SoilModel):
+            smn = sm.__name__
+        else:
+            raise ValueError(
+                f"Argument must either be Type[SoilModel] | SoilModel | str,"
+                f"not {type(sm)}"
+            )
+
         path = Path(__file__).parent / "datasets/Soil_Parameters.xlsx"
-        names = read_excel(path, sheet_name=sm.__name__).loc[:, "name"].to_list()
+        names = read_excel(path, sheet_name=smn).loc[:, "name"].to_list()
         return names
 
     def from_staring(self, year: str = "2018") -> "Soil":
+        if year not in ("2001", "2018"):
+            raise ValueError(f"Year must either be '2001' or '2018, not {year}")
         path = Path(__file__).parent / f"datasets/Staring_{year}.xlsx"
         parameters = read_excel(path, sheet_name="parameters", index_col=0)
         ser = parameters.loc[self.name].to_dict()
