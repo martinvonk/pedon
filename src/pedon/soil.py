@@ -421,6 +421,12 @@ class Soil:
         self.__setattr__("model", sm(**ser))
         return self
 
+    @staticmethod
+    def list_names(sm: Type[SoilModel]) -> list[str]:
+        path = Path(__file__).parent / "datasets/Soil_Parameters.xlsx"
+        names = read_excel(path, sheet_name=sm.__name__).loc[:, "name"].to_list()
+        return names
+
     def from_staring(self, year: str = "2018") -> "Soil":
         path = Path(__file__).parent / f"datasets/Staring_{year}.xlsx"
         parameters = read_excel(path, sheet_name="parameters", index_col=0)
