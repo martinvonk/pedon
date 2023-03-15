@@ -162,7 +162,7 @@ class Panday:
     def __post_init__(self):
         self.sr = self.theta_r / self.theta_s  # theta_r / theta_s
         self.gamma = 1 - 1 / self.beta  # m
-        self.sy = self.theta_s - self.theta_r
+        self.sy = self.theta_s - self.theta_r - self.theta(10**2)
 
     def theta(self, h: FloatArray) -> FloatArray:
         return (self.sr + self.s(h) * (1 - self.sr)) * self.theta_s
