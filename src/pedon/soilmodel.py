@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 
 import matplotlib.pyplot as plt
@@ -150,15 +150,19 @@ class Panday:
     """
 
     k_s: float
-    theta_r: float
-    theta_s: float
+    theta_r: float = field(repr=False)
+    theta_s: float = field(repr=False)
     alpha: float  # alpha
     beta: float  # n
     brook: float  # brooks-corey l
+    sr: float = field(init=False)
+    gamma: float = field(init=False, repr=False)  # 1 - 1 / beta
+    sy: float = field(init=False, repr=False)
 
     def __post_init__(self):
-        self.gamma = 1 - 1 / self.beta  # m
         self.sr = self.theta_r / self.theta_s  # theta_r / theta_s
+        self.gamma = 1 - 1 / self.beta  # m
+        self.sy = self.theta_s - self.theta_r
 
     def theta(self, h: FloatArray) -> FloatArray:
         return (self.sr + self.s(h) * (1 - self.sr)) * self.theta_s
