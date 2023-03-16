@@ -22,7 +22,7 @@ class SoilModel(Protocol):
         """Method to calcualte the permeability from the pressure head h"""
         ...
 
-    def plot(self):
+    def plot(self, ax: plt.Axes | None = None):
         """Method to plot the soil water retention curve"""
         ...
 
@@ -61,8 +61,8 @@ class Genuchten:
             s = self.s(h)
         return self.k_s * s**self.l * (1 - (1 - s ** (1 / self.m)) ** self.m) ** 2
 
-    def plot(self):
-        return plot_swrc(self)
+    def plot(self, ax: plt.Axes | None = None):
+        return plot_swrc(self, ax=ax)
 
 
 @dataclass
@@ -109,8 +109,8 @@ class Brooks:
             s = self.s(h)
         return self.k_s * s ** (3 + 2 / self.l)
 
-    def plot(self):
-        return plot_swrc(self)
+    def plot(self, ax: plt.Axes | None = None):
+        return plot_swrc(self, ax=ax)
 
 
 @dataclass
@@ -139,8 +139,8 @@ class Gardner:
             return self.k_s * self.a * theta**self.m
         return self.k_s * (self.a / (self.b + npabs(h) ** self.m))
 
-    def plot(self):
-        return plot_swrc(self)
+    def plot(self, ax: plt.Axes | None = None):
+        return plot_swrc(self, ax=ax)
 
 
 @dataclass
@@ -176,8 +176,8 @@ class Panday:
             s = self.s(h)
         return self.k_s * s**self.brook
 
-    def plot(self):
-        return plot_swrc(self)
+    def plot(self, ax: plt.Axes | None = None):
+        return plot_swrc(self, ax=ax)
 
 
 @dataclass
@@ -240,8 +240,8 @@ class Fredlund:
 
         return self.k_s * (teller / noemer)
 
-    def plot(self):
-        return plot_swrc(self)
+    def plot(self, ax: plt.Axes | None = None):
+        return plot_swrc(self, ax=ax)
 
 
 def get_soilmodel(soilmodel_name: str) -> Type[SoilModel]:
