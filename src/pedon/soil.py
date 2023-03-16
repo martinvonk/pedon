@@ -408,13 +408,15 @@ class Soil:
 
     def from_name(self, sm: Type[SoilModel] | SoilModel | str) -> "Soil":
         if isinstance(sm, SoilModel):
-            smn = sm.__class__.name
-            sm = type(sm)
+            if hasattr(sm, "__name__"):
+                smn = sm.__name__
+            else:
+                smn = sm.__class__.__name__
+                sm = type(sm)
         elif isinstance(sm, str):
             smn = sm
             sm = get_soilmodel(smn)
-        elif issubclass(sm, SoilModel):
-            smn = sm.__name__
+
         else:
             raise ValueError(
                 f"Argument must either be Type[SoilModel] | SoilModel | str,"
@@ -434,11 +436,15 @@ class Soil:
     @staticmethod
     def list_names(sm: Type[SoilModel] | SoilModel | str) -> list[str]:
         if isinstance(sm, SoilModel):
-            smn = sm.__class__.name
+            if hasattr(sm, "__name__"):
+                smn = sm.__name__
+            else:
+                smn = sm.__class__.__name__
+                sm = type(sm)
         elif isinstance(sm, str):
             smn = sm
-        elif issubclass(sm, SoilModel):
-            smn = sm.__name__
+            sm = get_soilmodel(smn)
+
         else:
             raise ValueError(
                 f"Argument must either be Type[SoilModel] | SoilModel | str,"
