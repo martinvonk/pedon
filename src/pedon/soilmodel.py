@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Protocol, runtime_checkable, Type
+from typing import Protocol, Type, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
@@ -22,7 +22,7 @@ class SoilModel(Protocol):
         """Method to calcualte the permeability from the pressure head h"""
         ...
 
-    def plot(self, ax: plt.Axes | None = None):
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         """Method to plot the soil water retention curve"""
         ...
 
@@ -61,7 +61,7 @@ class Genuchten:
             s = self.s(h)
         return self.k_s * s**self.l * (1 - (1 - s ** (1 / self.m)) ** self.m) ** 2
 
-    def plot(self, ax: plt.Axes | None = None):
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
 
@@ -109,7 +109,7 @@ class Brooks:
             s = self.s(h)
         return self.k_s * s ** (3 + 2 / self.l)
 
-    def plot(self, ax: plt.Axes | None = None):
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
 
@@ -139,7 +139,7 @@ class Gardner:
             return self.k_s * self.a * theta**self.m
         return self.k_s * (self.a / (self.b + npabs(h) ** self.m))
 
-    def plot(self, ax: plt.Axes | None = None):
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
 
@@ -177,7 +177,7 @@ class Panday:
             s = self.s(h)
         return self.k_s * s**self.brook
 
-    def plot(self, ax: plt.Axes | None = None):
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
 
@@ -241,7 +241,7 @@ class Fredlund:
 
         return self.k_s * (teller / noemer)
 
-    def plot(self, ax: plt.Axes | None = None):
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
 
