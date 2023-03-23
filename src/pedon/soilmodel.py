@@ -156,7 +156,8 @@ class Panday:
     alpha: float  # alpha
     beta: float  # n
     brook: float  # brooks-corey l
-    sr: float = field(init=False)
+    h_b: float = field(default=0, repr=False)
+    sr: float = field(init=False, repr=True)
     gamma: float = field(init=False, repr=False)  # 1 - 1 / beta
     sy: float = field(init=False, repr=False)
 
@@ -169,7 +170,7 @@ class Panday:
         return (self.sr + self.s(h) * (1 - self.sr)) * self.theta_s
 
     def s(self, h: FloatArray) -> FloatArray:
-        return (1 + npabs(self.alpha * h) ** self.beta) ** -self.gamma
+        return (1 + npabs(self.alpha * (h - self.h_b)) ** self.beta) ** -self.gamma
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is None:
