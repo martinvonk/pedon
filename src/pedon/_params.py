@@ -74,7 +74,7 @@ pPanday = DataFrame(
             "theta_s": 0.4,
             "alpha": 0.02,
             "beta": 2.3,
-            "brook": 0.5,
+            "brook": 10.0,
         },
         "p_min": {
             "k_s": 0.001,
@@ -82,7 +82,7 @@ pPanday = DataFrame(
             "theta_s": 0.2,
             "alpha": 0.001,
             "beta": 1.0,
-            "brook": -7,
+            "brook": 1.0,
         },
         "p_max": {
             "k_s": 100000.0,
@@ -90,7 +90,7 @@ pPanday = DataFrame(
             "theta_s": 0.5,
             "alpha": 0.15,
             "beta": 12,
-            "brook": 8,
+            "brook": 40.0,
         },
         "swrc": {
             "k_s": False,
