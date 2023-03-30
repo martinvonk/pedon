@@ -116,7 +116,7 @@ class SoilSample:
         W1: float | None = None,
         W2: float | None = None,
         return_res: bool = False,
-        relative_k: bool = False,
+        k_s: float | None = None,
     ) -> SoilModel:
         """Same method as RETC"""
 
@@ -125,17 +125,13 @@ class SoilSample:
 
         if pbounds is None:
             pbounds = get_params(sm.__name__)
-            if relative_k:
+            if k_s is not None:
                 pbounds = pbounds.drop("k_s")
             else:
                 pbounds.loc["k_s", "p_ini"] = max(k)
                 pbounds.loc["k_s", "p_max"] = max(k) * 10
             pbounds.loc["theta_s", "p_ini"] = max(theta)
             pbounds.loc["theta_s", "p_max"] = max(theta) + 0.02
-
-        if relative_k:
-            k_s = max(k)
-            k /= k_s
 
         if weights is None:
             weights = ones(self.h.shape)
@@ -150,14 +146,11 @@ class SoilSample:
 
         def fit_staring(p: FloatArray) -> FloatArray:
             est_pars = dict(zip(pbounds.index, p))
-            if relative_k:
+            if k_s is not None:
                 est_pars["k_s"] = k_s
             sml = sm(**est_pars)
             theta_diff = sml.theta(h=self.h) - theta
-            if relative_k:
-                k_diff = log(sml.k_r(h=self.h)) - log(k)
-            else:
-                k_diff = log(sml.k(h=self.h)) - log(k)
+            k_diff = log(sml.k(h=self.h)) - log(k)
             diff = append(weights * theta_diff, weights * W1 * W2 * k_diff)
             return diff
 
@@ -170,7 +163,7 @@ class SoilSample:
             ),
         )
         opt_pars = dict(zip(pbounds.index, res.x))
-        if relative_k:
+        if k_s is not None:
             opt_pars["k_s"] = k_s
         opt_sm = sm(**opt_pars)
         if return_res:
