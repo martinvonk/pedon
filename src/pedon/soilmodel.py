@@ -18,6 +18,10 @@ class SoilModel(Protocol):
         """Method to calculate the effective saturation from the pressure head h"""
         ...
 
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        """Method to calcualte the relative permeability from the pressure head h"""
+        ...
+
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         """Method to calcualte the permeability from the pressure head h"""
         ...
@@ -56,10 +60,13 @@ class Genuchten:
     def s(self, h: FloatArray) -> FloatArray:
         return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
 
-    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is None:
             s = self.s(h)
-        return self.k_s * s**self.l * (1 - (1 - s ** (1 / self.m)) ** self.m) ** 2
+        return s**self.l * (1 - (1 - s ** (1 / self.m)) ** self.m) ** 2
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -104,10 +111,13 @@ class Brooks:
             s[h >= self.h_b] = (h[h >= self.h_b] / self.h_b) ** -self.l
             return s
 
-    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is None:
             s = self.s(h)
-        return self.k_s * s ** (3 + 2 / self.l)
+        return s ** (3 + 2 / self.l)
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -133,11 +143,14 @@ class Gardner:
     def s(self, h: FloatArray) -> FloatArray:
         return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
 
-    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is not None:
             theta = s * (self.theta_s - self.theta_r) + self.theta_r
-            return self.k_s * self.a * theta**self.m
-        return self.k_s * (self.a / (self.b + npabs(h) ** self.m))
+            return self.a * theta**self.m
+        return self.a / (self.b + npabs(h) ** self.m)
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -172,10 +185,13 @@ class Panday:
     def s(self, h: FloatArray) -> FloatArray:
         return (1 + npabs(self.alpha * (h - self.h_b)) ** self.beta) ** -self.gamma
 
-    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is None:
             s = self.s(h)
-        return self.k_s * s**self.brook
+        return s**self.brook
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -201,7 +217,7 @@ class Fredlund:
     def s(self, h: FloatArray) -> FloatArray:
         return self.theta(h) / self.theta_s
 
-    def k(self, h: FloatArray, s: FloatArray | None = None):
+    def k_r(self, h: FloatArray, s: FloatArray | None = None):
         if s is not None:
             raise NotImplementedError(
                 "Can only calculate the hydraulic conductivity"
@@ -238,8 +254,10 @@ class Fredlund:
                 / exp(y)
                 * theta_d(exp(y), self.a, self.n, self.m, self.theta_s)
             )
+        return teller / noemer
 
-        return self.k_s * (teller / noemer)
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
