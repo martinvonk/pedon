@@ -116,14 +116,26 @@ class SoilSample:
         W1: float | None = None,
         W2: float | None = None,
         return_res: bool = False,
+        relative_k: bool = False,
     ) -> SoilModel:
         """Same method as RETC"""
+
+        theta = self.theta
+        k = self.k
+
         if pbounds is None:
             pbounds = get_params(sm.__name__)
-            pbounds.loc["k_s", "p_ini"] = max(self.k)
-            pbounds.loc["k_s", "p_max"] = max(self.k) * 10
-            pbounds.loc["theta_s", "p_ini"] = max(self.theta)
-            pbounds.loc["theta_s", "p_max"] = max(self.theta) + 0.02
+            if relative_k:
+                pbounds = pbounds.drop("k_s")
+            else:
+                pbounds.loc["k_s", "p_ini"] = max(k)
+                pbounds.loc["k_s", "p_max"] = max(k) * 10
+            pbounds.loc["theta_s", "p_ini"] = max(theta)
+            pbounds.loc["theta_s", "p_max"] = max(theta) + 0.02
+
+        if relative_k:
+            k_s = max(k)
+            k /= k_s
 
         if weights is None:
             weights = ones(self.h.shape)
@@ -132,14 +144,20 @@ class SoilSample:
             W1 = 0.1
 
         if W2 is None:
-            M = len(self.k) + len(self.theta)
-            N = len(self.theta)
-            W2 = (M - N) * sum(weights * self.theta) / (N * sum(weights * self.k))
+            M = len(k) + len(theta)
+            N = len(theta)
+            W2 = (M - N) * sum(weights * theta) / (N * sum(weights * k))
 
         def fit_staring(p: FloatArray) -> FloatArray:
-            sml = sm(**dict(zip(pbounds.index, p)))
-            theta_diff = sml.theta(h=self.h) - self.theta
-            k_diff = log(sml.k(h=self.h)) - log(self.k)
+            est_pars = dict(zip(pbounds.index, p))
+            if relative_k:
+                est_pars["k_s"] = k_s
+            sml = sm(**est_pars)
+            theta_diff = sml.theta(h=self.h) - theta
+            if relative_k:
+                k_diff = log(sml.k_r(h=self.h)) - log(k)
+            else:
+                k_diff = log(sml.k(h=self.h)) - log(k)
             diff = append(weights * theta_diff, weights * W1 * W2 * k_diff)
             return diff
 
@@ -152,6 +170,8 @@ class SoilSample:
             ),
         )
         opt_pars = dict(zip(pbounds.index, res.x))
+        if relative_k:
+            opt_pars["k_s"] = k_s
         opt_sm = sm(**opt_pars)
         if return_res:
             return opt_sm, {"res": res}
