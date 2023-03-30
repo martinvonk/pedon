@@ -303,7 +303,6 @@ def plot_swrc(
 def plot_hcf(
     sm: SoilModel,
     ax: plt.Axes | None = None,
-    relative_k: bool = False,
     **kwargs: dict,
 ) -> plt.Axes:
     """Plot the hydraulic conductivity function"""
@@ -314,11 +313,7 @@ def plot_hcf(
         ax.set_xscale("log")
 
     h = logspace(-6, 10, num=1000)
-
-    if relative_k:
-        k = sm.k_r(h=h)
-    else:
-        k = sm.k(h=h)
+    k = sm.k(h=h)
 
     ax.plot(k, h, label=sm.__class__.__name__, **kwargs)
     ax.set_ylim(1e-3, 1e6)
