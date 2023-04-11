@@ -169,7 +169,7 @@ class Panday:
     alpha: float  # alpha
     beta: float  # n
     brook: float  # brooks-corey l
-    h_b: float = field(default=0, repr=False)
+    h_b: float = field(default=0.0, repr=False)
     sr: float = field(init=False, repr=True)
     gamma: float = field(init=False, repr=False)  # 1 - 1 / beta
     sy: float = field(init=False, repr=False)
