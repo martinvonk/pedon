@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Protocol
+from dataclasses import dataclass, field
+from typing import Protocol, Type, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
@@ -8,6 +8,7 @@ from numpy import exp, full, linspace, log, logspace
 from ._typing import FloatArray
 
 
+@runtime_checkable
 class SoilModel(Protocol):
     def theta(self, h: FloatArray) -> FloatArray:
         """Method to calculate the soil moisture content from the pressure head h"""
@@ -17,11 +18,15 @@ class SoilModel(Protocol):
         """Method to calculate the effective saturation from the pressure head h"""
         ...
 
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        """Method to calcualte the relative permeability from the pressure head h"""
+        ...
+
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         """Method to calcualte the permeability from the pressure head h"""
         ...
 
-    def plot(self):
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         """Method to plot the soil water retention curve"""
         ...
 
@@ -55,13 +60,16 @@ class Genuchten:
     def s(self, h: FloatArray) -> FloatArray:
         return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
 
-    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is None:
             s = self.s(h)
-        return self.k_s * s**self.l * (1 - (1 - s ** (1 / self.m)) ** self.m) ** 2
+        return s**self.l * (1 - (1 - s ** (1 / self.m)) ** self.m) ** 2
 
-    def plot(self):
-        return plot_swrc(self)
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
 
 
 @dataclass
@@ -103,13 +111,16 @@ class Brooks:
             s[h >= self.h_b] = (h[h >= self.h_b] / self.h_b) ** -self.l
             return s
 
-    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is None:
             s = self.s(h)
-        return self.k_s * s ** (3 + 2 / self.l)
+        return s ** (3 + 2 / self.l)
 
-    def plot(self):
-        return plot_swrc(self)
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
 
 
 @dataclass
@@ -132,14 +143,17 @@ class Gardner:
     def s(self, h: FloatArray) -> FloatArray:
         return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
 
-    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is not None:
             theta = s * (self.theta_s - self.theta_r) + self.theta_r
-            return self.k_s * self.a * theta**self.m
-        return self.k_s * (self.a / (self.b + npabs(h) ** self.m))
+            return self.a * theta**self.m
+        return self.a / (self.b + npabs(h) ** self.m)
 
-    def plot(self):
-        return plot_swrc(self)
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
 
 
 @dataclass
@@ -150,29 +164,37 @@ class Panday:
     """
 
     k_s: float
-    theta_r: float
-    theta_s: float
+    theta_r: float = field(repr=False)
+    theta_s: float = field(repr=False)
     alpha: float  # alpha
     beta: float  # n
     brook: float  # brooks-corey l
+    h_b: float = field(default=0.0, repr=False)
+    sr: float = field(init=False, repr=True)
+    gamma: float = field(init=False, repr=False)  # 1 - 1 / beta
+    sy: float = field(init=False, repr=False)
 
     def __post_init__(self):
-        self.gamma = 1 - 1 / self.beta  # m
         self.sr = self.theta_r / self.theta_s  # theta_r / theta_s
+        self.gamma = 1 - 1 / self.beta  # m
+        self.sy = self.theta_s - self.theta_r - self.theta(10**2)
 
     def theta(self, h: FloatArray) -> FloatArray:
         return (self.sr + self.s(h) * (1 - self.sr)) * self.theta_s
 
     def s(self, h: FloatArray) -> FloatArray:
-        return (1 + npabs(self.alpha * h) ** self.beta) ** -self.gamma
+        return (1 + npabs(self.alpha * (h - self.h_b)) ** self.beta) ** -self.gamma
 
-    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is None:
             s = self.s(h)
-        return self.k_s * s**self.brook
+        return s**self.brook
 
-    def plot(self):
-        return plot_swrc(self)
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
 
 
 @dataclass
@@ -195,7 +217,7 @@ class Fredlund:
     def s(self, h: FloatArray) -> FloatArray:
         return self.theta(h) / self.theta_s
 
-    def k(self, h: FloatArray, s: FloatArray | None = None):
+    def k_r(self, h: FloatArray, s: FloatArray | None = None):
         if s is not None:
             raise NotImplementedError(
                 "Can only calculate the hydraulic conductivity"
@@ -232,11 +254,24 @@ class Fredlund:
                 / exp(y)
                 * theta_d(exp(y), self.a, self.n, self.m, self.theta_s)
             )
+        return teller / noemer
 
-        return self.k_s * (teller / noemer)
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
 
-    def plot(self):
-        return plot_swrc(self)
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
+def get_soilmodel(soilmodel_name: str) -> Type[SoilModel]:
+    sms = {
+        "Genuchten": Genuchten,
+        "Brooks": Brooks,
+        "Gardner": Gardner,
+        "Panday": Panday,
+        "Fredlund": Fredlund,
+    }
+    return sms[soilmodel_name]
 
 
 def plot_swrc(
@@ -278,7 +313,6 @@ def plot_hcf(
         ax.set_xscale("log")
 
     h = logspace(-6, 10, num=1000)
-
     k = sm.k(h=h)
 
     ax.plot(k, h, label=sm.__class__.__name__, **kwargs)

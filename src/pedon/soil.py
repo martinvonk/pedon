@@ -9,7 +9,7 @@ from scipy.optimize import least_squares
 
 from ._params import get_params
 from ._typing import FloatArray
-from .soilmodel import Brooks, Genuchten, SoilModel
+from .soilmodel import Brooks, Genuchten, SoilModel, get_soilmodel
 
 
 @dataclass
@@ -116,14 +116,22 @@ class SoilSample:
         W1: float | None = None,
         W2: float | None = None,
         return_res: bool = False,
+        k_s: float | None = None,
     ) -> SoilModel:
         """Same method as RETC"""
+
+        theta = self.theta
+        k = self.k
+
         if pbounds is None:
             pbounds = get_params(sm.__name__)
-            pbounds.loc["k_s", "p_ini"] = max(self.k)
-            pbounds.loc["k_s", "p_max"] = max(self.k) * 10
-            pbounds.loc["theta_s", "p_ini"] = max(self.theta)
-            pbounds.loc["theta_s", "p_max"] = max(self.theta) + 0.02
+            if k_s is not None:
+                pbounds = pbounds.drop("k_s")
+            else:
+                pbounds.loc["k_s", "p_ini"] = max(k)
+                pbounds.loc["k_s", "p_max"] = max(k) * 10
+            pbounds.loc["theta_s", "p_ini"] = max(theta)
+            pbounds.loc["theta_s", "p_max"] = max(theta) + 0.02
 
         if weights is None:
             weights = ones(self.h.shape)
@@ -132,14 +140,17 @@ class SoilSample:
             W1 = 0.1
 
         if W2 is None:
-            M = len(self.k) + len(self.theta)
-            N = len(self.theta)
-            W2 = (M - N) * sum(weights * self.theta) / (N * sum(weights * self.k))
+            M = len(k) + len(theta)
+            N = len(theta)
+            W2 = (M - N) * sum(weights * theta) / (N * sum(weights * k))
 
         def fit_staring(p: FloatArray) -> FloatArray:
-            sml = sm(**dict(zip(pbounds.index, p)))
-            theta_diff = sml.theta(h=self.h) - self.theta
-            k_diff = log(sml.k(h=self.h)) - log(self.k)
+            est_pars = dict(zip(pbounds.index, p))
+            if k_s is not None:
+                est_pars["k_s"] = k_s
+            sml = sm(**est_pars)
+            theta_diff = sml.theta(h=self.h) - theta
+            k_diff = log(sml.k(h=self.h)) - log(k)
             diff = append(weights * theta_diff, weights * W1 * W2 * k_diff)
             return diff
 
@@ -152,6 +163,8 @@ class SoilSample:
             ),
         )
         opt_pars = dict(zip(pbounds.index, res.x))
+        if k_s is not None:
+            opt_pars["k_s"] = k_s
         opt_sm = sm(**opt_pars)
         if return_res:
             return opt_sm, {"res": res}
@@ -406,13 +419,25 @@ class Soil:
     source: str | None = None
     description: str | None = None
 
-    def from_name(self, sm: Type[SoilModel]) -> "Soil":
+    def from_name(self, sm: Type[SoilModel] | SoilModel | str) -> "Soil":
+        if isinstance(sm, SoilModel):
+            if hasattr(sm, "__name__"):
+                smn = sm.__name__
+            else:
+                smn = sm.__class__.__name__
+                sm = type(sm)
+        elif isinstance(sm, str):
+            smn = sm
+            sm = get_soilmodel(smn)
+
+        else:
+            raise ValueError(
+                f"Argument must either be Type[SoilModel] | SoilModel | str,"
+                f"not {type(sm)}"
+            )
+
         path = Path(__file__).parent / "datasets/Soil_Parameters.xlsx"
-        ser = (
-            read_excel(path, sheet_name=sm.__name__, index_col=0)
-            .loc[self.name]
-            .to_dict()
-        )
+        ser = read_excel(path, sheet_name=smn, index_col=0).loc[self.name].to_dict()
         # path = Path(__file__).parent / f"datasets/{sm.__name__}.csv"
         # ser = read_csv(path, index_col=["name"]).loc[self.name].to_dict()
         self.__setattr__("type", ser.pop("soil type"))
@@ -421,7 +446,31 @@ class Soil:
         self.__setattr__("model", sm(**ser))
         return self
 
+    @staticmethod
+    def list_names(sm: Type[SoilModel] | SoilModel | str) -> list[str]:
+        if isinstance(sm, SoilModel):
+            if hasattr(sm, "__name__"):
+                smn = sm.__name__
+            else:
+                smn = sm.__class__.__name__
+                sm = type(sm)
+        elif isinstance(sm, str):
+            smn = sm
+            sm = get_soilmodel(smn)
+
+        else:
+            raise ValueError(
+                f"Argument must either be Type[SoilModel] | SoilModel | str,"
+                f"not {type(sm)}"
+            )
+
+        path = Path(__file__).parent / "datasets/Soil_Parameters.xlsx"
+        names = read_excel(path, sheet_name=smn).loc[:, "name"].to_list()
+        return names
+
     def from_staring(self, year: str = "2018") -> "Soil":
+        if year not in ("2001", 2001, "2018", 2018):
+            raise ValueError(f"Year must either be '2001' or '2018', not {year}")
         path = Path(__file__).parent / f"datasets/Staring_{year}.xlsx"
         parameters = read_excel(path, sheet_name="parameters", index_col=0)
         ser = parameters.loc[self.name].to_dict()
