@@ -469,8 +469,8 @@ class Soil:
         return names
 
     def from_staring(self, year: str = "2018") -> "Soil":
-        if year not in ("2001", "2018"):
-            raise ValueError(f"Year must either be '2001' or '2018, not {year}")
+        if year not in ("2001", 2001, "2018", 2018):
+            raise ValueError(f"Year must either be '2001' or '2018', not {year}")
         path = Path(__file__).parent / f"datasets/Staring_{year}.xlsx"
         parameters = read_excel(path, sheet_name="parameters", index_col=0)
         ser = parameters.loc[self.name].to_dict()
