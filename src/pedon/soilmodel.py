@@ -33,7 +33,7 @@ class SoilModel(Protocol):
 
 @dataclass
 class Genuchten:
-    """Mualem- van Genuchten Soil Model
+    """Mualem-van Genuchten Soil Model
 
     van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
     Hydraulic Conductivity of Unsaturated Soil
@@ -294,7 +294,12 @@ def plot_swrc(
     else:
         sw = sm.theta(h=h)
 
-    ax.plot(sw, -h, label=sm.__class__.__name__, **kwargs)
+    if "label" in kwargs:
+        label = kwargs.pop("label")
+    else:
+        label = getattr(getattr(sm, "__class__"), "__name__")
+
+    ax.plot(sw, -h, label=label, **kwargs)
     ax.set_ylim(1e-3, 1e6)
     ax.grid(True)
     return ax
@@ -315,7 +320,12 @@ def plot_hcf(
     h = logspace(-6, 10, num=1000)
     k = sm.k(h=h)
 
-    ax.plot(k, h, label=sm.__class__.__name__, **kwargs)
+    if "label" in kwargs:
+        label = kwargs.pop("label")
+    else:
+        label = getattr(getattr(sm, "__class__"), "__name__")
+
+    ax.plot(k, h, label=label, **kwargs)
     ax.set_ylim(1e-3, 1e6)
     ax.set_xlim()
     ax.grid(True)
