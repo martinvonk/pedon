@@ -26,6 +26,10 @@ class SoilModel(Protocol):
         """Method to calcualte the permeability from the pressure head h"""
         ...
 
+    def h(self, theta: FloatArray) -> FloatArray:
+        """Method to calcualte the pressure head h from the water content"""
+        ...
+
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         """Method to plot the soil water retention curve"""
         ...
@@ -67,6 +71,11 @@ class Genuchten:
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        h = 1 / self.alpha * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
+        return h
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -119,6 +128,9 @@ class Brooks:
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
 
+    def h(self, theta: FloatArray) -> FloatArray:
+        pass
+
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
@@ -151,6 +163,9 @@ class Gardner:
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        pass
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -192,6 +207,11 @@ class Panday:
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        h = 1 / self.alpha * ((1 / se) ** (1 / self.gamma) - 1) ** (1 / self.beta)
+        return h
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -258,6 +278,9 @@ class Fredlund:
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        pass
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
