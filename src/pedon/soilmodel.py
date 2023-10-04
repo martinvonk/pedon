@@ -3,7 +3,7 @@ from typing import Protocol, Type, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
-from numpy import exp, full, linspace, log, logspace
+from numpy import exp, full, linspace, log, logspace, log10
 
 from ._typing import FloatArray
 
@@ -26,6 +26,10 @@ class SoilModel(Protocol):
         """Method to calcualte the permeability from the pressure head h"""
         ...
 
+    def h(self, theta: FloatArray) -> FloatArray:
+        """Method to calcualte the pressure head h from the water content"""
+        ...
+
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         """Method to plot the soil water retention curve"""
         ...
@@ -33,7 +37,7 @@ class SoilModel(Protocol):
 
 @dataclass
 class Genuchten:
-    """Mualem- van Genuchten Soil Model
+    """Mualem-van Genuchten Soil Model
 
     van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
     Hydraulic Conductivity of Unsaturated Soil
@@ -67,6 +71,11 @@ class Genuchten:
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        h = 1 / self.alpha * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
+        return h
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -119,6 +128,22 @@ class Brooks:
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
 
+    def h(self, theta: FloatArray) -> FloatArray:
+        if isinstance(theta, float):
+            if theta >= self.theta_r:
+                return self.h_b * ((theta - self.theta_r) / (self.s(theta))) ** (
+                    -1 / self.l
+                )
+            else:
+                return self.h_b
+        else:
+            h = full(theta.shape, self.h_b)
+            mask = theta >= self.theta_r
+            h[mask] = self.h_b * (
+                (theta[mask] - self.theta_r) / (self.s(theta[mask]))
+            ) ** (-1 / self.l)
+            return h
+
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
@@ -152,6 +177,9 @@ class Gardner:
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
 
+    def h(self, theta: FloatArray) -> FloatArray:
+        return (npabs(theta) / self.a) ** (-1 / self.b)
+
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
@@ -177,7 +205,11 @@ class Panday:
     def __post_init__(self):
         self.sr = self.theta_r / self.theta_s  # theta_r / theta_s
         self.gamma = 1 - 1 / self.beta  # m
-        self.sy = self.theta_s - self.theta_r - self.theta(10**2)
+        theta_fc = (
+            self.beta ** -(0.60 * (2 + log10(self.k_s))) * (self.theta_s - self.theta_r)
+            + self.theta_r
+        )
+        self.sy = self.theta_s - theta_fc
 
     def theta(self, h: FloatArray) -> FloatArray:
         return (self.sr + self.s(h) * (1 - self.sr)) * self.theta_s
@@ -192,6 +224,11 @@ class Panday:
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        h = 1 / self.alpha * ((1 / se) ** (1 / self.gamma) - 1) ** (1 / self.beta)
+        return h
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -259,6 +296,11 @@ class Fredlund:
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
 
+    def h(self, theta: FloatArray) -> FloatArray:
+        return self.a * (exp(self.theta_s / theta) ** (1 / self.m) - exp(1)) ** (
+            1 / self.n
+        )
+
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
@@ -275,10 +317,7 @@ def get_soilmodel(soilmodel_name: str) -> Type[SoilModel]:
 
 
 def plot_swrc(
-    sm: SoilModel,
-    saturation: bool = False,
-    ax: plt.Axes | None = None,
-    **kwargs: dict,
+    sm: SoilModel, saturation: bool = False, ax: plt.Axes | None = None, **kwargs
 ) -> plt.Axes:
     """Plot soil water retention curve"""
 
@@ -294,7 +333,12 @@ def plot_swrc(
     else:
         sw = sm.theta(h=h)
 
-    ax.plot(sw, -h, label=sm.__class__.__name__, **kwargs)
+    if "label" in kwargs:
+        label = kwargs.pop("label")
+    else:
+        label = getattr(getattr(sm, "__class__"), "__name__")
+
+    ax.plot(sw, -h, label=label, **kwargs)
     ax.set_ylim(1e-3, 1e6)
     ax.grid(True)
     return ax
@@ -303,7 +347,7 @@ def plot_swrc(
 def plot_hcf(
     sm: SoilModel,
     ax: plt.Axes | None = None,
-    **kwargs: dict,
+    **kwargs,
 ) -> plt.Axes:
     """Plot the hydraulic conductivity function"""
 
@@ -315,7 +359,12 @@ def plot_hcf(
     h = logspace(-6, 10, num=1000)
     k = sm.k(h=h)
 
-    ax.plot(k, h, label=sm.__class__.__name__, **kwargs)
+    if "label" in kwargs:
+        label = kwargs.pop("label")
+    else:
+        label = getattr(getattr(sm, "__class__"), "__name__")
+
+    ax.plot(k, h, label=label, **kwargs)
     ax.set_ylim(1e-3, 1e6)
     ax.set_xlim()
     ax.grid(True)
