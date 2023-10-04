@@ -3,7 +3,7 @@ from typing import Protocol, Type, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
-from numpy import exp, full, linspace, log, logspace, log10, nan
+from numpy import exp, full, linspace, log, logspace, log10
 
 from ._typing import FloatArray
 
