@@ -129,7 +129,12 @@ class Brooks:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        pass
+        h = full(theta.shape, self.h_b)
+        mask = theta >= self.theta_r
+        h[mask] = self.h_b * ((theta[mask] - self.theta_r) / (self.s(theta[mask]))) ** (
+            -1 / self.l
+        )
+        return h
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -165,7 +170,7 @@ class Gardner:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        pass
+        return (abs(theta) / self.a) ** (-1 / self.b)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -284,7 +289,9 @@ class Fredlund:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        pass
+        return self.a * (exp ** (self.theta_s / theta) ** (1 / self.m) - exp(1)) ** (
+            1 / self.n
+        )
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
