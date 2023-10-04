@@ -69,7 +69,7 @@ pythonpath = ["src"]
 legacy_tox_ini = """
     [tox]
     requires = tox>=4
-    env_list = format, type, lint, py{310,311}
+    env_list = format, type, lint, py{310,311,312}
 
     [testenv]
     description = run unit tests
@@ -82,8 +82,8 @@ legacy_tox_ini = """
     basepython = python3.10
     extras = formatting
     commands =
-            black src
-            isort src
+            black src --check --verbose
+            isort src --check
 
     [testenv:type]
     description = run type checks
