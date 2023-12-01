@@ -3,7 +3,7 @@ from typing import Protocol, Type, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
-from numpy import exp, full, linspace, log, logspace, log10
+from numpy import exp, full, linspace, log, log10, logspace
 
 from ._typing import FloatArray
 
@@ -201,6 +201,7 @@ class Panday:
     sr: float = field(init=False, repr=True)
     gamma: float = field(init=False, repr=False)  # 1 - 1 / beta
     sy: float = field(init=False, repr=False)
+    ss: float = field(default=1e-6, repr=False)
 
     def __post_init__(self):
         self.sr = self.theta_r / self.theta_s  # theta_r / theta_s
