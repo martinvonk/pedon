@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Type
 
-from numpy import append, exp, log, ones
-from pandas import DataFrame, read_excel
+from numpy import append, array2string, exp, log, ones
+from pandas import DataFrame, read_csv
 from scipy.optimize import least_squares
 
 from ._params import get_params
@@ -37,19 +37,18 @@ class SoilSample:
                 f"No Staring series available for year '{year}'"
                 "please use either '2001' or '2018'"
             )
-        path = Path(__file__).parent / f"datasets/Staring_{year}.xlsx"
-        properties = read_excel(path, sheet_name="properties", index_col=0)
-        measurements = read_excel(path, sheet_name="measurements", index_col=[0, 1])
-        self.h = measurements.columns.astype(float).values
-        self.k = measurements.loc[name, "k"].astype(float).values
-        self.theta = measurements.loc[name, "theta"].astype(float).values
+        path = Path(__file__).parent / f"datasets/soilsamples.csv"
+        properties = read_csv(path, delimiter=";")
+        staring_properties = properties[
+            properties["source"] == f"Staring_{year}"
+        ].set_index("name")
 
-        self.silt_p = properties.loc[name, "silt_p"]
-        self.clay_p = properties.loc[name, "clay_p"]
-        self.om_p = properties.loc[name, "om_p"]
-        self.m50 = properties.loc[name, "m50"]
+        self.silt_p = staring_properties.loc[name, "silt_p"]
+        self.clay_p = staring_properties.loc[name, "clay_p"]
+        self.om_p = staring_properties.loc[name, "om_p"]
+        self.m50 = staring_properties.loc[name, "m50"]
         if year == "2001":
-            self.rho = properties.loc[name, "rho"]
+            self.rho = staring_properties.loc[name, "rho"]
         return self
 
     def fit_seperate(
@@ -413,13 +412,14 @@ class SoilSample:
 @dataclass
 class Soil:
     name: str
-    type: str | None = None
     model: SoilModel | None = None
     sample: SoilSample | None = None
     source: str | None = None
     description: str | None = None
 
-    def from_name(self, sm: Type[SoilModel] | SoilModel | str) -> "Soil":
+    def from_name(
+        self, sm: Type[SoilModel] | SoilModel | str, source: str | None = None
+    ) -> "Soil":
         if isinstance(sm, SoilModel):
             if hasattr(sm, "__name__"):
                 smn = sm.__name__
@@ -429,21 +429,30 @@ class Soil:
         elif isinstance(sm, str):
             smn = sm
             sm = get_soilmodel(smn)
-
         else:
             raise ValueError(
                 f"Argument must either be Type[SoilModel] | SoilModel | str,"
                 f"not {type(sm)}"
             )
 
-        path = Path(__file__).parent / "datasets/Soil_Parameters.xlsx"
-        ser = read_excel(path, sheet_name=smn, index_col=0).loc[self.name].to_dict()
-        # path = Path(__file__).parent / f"datasets/{sm.__name__}.csv"
-        # ser = read_csv(path, index_col=["name"]).loc[self.name].to_dict()
-        self.__setattr__("type", ser.pop("soil type"))
-        self.__setattr__("source", ser.pop("source"))
-        self.__setattr__("description", ser.pop("description"))
-        self.__setattr__("model", sm(**ser))
+        path = Path(__file__).parent / "datasets/soilsamples.csv"
+        ser = read_csv(path, delimiter=";", index_col=0)
+        sersm = ser[ser["soilmodel"] == smn].loc[[self.name], :]
+        if source is None and len(sersm) > 1:
+            raise Exception(
+                f"Multiple sources for soil {self.name}: "
+                f"{array2string(sersm.loc[:, 'source'].values)}. "
+                f"Please provide the source using the source argument"
+            )
+        elif (source is not None) and len(sersm) > 1:
+            sersm = sersm[sersm["source"] == source]
+
+        serd = sersm.squeeze().to_dict()
+
+        self.__setattr__("source", serd.pop("source"))
+        self.__setattr__("description", serd.pop("description"))
+        smserd = {x: serd[x] for x in sm.__dataclass_fields__.keys()}
+        self.__setattr__("model", sm(**smserd))
         return self
 
     @staticmethod
@@ -464,21 +473,16 @@ class Soil:
                 f"not {type(sm)}"
             )
 
-        path = Path(__file__).parent / "datasets/Soil_Parameters.xlsx"
-        names = read_excel(path, sheet_name=smn).loc[:, "name"].to_list()
-        return names
+        path = Path(__file__).parent / "datasets/soilsamples.csv"
+        names = read_csv(path, delimiter=";")
+
+        return names[names["soilmodel"] == smn].loc[:, "name"].unique().tolist()
 
     def from_staring(self, year: str = "2018") -> "Soil":
         if year not in ("2001", 2001, "2018", 2018):
             raise ValueError(f"Year must either be '2001' or '2018', not {year}")
-        path = Path(__file__).parent / f"datasets/Staring_{year}.xlsx"
-        parameters = read_excel(path, sheet_name="parameters", index_col=0)
-        ser = parameters.loc[self.name].to_dict()
-        self.__setattr__("type", ser.pop("soil type"))
-        self.__setattr__("source", ser.pop("source"))
-        self.__setattr__("description", ser.pop("description"))
-        sm = Genuchten(**ser)
-        self.__setattr__("model", sm)
+
+        self.from_name(sm=Genuchten, source=f"Staring_{year}")
         ss = SoilSample().from_staring(name=self.name, year=year)
         self.__setattr__("sample", ss)
         return self

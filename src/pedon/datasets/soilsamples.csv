@@ -1,0 +1,110 @@
+name;source;soilmodel;description;soil type;k_s;theta_r;theta_s;alpha;n;l;h_b;silt_p;clay_p;om_p;m50;rho;silt_p min;silt_p max;clay_p min;clay_p max;om_p min;om_p max;m50 min;m50 max;rho min;rho max
+Sand;HYDRUS;Genuchten;;Sand;712.8;0.045;0.43;0.145;2.68;0.5;;;;;;;;;;;;;;;;
+Loamy Sand;HYDRUS;Genuchten;;Loamy Sand;350.2;0.057;0.41;0.125;2.28;0.5;;;;;;;;;;;;;;;;
+Sandy Loam;HYDRUS;Genuchten;;Sandy Loam;106.1;0.065;0.41;0.075;1.89;0.5;;;;;;;;;;;;;;;;
+Loam;HYDRUS;Genuchten;;Loam;24.96;0.078;0.43;0.036;1.56;0.5;;;;;;;;;;;;;;;;
+Silt;HYDRUS;Genuchten;;Silt;6;0.034;0.46;0.016;1.37;0.5;;;;;;;;;;;;;;;;
+Silt Loam;HYDRUS;Genuchten;;Silt Loam;10.8;0.067;0.45;0.02;1.41;0.5;;;;;;;;;;;;;;;;
+Sandy Clay Loam;HYDRUS;Genuchten;;Sandy Clay Loam;31.44;0.1;0.39;0.059;1.48;0.5;;;;;;;;;;;;;;;;
+Clay Loam;HYDRUS;Genuchten;;Clay Loam;6.24;0.095;0.41;0.019;1.31;0.5;;;;;;;;;;;;;;;;
+Silty Clay Loam;HYDRUS;Genuchten;;Silty Clay Loam;1.68;0.089;0.43;0.01;1.23;0.5;;;;;;;;;;;;;;;;
+Sandy Clay;HYDRUS;Genuchten;;Sandy Clay;2.88;0.1;0.38;0.027;1.23;0.5;;;;;;;;;;;;;;;;
+Silty Clay;HYDRUS;Genuchten;;Silty Clay;0.48;0.07;0.36;0.005;1.09;0.5;;;;;;;;;;;;;;;;
+Clay;HYDRUS;Genuchten;;Clay;4.8;0.068;0.38;0.008;1.09;0.5;;;;;;;;;;;;;;;;
+B01;Staring_2018;Genuchten;leemarm zeer fijn tot matig fijn zand;Sand;31.23;0.02;0.427;0.0217;1.735;0.981;;5;0;7.50;0.01575;;0;10;;;0;15;0.0105;0.0210;1.40;1.70
+B02;Staring_2018;Genuchten;zwak lemig zeer fijn tot matig fijn zand;Sand;83.24;0.02;0.434;0.0216;1.35;7.202;;14;0;7.50;0.01575;;10;18;;;0;15;0.0105;0.0210;1.20;1.60
+B03;Staring_2018;Genuchten;sterk lemig zeer fijn tot matig fijn zand;Sand;19.08;0.02;0.443;0.015;1.51;0.139;;25.50;0;7.50;0.01575;;18;33;;;0;15;0.0105;0.0210;1.10;1.50
+B04;Staring_2018;Genuchten;zeer sterk lemig zeer fijn tot matig fijn zand;Sand;34.88;0.02;0.462;0.0149;1.40;0.295;;41.50;0;7.50;0.01575;;33;50;;;0;15;0.0105;0.0210;1.10;1.50
+B05;Staring_2018;Genuchten;grof zand;Sand;63.65;0.01;0.381;0.0428;1.81;0.024;;0;0;7.50;0.1105;;;;;;0;15;0.0210;0.2000;1.30;1.60
+B06;Staring_2018;Genuchten;keileem;Sand;104.1;0.01;0.385;0.0209;1.24;-1.2;;25;0;7.50;0.1025;;0;50;;;0;15;0.0050;0.2000;1.10;1.60
+B07;Staring_2018;Genuchten;zeer lichte zavel;Sand;14.58;0;0.401;0.0183;1.25;0.952;;0;10;7.50;;;;;8;12;0;15;;;1.20;1.80
+B08;Staring_2018;Genuchten;matig lichte zavel;Sand;3;0.01;0.433;0.0105;1.28;-1.919;;0;15;7.50;;;;;12;18;0;15;;;1.20;1.60
+B09;Staring_2018;Genuchten;zware zavel;Sand;1.75;0;0.43;0.007;1.27;-2.387;;0;21.50;7.50;;;;;18;25;0;15;;;1.20;1.60
+B10;Staring_2018;Genuchten;lichte klei;Clay;3.83;0.01;0.448;0.0128;1.14;4.581;;0;30;7.50;;;;;25;35;0;15;;;1.10;1.60
+B11;Staring_2018;Genuchten;matig zware klei;Clay;6.31;0.01;0.591;0.0216;1.11;-5.549;;0;42.50;7.50;;;;;35;50;0;15;;;0.90;1.70
+B12;Staring_2018;Genuchten;zeer zware klei;Clay;2.25;0.01;0.53;0.0166;1.09;-4.494;;0;75;7.50;;;;;50;100;0;15;;;0.90;1.30
+B13;Staring_2018;Genuchten;zandige leem;Sandy Loam;29.83;0.01;0.416;0.0084;1.44;-1.357;;67.50;0;7.50;;;50;85;;;0;15;;;1;1.60
+B14;Staring_2018;Genuchten;siltige leem;Silt Loam;0.9;0.01;0.417;0.0054;1.30;-0.335;;92.50;0;7.50;;;85;100;;;0;15;;;1.10;1.60
+B15;Staring_2018;Genuchten;venig zand;Peat;87.45;0.01;0.528;0.0237;1.28;-1.478;;0;4;20;;;;;0;8;15;25;;;1;1.30
+B16;Staring_2018;Genuchten;zandig veen en veen;Peat;12.36;0.01;0.786;0.0211;1.28;-1.221;;0;4;62.50;;;;;0;8;25;100;;;0.20;1
+B17;Staring_2018;Genuchten;venige klei;Peat;4.48;0;0.719;0.0191;1.14;0;;0;54;30.50;;;;;8;100;16;45;;;0.90;1.20
+B18;Staring_2018;Genuchten;kleiig veen;Peat;13.14;0;0.765;0.0205;1.15;0;;0;54;47.50;;;;;8;100;25;70;;;0.40;0.80
+O01;Staring_2018;Genuchten;leemarm zeer fijn tot matig fijn zand;Sand;22.32;0.01;0.366;0.016;2.16;2.868;;5;0;1.50;0.01575;;0;10;;;0;3;0.0105;0.0210;1.40;1.80
+O02;Staring_2018;Genuchten;zwak lemig zeer fijn tot matig fijn zand;Sand;22.76;0.02;0.387;0.0161;1.52;2.44;;14;0;1.50;0.01575;;10;18;;;0;3;0.0105;0.0210;1.40;1.70
+O03;Staring_2018;Genuchten;sterk lemig zeer fijn tot matig fijn zand;Sand;12.37;0.01;0.34;0.0172;1.70;0;;25.50;0;1.50;0.01575;;18;33;;;0;3;0.0105;0.0210;1.40;1.80
+O04;Staring_2018;Genuchten;zeer sterk lemig zeer fijn tot matig fijn zand;Sand;25.81;0.01;0.364;0.0136;1.49;2.179;;41.50;0;1.50;0.01575;;33;50;;;0;3;0.0105;0.0210;1.40;1.70
+O05;Staring_2018;Genuchten;grof zand;Sand;17.42;0.01;0.337;0.0303;2.89;0.074;;;0;1.50;0.1105;;;;;;0;3;0.0210;0.2000;1.50;1.70
+O06;Staring_2018;Genuchten;keileem;Sand;32.83;0.01;0.333;0.016;1.29;-1.01;;25;0;1.50;0.1025;;0;50;;;0;3;0.0050;0.2000;1.10;1.60
+O07;Staring_2018;Genuchten;beekleem;Sand;37.55;0.01;0.513;0.012;1.15;-2.013;;41.50;0;1.50;0.0100;;33;50;;;0;3;0.0050;0.0105;1;1.70
+O08;Staring_2018;Genuchten;zeer lichte zavel;Sand;8.64;0;0.454;0.0113;1.35;-0.904;;0;10;1.50;;;;;8;12;0;3;;;1.40;1.60
+O09;Staring_2018;Genuchten;matig lichte zavel;Sand;3.77;0;0.458;0.0097;1.38;-1.013;;0;15;1.50;;;;;12;18;0;3;;;1.30;1.70
+O10;Staring_2018;Genuchten;zware zavel;Sand;2.3;0.01;0.472;0.01;1.25;-0.793;;0;21.50;1.50;;;;;18;25;0;3;;;1.30;1.50
+O11;Staring_2018;Genuchten;lichte klei;Clay;2.12;0;0.444;0.0143;1.13;2.357;;0;30;1.50;;;;;25;35;0;3;;;1.30;1.60
+O12;Staring_2018;Genuchten;matig zware klei;Clay;1.08;0.01;0.561;0.0088;1.16;-3.172;;0;42.50;1.50;;;;;35;50;0;3;;;1;1.50
+O13;Staring_2018;Genuchten;zeer zware klei;Clay;9.69;0.01;0.573;0.0279;1.08;-6.091;;0;75;1.50;;;;;50;100;0;3;;;1;1.40
+O14;Staring_2018;Genuchten;zandige leem;Sandy Loam;2.5;0.01;0.394;0.0033;1.62;0.514;;67.50;0;1.50;;;50;85;;;0;3;;;1;1.60
+O15;Staring_2018;Genuchten;siltige leem;Silt Loam;2.79;0.01;0.41;0.0078;1.29;0;;92.50;0;1.50;;;85;100;;;0;3;;;1.10;1.60
+O16;Staring_2018;Genuchten;oligotroof veen;Peat;1.46;0;0.889;0.0097;1.36;-0.665;;0;0;67.50;;;;;;;35;100;;;0.10;0.70
+O17;Staring_2018;Genuchten;mesotroof en eutroof veen;Peat;3.4;0.01;0.849;0.0119;1.27;-1.249;;0;0;67.50;;;;;;;35;100;;;0.10;0.60
+O18;Staring_2018;Genuchten;moerige tussenlaag;Peat;35.95;0.01;0.58;0.0127;1.32;-0.786;;0;0;25;;;;;;;15;35;;;0.80;1.40
+Medium Sand;VS2D;Genuchten;;Medium Sand;40000;0.02;0.375;0.0431;3.1;0.5;;;;;;;;;;;;;;;;
+Sandy Loam;VS2D;Genuchten;;Sandy Loam;70;0.15;0.496;0.00847;4.8;0.5;;;;;;;;;;;;;;;;
+Silt Loam;VS2D;Genuchten;;Silt Loam;22.5;0.17;0.43;0.00505;7.0;0.5;;;;;;;;;;;;;;;;
+Del Monte Sand;VS2D;Genuchten;20 mesh;Sand;700000;0.036;0.36;0.00142;6.30;0.5;;;;;;;;;;;;;;;;
+Fresno Medium Sand;VS2D;Genuchten;;Sand;40000;0.02;0.375;0.00232;3.10;0.5;;;;;;;;;;;;;;;;
+Unconsolidated Sand;VS2D;Genuchten;;Sand;850;0.051;0.424;0.00134;9.00;0.5;;;;;;;;;;;;;;;;
+Sand;VS2D;Genuchten;;Sand;820;0.069;0.435;0.00326;3.90;0.5;;;;;;;;;;;;;;;;
+Fine Sand;VS2D;Genuchten;G.E. 13 - alpha 0.0104 in VS2DRTI;Sand;210;0.072;0.377;0.0096;6.90;0.5;;;;;;;;;;;;;;;;
+Columbia Sandy Loam;VS2D;Genuchten;;Sandy Loam;70;0.15;0.496;0.0118;4.80;0.5;;;;;;;;;;;;;;;;
+Touchet Silt Loam;VS2D;Genuchten;G.E. 3;Silt Loam;22;0.17;0.43;0.0198;7.00;0.5;;;;;;;;;;;;;;;;
+Hygiene Sandstone;VS2D;Genuchten;;Sand;15;0.15;0.25;0.0126;10.60;0.5;;;;;;;;;;;;;;;;
+Adelanto Loam;VS2D;Genuchten;;Loam;3.9;0.16;0.42;0.0274;2.06;0.5;;;;;;;;;;;;;;;;
+Limon Silt;VS2D;Genuchten;imbibition data;Silt;1.3;0.001;0.449;0.00651;1.30;0.5;;;;;;;;;;;;;;;;
+Yolo Light Clay;VS2D;Genuchten;alpha 0.0249 in VS2DRTI;Clay;1.1;0.175;0.495;0.00401;1.60;0.5;;;;;;;;;;;;;;;;
+Del Monte Sand;VS2D;Brooks;20 mesh;Sand;700000;0.011;0.36;;;2.5;0.112;;;;;;;;;;;;;;;
+Fresno Medium Sand;VS2D;Brooks;;Sand;40000;0;0.375;;;0.84;0.149;;;;;;;;;;;;;;;
+Unconsolidated Sand;VS2D;Brooks;;Sand;850;0.09;0.424;;;4.4;0.114;;;;;;;;;;;;;;;
+Sand;VS2D;Brooks;;Sand;820;0;0.435;;;0.84;0.196;;;;;;;;;;;;;;;
+Fine Sand;VS2D;Brooks;G.E. 13 - alpha 0.0104 in VS2DRTI;Sand;210;0.063;0.377;;;3.7;0.82;;;;;;;;;;;;;;;
+Columbia Sandy Loam;VS2D;Brooks;;Sandy Loam;70;0.11;0.496;;;1.6;0.85;;;;;;;;;;;;;;;
+Touchet Silt Loam;VS2D;Brooks;G.E. 3;Silt Loam;22;0.095;0.43;;;1.7;1.45;;;;;;;;;;;;;;;
+Hygiene Sandstone;VS2D;Brooks;;Sand;15;0.13;0.25;;;2.9;1.06;;;;;;;;;;;;;;;
+Adelanto Loam;VS2D;Brooks;;Loam;3.9;0.13;0.42;;;0.51;1.41;;;;;;;;;;;;;;;
+Limon Silt;VS2D;Brooks;imbibition data;Silt;1.3;0;0.449;;;0.22;0.338;;;;;;;;;;;;;;;
+Yolo Light Clay;VS2D;Brooks;alpha 0.0249 in VS2DRTI;Clay;1.1;0.055;0.495;;;0.25;0.181;;;;;;;;;;;;;;;
+B01;Staring_2001;Genuchten;leemarm zeer fijn tot matig fijn zand;Sand;31.23;0.02;0.427;0.0217;1.735;0.981;;7;0;2.50;0.0155;1.55;;;;;;;;;;
+B02;Staring_2001;Genuchten;zwak lemig zeer fijn tot matig fijn zand;Sand;83.24;0.02;0.434;0.0216;1.35;7.202;;14.50;0;5.50;0.0150;1.40;0;10;;;0;15;0.0105;0.0210;;
+B03;Staring_2001;Genuchten;sterk lemig zeer fijn tot matig fijn zand;Sand;19.08;0.02;0.443;0.015;1.51;0.139;;23.50;0;8;0.0135;1.30;10;18;;;0;15;0.0105;0.0210;;
+B04;Staring_2001;Genuchten;zeer sterk lemig zeer fijn tot matig fijn zand;Sand;34.88;0.02;0.462;0.0149;1.40;0.295;;43.50;0;3.50;0.0139;1.30;18;33;;;0;15;0.0105;0.0210;;
+B05;Staring_2001;Genuchten;grof zand;Sand;63.65;0.01;0.381;0.0428;1.81;0.024;;0;0;2;0.0425;1.45;33;50;;;0;15;0.0105;0.0210;;
+B06;Staring_2001;Genuchten;keileem;Sand;104.1;0.01;0.385;0.0209;1.24;-1.2;;22;0;4.50;0.0275;1.35;;;;;0;15;0.0210;0.2000;;
+B07;Staring_2001;Genuchten;zeer lichte zavel;Sand;14.58;0;0.401;0.0183;1.25;0.952;;0;11;3.50;;1.50;0;50;;;0;15;0.0050;0.2000;;
+B08;Staring_2001;Genuchten;matig lichte zavel;Sand;3;0.01;0.433;0.0105;1.28;-1.919;;0;14;2;;1.40;;;8;12;0;15;;;;
+B09;Staring_2001;Genuchten;zware zavel;Sand;1.75;0;0.43;0.007;1.27;-2.387;;0;21.50;4.50;;1.40;;;12;18;0;15;;;;
+B10;Staring_2001;Genuchten;lichte klei;Clay;3.83;0.01;0.448;0.0128;1.14;4.581;;0;30.50;3.50;;1.35;;;18;25;0;15;;;;
+B11;Staring_2001;Genuchten;matig zware klei;Clay;6.31;0.01;0.591;0.0216;1.11;-5.549;;0;42.50;9;;1.30;;;25;35;0;15;;;;
+B12;Staring_2001;Genuchten;zeer zware klei;Clay;2.25;0.01;0.53;0.0166;1.09;-4.494;;0;64;4;;1.10;;;35;50;0;15;;;;
+B13;Staring_2001;Genuchten;zandige leem;Sandy Loam;29.83;0.01;0.416;0.0084;1.44;-1.357;;67.50;0;4.50;;1.30;;;50;100;0;15;;;;
+B14;Staring_2001;Genuchten;siltige leem;Silt Loam;0.9;0.01;0.417;0.0054;1.30;-0.335;;90;0;3;;1.35;50;85;;;0;15;;;;
+B15;Staring_2001;Genuchten;venig zand;Peat;87.45;0.01;0.528;0.0237;1.28;-1.478;;0;4;18.50;;1.15;85;100;;;0;15;;;;
+B16;Staring_2001;Genuchten;zandig veen en veen;Peat;12.36;0.01;0.786;0.0211;1.28;-1.221;;0;4;54;;0.60;;;0;8;15;25;;;;
+B17;Staring_2001;Genuchten;venige klei;Peat;4.48;0;0.719;0.0191;1.14;0;;0;55;25;;1.05;;;0;8;25;100;;;;
+B18;Staring_2001;Genuchten;kleiig veen;Peat;13.14;0;0.765;0.0205;1.15;0;;0;45;47.50;;0.60;;;8;100;16;45;;;;
+O01;Staring_2001;Genuchten;leemarm zeer fijn tot matig fijn zand;Sand;22.32;0.01;0.366;0.016;2.16;2.868;;5.50;0;1.50;0.0155;1.60;;;8;100;25;70;;;;
+O02;Staring_2001;Genuchten;zwak lemig zeer fijn tot matig fijn zand;Sand;22.76;0.02;0.387;0.0161;1.52;2.44;;13;0;2;0.0140;1.55;0;10;;;0;3;0.0105;0.0210;;
+O03;Staring_2001;Genuchten;sterk lemig zeer fijn tot matig fijn zand;Sand;12.37;0.01;0.34;0.0172;1.70;0;;26;0;1;0.0143;1.60;10;18;;;0;3;0.0105;0.0210;;
+O04;Staring_2001;Genuchten;zeer sterk lemig zeer fijn tot matig fijn zand;Sand;25.81;0.01;0.364;0.0136;1.49;2.179;;41.50;0;1;0.0149;1.55;18;33;;;0;3;0.0105;0.0210;;
+O05;Staring_2001;Genuchten;grof zand;Sand;17.42;0.01;0.337;0.0303;2.89;0.074;;0;0;1;0.0310;1.60;33;50;;;0;3;0.0105;0.0210;;
+O06;Staring_2001;Genuchten;keileem;Sand;32.83;0.01;0.333;0.016;1.29;-1.01;;22.50;0;4;0.0275;1.35;;;;;0;3;0.0210;0.2000;;
+O07;Staring_2001;Genuchten;beekleem;Sand;37.55;0.01;0.513;0.012;1.15;-2.013;;40;0;2;0.0120;1.35;0;50;;;0;3;0.0050;0.2000;;
+O08;Staring_2001;Genuchten;zeer lichte zavel;Sand;8.64;0;0.454;0.0113;1.35;-0.904;;0;9.50;1;;1.50;33;50;;;0;3;0.0050;0.0150;;
+O09;Staring_2001;Genuchten;matig lichte zavel;Sand;3.77;0;0.458;0.0097;1.38;-1.013;;0;14.50;1;;1.50;;;8;12;0;3;;;;
+O10;Staring_2001;Genuchten;zware zavel;Sand;2.3;0.01;0.472;0.01;1.25;-0.793;;0;20;1.50;;1.40;;;12;18;0;3;;;;
+O11;Staring_2001;Genuchten;lichte klei;Clay;2.12;0;0.444;0.0143;1.13;2.357;;0;30.50;2;;1.45;;;18;25;0;3;;;;
+O12;Staring_2001;Genuchten;matig zware klei;Clay;1.08;0.01;0.561;0.0088;1.16;-3.172;;0;41.50;1.50;;1.25;;;25;35;0;3;;;;
+O13;Staring_2001;Genuchten;zeer zware klei;Clay;9.69;0.01;0.573;0.0279;1.08;-6.091;;0;63.50;1.50;;1.20;;;35;50;0;3;;;;
+O14;Staring_2001;Genuchten;zandige leem;Sandy Loam;2.5;0.01;0.394;0.0033;1.62;0.514;;67.50;0;1;;1.30;;;50;100;0;3;;;;
+O15;Staring_2001;Genuchten;siltige leem;Silt Loam;2.79;0.01;0.41;0.0078;1.29;0;;88.50;0;2;;1.35;50;85;;;0;3;;;;
+O16;Staring_2001;Genuchten;oligotroof veen;Peat;1.46;0;0.889;0.0097;1.36;-0.665;;0;0;68;;0.40;85;100;;;0;3;;;;
+O17;Staring_2001;Genuchten;mesotroof en eutroof veen;Peat;3.4;0.01;0.849;0.0119;1.27;-1.249;;0;0;70;;0.35;;;;;35;100;;;;
+O18;Staring_2001;Genuchten;moerige tussenlaag;Peat;35.95;0.01;0.58;0.0127;1.32;-0.786;;0;0;22.50;;1.10;;;;;35;100;;;;
