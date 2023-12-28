@@ -3,7 +3,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Type
 
-from numpy import append, array2string, exp, log, ones
+from numpy import abs as npabs
+from numpy import append, array2string, exp, full, isnan, log
 from pandas import DataFrame, read_csv
 from scipy.optimize import least_squares
 
@@ -55,8 +56,8 @@ class SoilSample:
         self,
         sm: Type[SoilModel],
         pbounds: DataFrame | None = None,
-        weights: FloatArray | None = None,
-        return_res: bool = False,
+        weights: FloatArray | float = 1.0,
+        silent: bool = True,
     ) -> SoilModel:
         """Fit the soil water retention and conductivity seperate."""
         if pbounds is None:
@@ -65,8 +66,8 @@ class SoilSample:
             pbounds.loc["theta_s", "p_ini"] = max(self.theta)
             pbounds.loc["theta_s", "p_max"] = max(self.theta) + 0.01
 
-        if weights is None:
-            weights = ones(self.h.shape)
+        if isinstance(weights, float):
+            weights = full(self.h.shape, weights)
 
         sml = sm(**dict(zip(pbounds.index, pbounds.loc[:, "p_ini"])))
 
@@ -102,20 +103,20 @@ class SoilSample:
 
         opt_pars = dict(zip(pbounds.index[pbounds.loc[:, "swrc"]], res_swrc.x))
         opt_pars.update(dict(zip(pbounds.index[~pbounds.loc[:, "swrc"]], res_k.x)))
-        opt_sm = sm(**opt_pars)
-        if return_res:
-            return opt_sm, {"res_swrc": res_swrc, "res_k": res_k}
-        return opt_sm
+        if not silent:
+            print("SciPy Optimization Result Soil Water Retention Curve\n", res_swrc)
+            print("SciPy Optimization Result Hydraulic Conductivity Function\n", res_k)
+        return sm(**opt_pars)
 
     def fit(
         self,
         sm: Type[SoilModel],
         pbounds: DataFrame | None = None,
-        weights: FloatArray | None = None,
-        W1: float | None = None,
+        weights: FloatArray | float = 1.0,
+        W1: float = 0.1,
         W2: float | None = None,
-        return_res: bool = False,
         k_s: float | None = None,
+        silent: bool = True,
     ) -> SoilModel:
         """Same method as RETC"""
 
@@ -132,16 +133,13 @@ class SoilSample:
             pbounds.loc["theta_s", "p_ini"] = max(theta)
             pbounds.loc["theta_s", "p_max"] = max(theta) + 0.02
 
-        if weights is None:
-            weights = ones(self.h.shape)
-
-        if W1 is None:
-            W1 = 0.1
+        if isinstance(weights, float):
+            weights = full(self.h.shape, weights)
 
         if W2 is None:
             M = len(k) + len(theta)
             N = len(theta)
-            W2 = (M - N) * sum(weights * theta) / (N * sum(weights * k))
+            W2 = (M - N) * sum(weights * theta) / (N * sum(weights * npabs(log(k))))
 
         def fit_staring(p: FloatArray) -> FloatArray:
             est_pars = dict(zip(pbounds.index, p))
@@ -164,10 +162,11 @@ class SoilSample:
         opt_pars = dict(zip(pbounds.index, res.x))
         if k_s is not None:
             opt_pars["k_s"] = k_s
-        opt_sm = sm(**opt_pars)
-        if return_res:
-            return opt_sm, {"res": res}
-        return opt_sm
+
+        if not silent:
+            print("SciPy Optimization Result\n", res)
+
+        return sm(**opt_pars)
 
     def wosten(self, ts: bool = False) -> Genuchten:
         """Wosten et al (1999) - Development and use of a database of hydraulic
@@ -255,7 +254,7 @@ class SoilSample:
             theta_r=theta_r,
             theta_s=theta_s,
             alpha=exp(alpha_),
-            n=exp(n_)+1,
+            n=exp(n_) + 1,
             l=(10 * exp(l_) - 10) / (1 + exp(l_)),
         )
 
@@ -448,10 +447,15 @@ class Soil:
             sersm = sersm[sersm["source"] == source]
 
         serd = sersm.squeeze().to_dict()
-
+        if isnan(serd["description"]):
+            serd["description"] = serd["soil type"]
         self.__setattr__("source", serd.pop("source"))
         self.__setattr__("description", serd.pop("description"))
-        smserd = {x: serd[x] for x in sm.__dataclass_fields__.keys()}
+        smserd = {
+            x: serd[x]
+            for x in sm.__dataclass_fields__.keys()
+            if sm.__dataclass_fields__[x].init
+        }
         self.__setattr__("model", sm(**smserd))
         return self
 
