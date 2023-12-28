@@ -10,7 +10,7 @@ def test_sample_staring_2001() -> None:
 
 
 def test_soil_from_name() -> None:
-    pe.soil.Soil("VS2D_Del Monte Sand").from_name(pe.Brooks)
+    pe.soil.Soil("Del Monte Sand").from_name(pe.Brooks)
 
 
 def test_soil_from_staring() -> None:
