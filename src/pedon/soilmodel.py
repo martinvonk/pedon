@@ -49,6 +49,7 @@ class Genuchten:
     alpha: float
     n: float
     l: float = 0.5  # noqa: E741
+    m: float = field(init=False, repr=False)
 
     def __post_init__(self):
         self.m = 1 - 1 / self.n

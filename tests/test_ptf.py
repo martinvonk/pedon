@@ -6,7 +6,7 @@ import pedon as pe
 @pytest.fixture
 def ss() -> pe.soil.SoilSample:
     return pe.soil.SoilSample(
-        sand_p=40, silt_p=10, clay_p=30, rho=1.5, om_p=20, m50=10000
+        sand_p=40, silt_p=10, clay_p=30, rho=1.5, om_p=20, m50=150
     )
 
 

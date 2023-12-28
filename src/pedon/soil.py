@@ -213,7 +213,7 @@ class SoilSample:
             - 0.1940 * self.om_p
             + 45.5 * self.rho
             - 7.24 * self.rho**2
-            - 0.0003658 * self.clay_p**2
+            + 0.0003658 * self.clay_p**2
             + 0.002885 * self.om_p**2
             - 12.81 * self.rho**-1
             - 0.1524 * self.silt_p**-1
@@ -251,12 +251,12 @@ class SoilSample:
         )
         theta_r = 0.01
         return Genuchten(
-            k_s=exp(ks_),
+            k_s=max(exp(ks_), 0),
             theta_r=theta_r,
             theta_s=theta_s,
             alpha=exp(alpha_),
-            n=exp(n_),
-            l=exp(l_),
+            n=exp(n_)+1,
+            l=(10 * exp(l_) - 10) / (1 + exp(l_)),
         )
 
     def wosten_sand(self, ts: bool = False) -> Genuchten:
