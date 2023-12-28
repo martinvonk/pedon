@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import Type
 
 from numpy import abs as npabs
-from numpy import append, array2string, exp, full, isnan, log
-from pandas import DataFrame, read_csv
+from numpy import append, array2string, exp, full, log
+from pandas import DataFrame, isna, read_csv
 from scipy.optimize import least_squares
 
 from ._params import get_params
@@ -447,7 +447,7 @@ class Soil:
             sersm = sersm[sersm["source"] == source]
 
         serd = sersm.squeeze().to_dict()
-        if isnan(serd["description"]):
+        if isna(serd["description"]):
             serd["description"] = serd["soil type"]
         self.__setattr__("source", serd.pop("source"))
         self.__setattr__("description", serd.pop("description"))
