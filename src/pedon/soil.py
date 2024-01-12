@@ -38,7 +38,7 @@ class SoilSample:
                 f"No Staring series available for year '{year}'"
                 "please use either '2001' or '2018'"
             )
-        path = Path(__file__).parent / f"datasets/soilsamples.csv"
+        path = Path(__file__).parent / "datasets/soilsamples.csv"
         properties = read_csv(path, delimiter=";")
         staring_properties = properties[
             properties["source"] == f"Staring_{year}"
