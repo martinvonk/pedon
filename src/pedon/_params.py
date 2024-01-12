@@ -16,30 +16,19 @@ pGenuchten = DataFrame(
             "theta_s": 0.2,
             "alpha": 0.001,
             "n": 1.000001,
-            "l": -7,
+            "l": -7.0,
         },
         "p_max": {
             "k_s": 100000.0,
             "theta_r": 0.2,
             "theta_s": 0.9,
             "alpha": 0.20,
-            "n": 12,
-            "l": 8,
-        },
-        "swrc": {
-            "k_s": False,
-            "theta_r": True,
-            "theta_s": True,
-            "alpha": True,
-            "n": True,
-            "l": False,
+            "n": 12.0,
+            "l": 8.0,
         },
     },
+    dtype=float,
 )
-pGenuchten.loc[:, ["p_ini", "p_min", "p_max"]] = pGenuchten.loc[
-    :, ["p_ini", "p_min", "p_max"]
-].astype(float)
-pGenuchten.loc[:, "swrc"] = pGenuchten.loc[:, "swrc"].astype(bool)
 
 pBrooks = DataFrame(
     data={
@@ -51,21 +40,16 @@ pBrooks = DataFrame(
             "h_b": 0.0001,
             "l": 0.1,
         },
-        "p_max": {"k_s": 100000.0, "theta_r": 0.2, "theta_s": 0.5, "h_b": 100, "l": 5},
-        "swrc": {
-            "k_s": False,
-            "theta_r": True,
-            "theta_s": True,
-            "h_b": True,
-            "l": True,
+        "p_max": {
+            "k_s": 100000.0,
+            "theta_r": 0.2,
+            "theta_s": 0.5,
+            "h_b": 100.0,
+            "l": 5.0,
         },
     },
+    dtype=float,
 )
-pBrooks.loc[:, ["p_ini", "p_min", "p_max"]] = pBrooks.loc[
-    :, ["p_ini", "p_min", "p_max"]
-].astype(float)
-pBrooks.loc[:, "swrc"] = pBrooks.loc[:, "swrc"].astype(bool)
-
 pPanday = DataFrame(
     data={
         "p_ini": {
@@ -89,23 +73,12 @@ pPanday = DataFrame(
             "theta_r": 0.2,
             "theta_s": 0.5,
             "alpha": 0.30,
-            "beta": 12,
+            "beta": 12.0,
             "brook": 50.0,
         },
-        "swrc": {
-            "k_s": False,
-            "theta_r": True,
-            "theta_s": True,
-            "alpha": True,
-            "beta": True,
-            "brook": False,
-        },
     },
+    dtype=float,
 )
-pPanday.loc[:, ["p_ini", "p_min", "p_max"]] = pPanday.loc[
-    :, ["p_ini", "p_min", "p_max"]
-].astype(float)
-pPanday.loc[:, "swrc"] = pPanday.loc[:, "swrc"].astype(bool)
 
 
 def get_params(sm_name: str) -> DataFrame:

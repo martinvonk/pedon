@@ -64,7 +64,3 @@ def sample() -> pe.soil.SoilSample:
 
 def test_fit(sample: pe.soil.SoilSample) -> None:
     sample.fit(pe.soilmodel.Genuchten)
-
-
-def test_fit_seperate(sample: pe.soil.SoilSample) -> None:
-    sample.fit(pe.soilmodel.Brooks)

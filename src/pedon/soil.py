@@ -52,62 +52,6 @@ class SoilSample:
             self.rho = staring_properties.loc[name, "rho"]
         return self
 
-    def fit_seperate(
-        self,
-        sm: Type[SoilModel],
-        pbounds: DataFrame | None = None,
-        weights: FloatArray | float = 1.0,
-        silent: bool = True,
-    ) -> SoilModel:
-        """Fit the soil water retention and conductivity seperate."""
-        if pbounds is None:
-            pbounds = get_params(sm.__name__)
-            pbounds.loc["k_s", "p_ini"] = max(self.k)
-            pbounds.loc["theta_s", "p_ini"] = max(self.theta)
-            pbounds.loc["theta_s", "p_max"] = max(self.theta) + 0.01
-
-        if isinstance(weights, float):
-            weights = full(self.h.shape, weights)
-
-        sml = sm(**dict(zip(pbounds.index, pbounds.loc[:, "p_ini"])))
-
-        def fit_swrc(p: FloatArray) -> FloatArray:
-            for pname, pv in zip(pbounds.index[pbounds.loc[:, "swrc"]], p):
-                sml.__setattr__(pname, pv)
-                diff = weights * (sml.theta(h=self.h) - self.theta)
-            return diff
-
-        def fit_k(p: FloatArray) -> FloatArray:
-            for pname, pv in zip(pbounds.index[~pbounds.loc[:, "swrc"]], p):
-                sml.__setattr__(pname, pv)
-                diff = weights * (log(sml.k(h=self.h)) - log(self.k))
-            return diff
-
-        res_swrc = least_squares(
-            fit_swrc,
-            x0=pbounds.loc[pbounds.swrc, "p_ini"],
-            bounds=(
-                pbounds.loc[pbounds.swrc, "p_min"],
-                pbounds.loc[pbounds.swrc, "p_max"],
-            ),
-        )
-
-        res_k = least_squares(
-            fit_k,
-            x0=pbounds.loc[~pbounds.swrc, "p_ini"],
-            bounds=(
-                pbounds.loc[~pbounds.swrc, "p_min"],
-                pbounds.loc[~pbounds.swrc, "p_max"],
-            ),
-        )
-
-        opt_pars = dict(zip(pbounds.index[pbounds.loc[:, "swrc"]], res_swrc.x))
-        opt_pars.update(dict(zip(pbounds.index[~pbounds.loc[:, "swrc"]], res_k.x)))
-        if not silent:
-            print("SciPy Optimization Result Soil Water Retention Curve\n", res_swrc)
-            print("SciPy Optimization Result Hydraulic Conductivity Function\n", res_k)
-        return sm(**opt_pars)
-
     def fit(
         self,
         sm: Type[SoilModel],
