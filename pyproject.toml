@@ -10,7 +10,7 @@ description = "Python package for (unsaturated) soil properties including pedotr
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
-dependencies = ["numpy", "matplotlib", "pandas", "scipy", "openpyxl"]
+dependencies = ["numpy", "matplotlib", "pandas", "scipy"]
 classifiers = [
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.10',
@@ -70,7 +70,7 @@ version = { attr = "pedon._version.__version__" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-"pedon.datasets" = ["*.xlsx"]
+"pedon.datasets" = ["*.csv"]
 
 [tool.black]
 line-length = 88
