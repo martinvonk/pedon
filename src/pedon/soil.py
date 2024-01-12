@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Type
 
 from numpy import abs as npabs
-from numpy import append, array2string, exp, full, log
+from numpy import append, array2string, exp, full, log, log10
 from pandas import DataFrame, isna, read_csv
 from scipy.optimize import least_squares
 
@@ -121,7 +121,9 @@ class SoilSample:
         """Same method as RETC"""
 
         theta = self.theta
+        N = len(theta)
         k = self.k
+        M = N + len(k)
 
         if pbounds is None:
             pbounds = get_params(sm.__name__)
@@ -134,25 +136,27 @@ class SoilSample:
             pbounds.loc["theta_s", "p_max"] = max(theta) + 0.02
 
         if isinstance(weights, float):
-            weights = full(self.h.shape, weights)
+            weights = full(M, weights)
 
         if W2 is None:
-            M = len(k) + len(theta)
-            N = len(theta)
-            W2 = (M - N) * sum(weights * theta) / (N * sum(weights * npabs(log(k))))
+            W2 = (
+                (M - N)
+                * sum(weights[0:N] * theta)
+                / (N * sum(weights[N:M] * npabs(log10(k))))
+            )
 
-        def fit_staring(p: FloatArray) -> FloatArray:
+        def get_diff(p: FloatArray) -> FloatArray:
             est_pars = dict(zip(pbounds.index, p))
             if k_s is not None:
                 est_pars["k_s"] = k_s
             sml = sm(**est_pars)
             theta_diff = sml.theta(h=self.h) - theta
-            k_diff = log(sml.k(h=self.h)) - log(k)
-            diff = append(weights * theta_diff, weights * W1 * W2 * k_diff)
+            k_diff = log10(sml.k(h=self.h)) - log10(k)
+            diff = append(weights[0:N] * theta_diff, weights[N:M] * W1 * W2 * k_diff)
             return diff
 
         res = least_squares(
-            fit_staring,
+            get_diff,
             x0=pbounds.loc[:, "p_ini"],
             bounds=(
                 pbounds.loc[:, "p_min"],
