@@ -3,8 +3,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Type
 
-from numpy import append, exp, log, ones
-from pandas import DataFrame, read_excel
+from numpy import abs as npabs
+from numpy import append, array2string, exp, full, log, log10
+from pandas import DataFrame, isna, read_csv
 from scipy.optimize import least_squares
 
 from ._params import get_params
@@ -37,91 +38,36 @@ class SoilSample:
                 f"No Staring series available for year '{year}'"
                 "please use either '2001' or '2018'"
             )
-        path = Path(__file__).parent / f"datasets/Staring_{year}.xlsx"
-        properties = read_excel(path, sheet_name="properties", index_col=0)
-        measurements = read_excel(path, sheet_name="measurements", index_col=[0, 1])
-        self.h = measurements.columns.astype(float).values
-        self.k = measurements.loc[name, "k"].astype(float).values
-        self.theta = measurements.loc[name, "theta"].astype(float).values
+        path = Path(__file__).parent / "datasets/soilsamples.csv"
+        properties = read_csv(path, delimiter=";")
+        staring_properties = properties[
+            properties["source"] == f"Staring_{year}"
+        ].set_index("name")
 
-        self.silt_p = properties.loc[name, "silt_p"]
-        self.clay_p = properties.loc[name, "clay_p"]
-        self.om_p = properties.loc[name, "om_p"]
-        self.m50 = properties.loc[name, "m50"]
+        self.silt_p = staring_properties.loc[name, "silt_p"]
+        self.clay_p = staring_properties.loc[name, "clay_p"]
+        self.om_p = staring_properties.loc[name, "om_p"]
+        self.m50 = staring_properties.loc[name, "m50"]
         if year == "2001":
-            self.rho = properties.loc[name, "rho"]
+            self.rho = staring_properties.loc[name, "rho"]
         return self
-
-    def fit_seperate(
-        self,
-        sm: Type[SoilModel],
-        pbounds: DataFrame | None = None,
-        weights: FloatArray | None = None,
-        return_res: bool = False,
-    ) -> SoilModel:
-        """Fit the soil water retention and conductivity seperate."""
-        if pbounds is None:
-            pbounds = get_params(sm.__name__)
-            pbounds.loc["k_s", "p_ini"] = max(self.k)
-            pbounds.loc["theta_s", "p_ini"] = max(self.theta)
-            pbounds.loc["theta_s", "p_max"] = max(self.theta) + 0.01
-
-        if weights is None:
-            weights = ones(self.h.shape)
-
-        sml = sm(**dict(zip(pbounds.index, pbounds.loc[:, "p_ini"])))
-
-        def fit_swrc(p: FloatArray) -> FloatArray:
-            for pname, pv in zip(pbounds.index[pbounds.loc[:, "swrc"]], p):
-                sml.__setattr__(pname, pv)
-                diff = weights * (sml.theta(h=self.h) - self.theta)
-            return diff
-
-        def fit_k(p: FloatArray) -> FloatArray:
-            for pname, pv in zip(pbounds.index[~pbounds.loc[:, "swrc"]], p):
-                sml.__setattr__(pname, pv)
-                diff = weights * (log(sml.k(h=self.h)) - log(self.k))
-            return diff
-
-        res_swrc = least_squares(
-            fit_swrc,
-            x0=pbounds.loc[pbounds.swrc, "p_ini"],
-            bounds=(
-                pbounds.loc[pbounds.swrc, "p_min"],
-                pbounds.loc[pbounds.swrc, "p_max"],
-            ),
-        )
-
-        res_k = least_squares(
-            fit_k,
-            x0=pbounds.loc[~pbounds.swrc, "p_ini"],
-            bounds=(
-                pbounds.loc[~pbounds.swrc, "p_min"],
-                pbounds.loc[~pbounds.swrc, "p_max"],
-            ),
-        )
-
-        opt_pars = dict(zip(pbounds.index[pbounds.loc[:, "swrc"]], res_swrc.x))
-        opt_pars.update(dict(zip(pbounds.index[~pbounds.loc[:, "swrc"]], res_k.x)))
-        opt_sm = sm(**opt_pars)
-        if return_res:
-            return opt_sm, {"res_swrc": res_swrc, "res_k": res_k}
-        return opt_sm
 
     def fit(
         self,
         sm: Type[SoilModel],
         pbounds: DataFrame | None = None,
-        weights: FloatArray | None = None,
-        W1: float | None = None,
+        weights: FloatArray | float = 1.0,
+        W1: float = 0.1,
         W2: float | None = None,
-        return_res: bool = False,
         k_s: float | None = None,
+        silent: bool = True,
     ) -> SoilModel:
         """Same method as RETC"""
 
         theta = self.theta
+        N = len(theta)
         k = self.k
+        M = N + len(k)
 
         if pbounds is None:
             pbounds = get_params(sm.__name__)
@@ -133,29 +79,28 @@ class SoilSample:
             pbounds.loc["theta_s", "p_ini"] = max(theta)
             pbounds.loc["theta_s", "p_max"] = max(theta) + 0.02
 
-        if weights is None:
-            weights = ones(self.h.shape)
-
-        if W1 is None:
-            W1 = 0.1
+        if isinstance(weights, float):
+            weights = full(M, weights)
 
         if W2 is None:
-            M = len(k) + len(theta)
-            N = len(theta)
-            W2 = (M - N) * sum(weights * theta) / (N * sum(weights * k))
+            W2 = (
+                (M - N)
+                * sum(weights[0:N] * theta)
+                / (N * sum(weights[N:M] * npabs(log10(k))))
+            )
 
-        def fit_staring(p: FloatArray) -> FloatArray:
+        def get_diff(p: FloatArray) -> FloatArray:
             est_pars = dict(zip(pbounds.index, p))
             if k_s is not None:
                 est_pars["k_s"] = k_s
             sml = sm(**est_pars)
             theta_diff = sml.theta(h=self.h) - theta
-            k_diff = log(sml.k(h=self.h)) - log(k)
-            diff = append(weights * theta_diff, weights * W1 * W2 * k_diff)
+            k_diff = log10(sml.k(h=self.h)) - log10(k)
+            diff = append(weights[0:N] * theta_diff, weights[N:M] * W1 * W2 * k_diff)
             return diff
 
         res = least_squares(
-            fit_staring,
+            get_diff,
             x0=pbounds.loc[:, "p_ini"],
             bounds=(
                 pbounds.loc[:, "p_min"],
@@ -165,10 +110,11 @@ class SoilSample:
         opt_pars = dict(zip(pbounds.index, res.x))
         if k_s is not None:
             opt_pars["k_s"] = k_s
-        opt_sm = sm(**opt_pars)
-        if return_res:
-            return opt_sm, {"res": res}
-        return opt_sm
+
+        if not silent:
+            print("SciPy Optimization Result\n", res)
+
+        return sm(**opt_pars)
 
     def wosten(self, ts: bool = False) -> Genuchten:
         """Wosten et al (1999) - Development and use of a database of hydraulic
@@ -214,7 +160,7 @@ class SoilSample:
             - 0.1940 * self.om_p
             + 45.5 * self.rho
             - 7.24 * self.rho**2
-            - 0.0003658 * self.clay_p**2
+            + 0.0003658 * self.clay_p**2
             + 0.002885 * self.om_p**2
             - 12.81 * self.rho**-1
             - 0.1524 * self.silt_p**-1
@@ -252,12 +198,12 @@ class SoilSample:
         )
         theta_r = 0.01
         return Genuchten(
-            k_s=exp(ks_),
+            k_s=max(exp(ks_), 0),
             theta_r=theta_r,
             theta_s=theta_s,
             alpha=exp(alpha_),
-            n=exp(n_),
-            l=exp(l_),
+            n=exp(n_) + 1,
+            l=(10 * exp(l_) - 10) / (1 + exp(l_)),
         )
 
     def wosten_sand(self, ts: bool = False) -> Genuchten:
@@ -413,13 +359,14 @@ class SoilSample:
 @dataclass
 class Soil:
     name: str
-    type: str | None = None
     model: SoilModel | None = None
     sample: SoilSample | None = None
     source: str | None = None
     description: str | None = None
 
-    def from_name(self, sm: Type[SoilModel] | SoilModel | str) -> "Soil":
+    def from_name(
+        self, sm: Type[SoilModel] | SoilModel | str, source: str | None = None
+    ) -> "Soil":
         if isinstance(sm, SoilModel):
             if hasattr(sm, "__name__"):
                 smn = sm.__name__
@@ -429,21 +376,35 @@ class Soil:
         elif isinstance(sm, str):
             smn = sm
             sm = get_soilmodel(smn)
-
         else:
             raise ValueError(
                 f"Argument must either be Type[SoilModel] | SoilModel | str,"
                 f"not {type(sm)}"
             )
 
-        path = Path(__file__).parent / "datasets/Soil_Parameters.xlsx"
-        ser = read_excel(path, sheet_name=smn, index_col=0).loc[self.name].to_dict()
-        # path = Path(__file__).parent / f"datasets/{sm.__name__}.csv"
-        # ser = read_csv(path, index_col=["name"]).loc[self.name].to_dict()
-        self.__setattr__("type", ser.pop("soil type"))
-        self.__setattr__("source", ser.pop("source"))
-        self.__setattr__("description", ser.pop("description"))
-        self.__setattr__("model", sm(**ser))
+        path = Path(__file__).parent / "datasets/soilsamples.csv"
+        ser = read_csv(path, delimiter=";", index_col=0)
+        sersm = ser[ser["soilmodel"] == smn].loc[[self.name], :]
+        if source is None and len(sersm) > 1:
+            raise Exception(
+                f"Multiple sources for soil {self.name}: "
+                f"{array2string(sersm.loc[:, 'source'].values)}. "
+                f"Please provide the source using the source argument"
+            )
+        elif (source is not None) and len(sersm) > 1:
+            sersm = sersm[sersm["source"] == source]
+
+        serd = sersm.squeeze().to_dict()
+        if isna(serd["description"]):
+            serd["description"] = serd["soil type"]
+        self.__setattr__("source", serd.pop("source"))
+        self.__setattr__("description", serd.pop("description"))
+        smserd = {
+            x: serd[x]
+            for x in sm.__dataclass_fields__.keys()
+            if sm.__dataclass_fields__[x].init
+        }
+        self.__setattr__("model", sm(**smserd))
         return self
 
     @staticmethod
@@ -464,21 +425,16 @@ class Soil:
                 f"not {type(sm)}"
             )
 
-        path = Path(__file__).parent / "datasets/Soil_Parameters.xlsx"
-        names = read_excel(path, sheet_name=smn).loc[:, "name"].to_list()
-        return names
+        path = Path(__file__).parent / "datasets/soilsamples.csv"
+        names = read_csv(path, delimiter=";")
+
+        return names[names["soilmodel"] == smn].loc[:, "name"].unique().tolist()
 
     def from_staring(self, year: str = "2018") -> "Soil":
         if year not in ("2001", 2001, "2018", 2018):
             raise ValueError(f"Year must either be '2001' or '2018', not {year}")
-        path = Path(__file__).parent / f"datasets/Staring_{year}.xlsx"
-        parameters = read_excel(path, sheet_name="parameters", index_col=0)
-        ser = parameters.loc[self.name].to_dict()
-        self.__setattr__("type", ser.pop("soil type"))
-        self.__setattr__("source", ser.pop("source"))
-        self.__setattr__("description", ser.pop("description"))
-        sm = Genuchten(**ser)
-        self.__setattr__("model", sm)
+
+        self.from_name(sm=Genuchten, source=f"Staring_{year}")
         ss = SoilSample().from_staring(name=self.name, year=year)
         self.__setattr__("sample", ss)
         return self
