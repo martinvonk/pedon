@@ -49,6 +49,7 @@ class Genuchten:
     alpha: float
     n: float
     l: float = 0.5  # noqa: E741
+    m: float = field(init=False, repr=False)
 
     def __post_init__(self):
         self.m = 1 - 1 / self.n
@@ -209,7 +210,7 @@ class Panday:
         theta_fc = (
             self.beta ** -(0.60 * (2 + log10(self.k_s))) * (self.theta_s - self.theta_r)
             + self.theta_r
-        )
+        )  # assumes k_s is in [cm]
         self.sy = self.theta_s - theta_fc
 
     def theta(self, h: FloatArray) -> FloatArray:
