@@ -200,13 +200,14 @@ class Panday:
     brook: float  # brooks-corey l
     h_b: float = field(default=0.0, repr=False)
     sr: float = field(init=False, repr=True)
-    gamma: float = field(init=False, repr=False)  # 1 - 1 / beta
+    c: float = field(default=1.0, repr=False) # mualem 1.0, burdine, 2.0
+    gamma: float = field(init=False, repr=False)  # 1 - c / beta
     sy: float = field(init=False, repr=False)
     ss: float = field(default=1e-6, repr=False)
 
     def __post_init__(self):
         self.sr = self.theta_r / self.theta_s  # theta_r / theta_s
-        self.gamma = 1 - 1 / self.beta  # m
+        self.gamma = 1 - self.c / self.beta  # m
         theta_fc = (
             self.beta ** -(0.60 * (2 + log10(self.k_s))) * (self.theta_s - self.theta_r)
             + self.theta_r
