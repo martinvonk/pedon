@@ -306,6 +306,43 @@ class Fredlund:
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
+@dataclass
+class Fujita:
+    """Fujita and Parlange
+
+    """
+
+    k_s: float
+    theta_s: float
+    theta_r: float
+    h_s: float
+    h_c: float
+    beta: float
+    gamma: float
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        raise NotImplementedError("Method is implicit")
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None):
+        if self.s is None:
+            s = self.s(h)
+        return s * (1 - self.gamma * (1 - s) / (1- self.beta * s))
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        s = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        deel1 = (self.gamma - self.beta) / (self.gamma * (1 - self.gamma))
+        deel2 = log((1 - self.gamma + (self.gamma - self.beta) * s) / (s * (1 - self.beta)))
+        deel3 = self.beta / self.gamma * log((1 - self.beta * s) / (s * (1 - self.beta)))
+        return self.h_s + self.h_c * (deel1 * deel2 + deel3)
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
 
 def get_soilmodel(soilmodel_name: str) -> Type[SoilModel]:
     sms = {
@@ -314,6 +351,7 @@ def get_soilmodel(soilmodel_name: str) -> Type[SoilModel]:
         "Gardner": Gardner,
         "Panday": Panday,
         "Fredlund": Fredlund,
+        "Fujita": Fujita
     }
     return sms[soilmodel_name]
 
