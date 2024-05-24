@@ -368,14 +368,16 @@ class SoilSample:
         ]
 
         data = {"soildata": [soildata]}
-        rjson = requests.post(f"http://www.handbook60.org/api/v1/rosetta/{rosetta_version}", json=data)
+        rjson = requests.post(
+            f"http://www.handbook60.org/api/v1/rosetta/{rosetta_version}", json=data
+        )
         vgpar = rjson["van_genuchten_params"][0]
         return Genuchten(
-            k_s=10**vgpar[4],
+            k_s=10 ** vgpar[4],
             theta_r=vgpar[0],
             theta_s=vgpar[1],
-            alpha=10**vgpar[2],
-            n=10**vgpar1[3],
+            alpha=10 ** vgpar[2],
+            n=10 ** vgpar1[3],
         )
 
 
