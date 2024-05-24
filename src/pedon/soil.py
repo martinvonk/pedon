@@ -355,6 +355,29 @@ class SoilSample:
             l=round(labda, 5),
         )
 
+    def rosetta(self, rosetta_version: int = 3) -> Genuchten:
+        """Rosetta (Schaap et al., 2001) - Predicting soil water retention from soil"""
+
+        soildata = [
+            self.sand_p,
+            self.silt_p,
+            self.clay_p,
+            -9.9 if self.rho is None else self.rho,
+            -9.9 if self.th33 is None else self.th33,
+            -9.9 if self.th1500 is None else self.th1500,
+        ]
+
+        data = {"soildata": [soildata]}
+        rjson = requests.post(f"http://www.handbook60.org/api/v1/rosetta/{rosetta_version}", json=data)
+        vgpar = rjson["van_genuchten_params"][0]
+        return Genuchten(
+            k_s=10**vgpar[4],
+            theta_r=vgpar[0],
+            theta_s=vgpar[1],
+            alpha=10**vgpar[2],
+            n=10**vgpar1[3],
+        )
+
 
 @dataclass
 class Soil:
