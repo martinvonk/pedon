@@ -160,24 +160,44 @@ def bofek_to_boring(profiles: pd.DataFrame, iprofile: int):
 import pedon as pe
 
 import numpy as np
-
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib.patheffects as path_effects
 
 gs = [
-    pe.Genuchten(0.1, 0.05, 0.4, 0.3, 1.2),
-    pe.Genuchten(0.1, 0.05, 0.4, 0.3, 1.2),
-    pe.Genuchten(0.1, 0.05, 0.4, 0.3, 1.2),
+    pe.Soil("B05").from_staring(),
+    pe.Soil("O05").from_staring(),
+    pe.Soil("O04").from_staring(),
 ]
 
-depth = np.array([0.0, 20.0, 40.0, 70.0, 120.0])
-ghg_depth = 50.0
-h = depth - ghg_depth  # pressure head
+h = np.array([0.0, 20.0, 70.0, 120.0])
 # pressure head = head - z = h + depths
-dh = 1.0
-for hs, he, g in zip(h[:-1], h[1:], gs):
+dh = 0.1
+f, ax = plt.subplots(figsize=(3, 4))
+thetas = []
+for hs, he, g in zip(h[:-1], h[1:], gs[::-1]):
     hr = np.arange(hs, he, dh)
-    print(hr)
-    theta = g.theta(hr)
+    thetas.append(g.model.theta(hr))
 
+hs = np.arange(h[0], h[-1], dh)
+theta = np.concatenate(thetas)
+ax.plot(theta, hs, label="theta")
+ax.set_ylabel("Drukhoogte [cm]")
+ax.set_xlabel(r"$\theta$ [-]")
+ax.set_xlim(0.0, 0.4)
+cmap = mpl.cm.get_cmap("YlOrBr_r")
+norm = mpl.colors.LogNorm(vmin=0.1, vmax=100.0)
+annotate_kwargs = dict(ha="center", va="center", path_effects = [path_effects.Stroke(linewidth=2, foreground='white'), path_effects.Normal()])
+
+for hs, he, g in zip(h[:-1], h[1:], gs[::-1]):
+    ax.fill_between(ax.get_xlim(), hs, he, color=cmap(norm(g.model.k_s)))
+    ax.axhline(he, color="black", linestyle="--", linewidth=0.5)
+    ax.annotate(g.name, (0.05, (hs + he) / 2), **annotate_kwargs)
+ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
+ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.05))
+ax.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
+ax.set_ylim(h[0], h[-1])
+f.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax, label="Ks [cm/d]")
 
 # %%
 def get_brooks(gen: pe.Genuchten, h: np.ndarray[float] | None) -> pe.Brooks:
@@ -188,13 +208,13 @@ def get_brooks(gen: pe.Genuchten, h: np.ndarray[float] | None) -> pe.Brooks:
         pbounds = pe._params.pBrooks.copy()
         pbounds.loc["theta_r"] = (
             gen.theta_r,
-            max(g.theta_r - 0.1, 0.0),
+            max(gen.theta_r - 0.1, 0.0),
             gen.theta_r + 0.1,
         )
         pbounds.loc["theta_s"] = (gen.theta_s, gen.theta_s - 0.1, gen.theta_s + 0.1)
         pbounds.loc["l"] = (5.0, 0.01, 20.0)
         pbounds.loc["h_b"] = (1.0, 0.1, 100.0)
-        bc = soilsample.fit(pe.Brooks, pbounds=pbounds, k_s=g.k_s)
+        bc = soilsample.fit(pe.Brooks, pbounds=pbounds, k_s=gen.k_s)
     else:
         # Morel-Seytoux (1996) - Parameter equivalence for the Brooks-Corey and van Genuchten soil characteristics
         eps = 1 + 2 / gen.m  # eq 16b
@@ -214,29 +234,82 @@ def get_brooks(gen: pe.Genuchten, h: np.ndarray[float] | None) -> pe.Brooks:
 
 
 # %%
-
-# name = "B05"
-# g = pe.Soil(name=name).from_staring("2018").model
+name = "B05"
+g = pe.Soil(name=name).from_staring("2018").model
 hb = []
-for name, g in soil_mapper.items():
-    h = np.logspace(-2, 6, num=11)
-    bc1 = get_brooks(g, h)
-    bc2 = get_brooks(g, None)
 
-    print(name)
-    print(3 + 2 / bc1.l, 3 + 2 / bc2.l)
-    print(bc1.h_b, bc2.h_b)
+f, ax = plt.subplots(1, 2, figsize=(6, 4.5), sharey=True, constrained_layout=True)
+h = np.logspace(-2, 6, num=11)
+bc1 = get_brooks(g, h)
+bc2 = get_brooks(g, None)
 
-    ax1 = pe.plot_swrc(g)
-    pe.plot_swrc(bc1, ax=ax1)
-    pe.plot_swrc(bc2, ax=ax1)
-    ax1.set_title(name)
+print(name)
+print(3 + 2 / bc1.l, 3 + 2 / bc2.l)
+print(bc1.h_b, bc2.h_b)
 
-    ax2 = pe.plot_hcf(g)
-    pe.plot_hcf(bc1, ax=ax2)
-    pe.plot_hcf(bc2, ax=ax2)
-    ax2.set_title(name)
-    hb.append(bc1.h_b)
-    # break
+pe.plot_swrc(g, ax=ax[0], label="van Genuchten", linewidth=2.5)
+pe.plot_swrc(bc1, ax=ax[0], label="Brooks-Corey Fit", linewidth=2.0)
+pe.plot_swrc(bc2, ax=ax[0], label="Brooks-Corey Formule", linewidth=1.5)
+ax[0].set_yscale("log")
+ax[0].set_title("Bodemvocht Retentiecurve")
+ax[0].set_xlabel(r"$\theta$ [-]")
+ax[0].legend()
+ax[0].set_ylabel("Drukhoogte [cm]")
 
+pe.plot_hcf(g, ax=ax[1], linewidth=2.5)
+pe.plot_hcf(bc1, ax=ax[1], linewidth=2.0)
+pe.plot_hcf(bc2, ax=ax[1], linewidth=1.5)
+ax[1].set_yscale("log")
+ax[1].set_title("Doorlatendheidsfunctie")
+ax[1].set_xlabel(r"$K_s$ [cm/d]")
 # %%
+
+gw_level = 200
+soil = "O05"
+sm = pe.Soil(soil).from_staring("2018").model
+h = np.logspace(-1, np.log10(gw_level), num=100)
+theta = sm.theta(h)
+f, ax = plt.subplots(figsize=(2.5, 4))
+
+ax.axvline(sm.theta_s, color="black", linestyle="--", linewidth=0.5)
+ax.axvline(sm.theta_r, color="black", linestyle="--", linewidth=0.5)
+annotate_kwargs = dict(textcoords="offset points", ha="center", va="center", path_effects = [path_effects.Stroke(linewidth=2, foreground='white'), path_effects.Normal()])
+ax.annotate(
+    r"$\theta_s$",
+    (sm.theta_s, gw_level-100),
+    xytext=(0, 0),
+    **annotate_kwargs,
+)
+ax.annotate(
+    r"$\theta_r$",
+    (sm.theta_r, 1.0),
+    xytext=(5, 0),
+    **annotate_kwargs,
+)
+ax.fill_betweenx(h, theta, sm.theta_s, color="C1", alpha=0.25, hatch="/")
+ax.annotate(
+    "Vrije Berging",
+    ((sm.theta_s + sm.theta_r) / 2, gw_level-100),
+    xytext=(0, 0),
+    **annotate_kwargs,
+)
+
+ax.semilogy(theta, h, label="van Genuchten")
+ax.set_ylim(min(h), max(h))
+ax.grid(False)
+ax.set_xlabel(r"$\theta$ [-]")
+ax.set_ylabel("Drukhoogte [cm]")
+ax.set_xlim(0.0, sm.theta_s + 0.02)
+ax.xaxis.set_major_locator(mpl.ticker.MultipleLocator(0.1))
+ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(0.05))
+ax.set_title(f"{soil} met grondwaterspiegel\nop {gw_level} cm diepte", fontsize=10)
+
+depth = h - gw_level
+axd = ax.twinx()
+# axd.semilogy(theta, h, label="van Genuchten")
+axd.set_yscale("log")
+axd.set_ylim(min(h), max(h))
+axd.invert_yaxis()
+axd.set_ylabel("Grondwaterspiegeldiepte [cm]")
+
+
