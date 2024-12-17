@@ -52,7 +52,7 @@ flake8 = "^6.1.0"
 ruff = "^0.1.9"
 black = { extras = ["jupyter"], version = "^23.12.1" }
 isort = "^5.13.2"
-mypy = "^1.8.0"
+mypy = "^1.13.0"
 pandas-stubs = "^2.1.4.231218"
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
@@ -82,6 +82,8 @@ profile = "black"
 
 [tool.mypy]
 mypy_path = "src"
+plugins = "numpy.typing.mypy_plugin"
+
 
 [tool.ruff]
 line-length = 88
