@@ -104,7 +104,7 @@ class Brooks:
                 return self.theta_s
         else:
             theta = full(h.shape, self.theta_s)
-            theta[h >= self.h_b] = self.theta_r + self.s(h[h > self.h_b]) * (
+            theta[h >= self.h_b] = self.theta_r + self.s(h[h >= self.h_b]) * (
                 self.theta_s - self.theta_r
             )
             return theta

@@ -1,4 +1,5 @@
 # type: ignore
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Type
@@ -384,6 +385,13 @@ class Soil:
 
         path = Path(__file__).parent / "datasets/soilsamples.csv"
         ser = read_csv(path, delimiter=";", index_col=0)
+        if "HYDRUS_" in self.name:
+            self.name = self.name.replace("HYDRUS_", "")
+            source = "HYDRUS"
+            logging.warning(
+                "Removed 'HYDRUS_' from soil name. For future use"
+                "please provide source='HYDRUS' argument"
+            )
         sersm = ser[ser["soilmodel"] == smn].loc[[self.name], :]
         if source is None and len(sersm) > 1:
             raise Exception(
