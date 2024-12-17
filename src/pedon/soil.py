@@ -389,7 +389,8 @@ class Soil:
             self.name = self.name.replace("HYDRUS_", "")
             source = "HYDRUS"
             logging.warning(
-                "Removed 'HYDRUS_' from soil name. For future use please use source='HYDRUS' argument"
+                "Removed 'HYDRUS_' from soil name. For future use"
+                "please provide source='HYDRUS' argument"
             )
         sersm = ser[ser["soilmodel"] == smn].loc[[self.name], :]
         if source is None and len(sersm) > 1:
