@@ -1,4 +1,4 @@
-from numpy import float64
-from numpy.typing import NDArray
+# from numpy import float64
+from numpy.typing import ArrayLike
 
-FloatArray = NDArray[float64]
+FloatArray = ArrayLike #NDArray[float64]
