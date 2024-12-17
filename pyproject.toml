@@ -16,6 +16,7 @@ classifiers = [
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Topic :: Scientific/Engineering :: Hydrology',
         'Intended Audience :: Science/Research',
         "License :: OSI Approved :: MIT License",
@@ -97,7 +98,7 @@ pythonpath = ["src"]
 legacy_tox_ini = """
     [tox]
     requires = tox>=4
-    env_list = format, type, lint, py{310,311,312}
+    env_list = format, type, lint, py{310,311,312,313}
 
     [testenv]
     description = run unit tests
