@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pandas import DataFrame
 
 pGenuchten = DataFrame(
@@ -81,6 +83,7 @@ pPanday = DataFrame(
 )
 
 
-def get_params(sm_name: str) -> DataFrame:
+def get_params(sm_name: Literal["Genuchten", "Brooks", "Panday"]) -> DataFrame:
+    """Get the parameter bounds for a specific soil model."""
     params = {"Genuchten": pGenuchten, "Brooks": pBrooks, "Panday": pPanday}
     return params[sm_name].copy()
