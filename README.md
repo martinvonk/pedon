@@ -29,6 +29,7 @@ Measurements for different soil properties and parameters are available from the
 Additionaly, there are pedotransfer functions implemented such as:
   - Van Genuchten: [Wösten](https://www.sciencedirect.com/science/article/pii/S0016706198001323/pdfft?md5=6844f89c07deb81001c2a6eea6fc9e32&pid=1-s2.0-S0016706198001323-main.pdf)
   - Van Genuchten: [Staring Series](https://edepot.wur.nl/43272)
+  - Van Genuchten: [Rosetta v1, 2 & 3 (Schaap et al. 2001)](https://doi.org/10.1016/S0022-1694(01)00466-8)
   - Brooks-Corey: [Cosby](https://hess.copernicus.org/articles/25/2445/2021/hess-25-2445-2021.pdf)
 
 ## Installation
@@ -40,7 +41,5 @@ To get the development version download the GitHub code to your computer. Use cd
 
 `pip install -e .`
 
-
 ## Todo
-- [ ] Rosetta Pedotransfer Function
 - [ ] Other soil models such as Haverkamp

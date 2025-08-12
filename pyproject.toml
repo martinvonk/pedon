@@ -31,7 +31,8 @@ repository = "https://github.com/martinvonk/pedon"
 [project.optional-dependencies]
 ruffing = ["ruff"]
 typing = ["mypy", "pandas-stubs"]
-pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar"]
+rosetta = ["httpx"]
+pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar", "pedon[rosetta]"]
 coveraging = ["coverage"]
 dev = ["pedon[linting,typing,pytesting]", "tox"]
 

@@ -24,3 +24,8 @@ def test_wosten_clay(ss: pe.soil.SoilSample) -> None:
 
 def test_cosby(ss: pe.soil.SoilSample) -> None:
     ss.cosby()
+
+
+def test_rosetta(ss: pe.soil.SoilSample) -> None:
+    sm = ss.rosetta()
+    assert isinstance(sm, pe.Genuchten)
