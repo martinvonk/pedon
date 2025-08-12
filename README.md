@@ -9,10 +9,7 @@
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/martinvonk/pedon/tests.yaml?style=flat-square)](https://github.com/martinvonk/pedon/actions/workflows/tests.yaml)
 [![MyPy](https://img.shields.io/badge/type_checker-mypy-2A6DB2?style=flat-square)](https://mypy-lang.org/)
-[![Format: isort](https://img.shields.io/badge/imports-isort-ef8336?style=flat-square)](https://pycqa.github.io/isort/index.html)
-[![Format: Black](https://img.shields.io/badge/code_style-black-black?style=flat-square)](https://github.com/psf/black)
-[![Linter: flake8](https://img.shields.io/badge/linter-flake8-yellowgreen?style=flat-square)](https://flake8.pycqa.org/)
-[![Linter: ruff](https://img.shields.io/badge/linter-ruff-red?style=flat-square)](https://github.com/charliermarsh/ruff)
+[![ruff](https://img.shields.io/badge/linter-ruff-red?style=flat-square)](https://github.com/charliermarsh/ruff)
 
 
 Python package for (unsaturated) soil properties including pedotransfer functions. This package takes an object-oriented approach to soils, soil samples and soil models. Soil models that are available in this package are:
