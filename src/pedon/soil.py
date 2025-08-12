@@ -2,7 +2,7 @@
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Type
+from typing import Literal, Type
 
 from numpy import abs as npabs
 from numpy import append, array2string, exp, full, log, log10
@@ -354,6 +354,46 @@ class SoilSample:
             theta_s=round(theta_s, 4),
             h_b=round(psi_s, 5),
             l=round(labda, 5),
+        )
+
+    def rosetta(self, version: Literal[1, 2, 3] = 3) -> Genuchten:
+        """Rosetta (Schaap et al., 2001) - Predicting soil water retention from soil"""
+        try:
+            from httpx import post as httpx_post
+        except ImportError:
+            raise ImportError(
+                "httpx is required for the rosetta method to make api calls. "
+                "Please install it with 'pip install httpx'."
+            )
+
+        soildata = [
+            self.sand_p,  # %
+            self.silt_p,  # %
+            self.clay_p,  # %
+            -9.9 if self.rho is None else self.rho,  # g/cm3
+            -9.9 if self.th33 is None else self.th33,  # [-]
+            -9.9 if self.th1500 is None else self.th1500,  # [-]
+        ]
+
+        data = {"soildata": [soildata]}
+        r = httpx_post(
+            f"https://www.handbook60.org/api/v1/rosetta/{version}",
+            json=data,
+        )
+        if r.is_error:
+            raise ValueError(f"Rosetta API error: {r}")
+
+        rjson = r.json()
+        vgpar = rjson["van_genuchten_params"][0]
+        # stdev = rjson["stdev"][0] # TODO: return extra Genuchten classes with stdev or report/print
+        if None in vgpar:
+            raise ValueError(f"Rosetta API returned None values: {vgpar}")
+        return Genuchten(
+            k_s=10 ** vgpar[4],
+            theta_r=vgpar[0],
+            theta_s=vgpar[1],
+            alpha=10 ** vgpar[2],
+            n=10 ** vgpar[3],
         )
 
 
