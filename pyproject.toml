@@ -34,7 +34,7 @@ typing = ["mypy", "pandas-stubs"]
 rosetta = ["httpx"]
 pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar", "pedon[rosetta]"]
 coveraging = ["coverage"]
-dev = ["pedon[linting,typing,pytesting]", "tox"]
+dev = ["pedon[ruffing,typing,pytesting]", "tox"]
 
 
 [tool.setuptools]
