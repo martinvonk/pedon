@@ -13,9 +13,9 @@
 
 
 Python package for (unsaturated) soil properties including pedotransfer functions. This package takes an object-oriented approach to soils, soil samples and soil models. Soil models that are available in this package are:
-  - [Mualem-Van Genuchten](http://www.soilphysics.okstate.edu/teaching/soil-6583/references-folder/van%20Genuchten%201980.pdf)
+  - [Mualem-Van Genuchten](https://www.soilphysics.okstate.edu/teaching/soil-6583/references-folder/van%20Genuchten%201980.pdf)
   - [Brooks-Corey](https://www.wipp.energy.gov/library/cra/2009_cra/references/Others/Brooks_Corey_1964_Hydraulic_Properties_ERMS241117.pdf)
-  - [Fredlund & Xing](http://projects.mans.edu.eg/heepf/ilppp/cources/12/pdf%20course/1/pressure/osmotic%20soilsalinity22.pdf)
+  - [Fredlund & Xing](https://projects.mans.edu.eg/heepf/ilppp/cources/12/pdf%20course/1/pressure/osmotic%20soilsalinity22.pdf)
   - Gardner
   - Panday ([Modflow-USG](https://www.gsienv.com/product/modflow-usg/))
 
