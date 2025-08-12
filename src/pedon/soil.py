@@ -376,7 +376,10 @@ class SoilSample:
         ]
 
         data = {"soildata": [soildata]}
-        r = httpx_post(f"https://www.handbook60.org/api/v1/rosetta/{version}", json=data)
+        r = httpx_post(
+            f"https://www.handbook60.org/api/v1/rosetta/{version}",
+            json=data,
+        )
         if r.is_error:
             raise ValueError(f"Rosetta API error: {r}")
 
