@@ -41,5 +41,3 @@ To get the development version download the GitHub code to your computer. Use cd
 
 `pip install -e .`
 
-## Todo
-- [ ] Other soil models such as Haverkamp
