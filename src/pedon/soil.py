@@ -5,7 +5,10 @@ from pathlib import Path
 from typing import Literal, Type
 
 from numpy import abs as npabs
-from numpy import append, array2string, exp, full, log, log10
+# from numpy import append, array2string, exp, full, log, log10
+#### AP1025: how do you treat operations using arrays? i continue using np.multiply etc. in my modifications to pedon
+from numpy import append, array2string, exp, full, log, log10, cos, divide, multiply, zeros, abs 
+####
 from pandas import DataFrame, isna, read_csv
 from scipy.optimize import least_squares
 
@@ -24,6 +27,13 @@ class SoilSample:
     th1500: float | None = None  # cm
     om_p: float | None = None  # organic matter %
     m50: float | None = None  # median sand fraction
+    #### AP1025: modification for HYPAGS
+    d10: float | None = None # d10 representative grain diameter (e.g. from sieve curve) [m]
+    d20: float | None = None # d20 representative grain diameter (e.g. from sieve curve) [m]
+    d50: float | None = None # d50 (mean) representative grain diameter (e.g. from sieve curve) [m]
+    d60: float | None = None # d60 representative grain diameter (e.g. from sieve curve) [m]
+    ne: float | None = None # effective porosity [-]
+    ####
     h: FloatArray | None = field(default=None, repr=False)  # pressure head measurement
     k: FloatArray | None = field(
         default=None, repr=False
@@ -395,8 +405,267 @@ class SoilSample:
             alpha=10 ** vgpar[2],
             n=10 ** vgpar[3],
         )
+        
+    #### AP1025: modification for HYPAGS
+    def hypags(self) -> Genuchten:
+        # Peche, A., Houben, G., & Altfelder, S. (2024). Approximation of van Genuchten Parameter Ranges from Hydraulic Conductivity Data. Groundwater, 62(3), 469-479.
+        # Peche, A., & Houben, G. J. (2023). Estimating characteristic grain sizes and effective porosity from hydraulic conductivity data. Groundwater, 61(4), 574-585.
+        
+        """function carries out HYPAGS procedure
 
+        Parameters
+        ----------
+        KK : Kozeny-Carman-based K --> note that only the Kozeny-Carman-based parameterization is implemented in pedon
+    
+        Calculates and eturns
+        -------
+        d1K : Kozeny-Carman-based d10
+        d2K : Kozeny-Carman-based d20
+        d5K : Kozeny-Carman-based d50
+        d6K : Kozeny-Carman-based effective porosity
+        poroK : Kozeny-Carman-based effective porosity
+        h : capillary rise height
+        drep : capillary rise representative grain diameter
+        alpha : approximation of mean van Genuchten alpha
+        alpha_plus_dalpha : upper range limit of van Genuchten alpha
+        alpha_minus_dalpha : lower range limit of van Genuchten alpha
+        n : approximation of mean van Genuchten n
+        n_plus_dn : upper range limit of van Genuchten n
+        n_minus_dn : lower range limit of van Genuchten n
+        theta_r : residual water content
+        theta_r_plus_dtheta_r : upper range limit of residual water content
+        theta_r_minus_dtheta_r : lower range limit of residual water content
+        
+        """
+        ### constants and coefficients
+        
+        rho_f, g, mu = 999.7, 9.81, 1.1306e-3 # fluid density [kg/m³], grav. accel. [m²/s], dynamic visc. [kg/(ms)] -> assumption: fluid temperature is 20°C
+        c = mu/(rho_f*g) 
+        a1, a2, a3 = 1.00401066e+00, 1.50991411e-04, 5.78888587e-03 # alpha-coefficients
+        gamma, theta = .0728, .0 # surface tension [J/m²], contact angle, parameters for Young-Laplace eq.
+        factor = 2*gamma*cos(theta)/(rho_f*g) # factor Young-Laplace eq. (fluid properties, contact angle, surface tension)
+        crgd1, crgd2 = .0001803,  0.10 # coefficients for the calculation of the capillary-rise-representative grain diameter
+        vGn1, vGn2, vGn3, vGn4, vGn5 = 1.12411782, 0.55750592, 1.67561574, 0.30307062, 1.16193138 # coefficients for the calculation of van Genuchten n
+        Pi, c1, c2 = .0009, 1.2, 1.13 # dimensionless number Pi and c-coefficients --> [Kozeny-Carman-based parameterization]
+        
+        ### hypags functions
+        def iterator(ne_i, d50_i, const):
+            """
+            
 
+            Parameters (Parametrization-dependent)
+            ----------
+            K : input hydraulic conductivity
+            d2 : input d20
+            a1 : input coefficient a1
+            a2 : input coefficient a2
+            a3 : input coefficient a3
+            const : fluid properties and gravitaiotnal acceleration constant
+
+            Returns
+            -------
+            n_r : effective porosity
+            d5 : d50
+
+            """
+            # iterative scheme to approximate d50 and effective porosity
+            # constants 
+            error = 10
+            c = 180 * const
+            n = zeros(100)
+            d = zeros(100)
+            d[0] = d50_i
+            n[0] = ne_i
+            j = 0
+            while error > 1e-10:
+                n[j+1] = (self.k/(d[j]**2) * c * (1 - n[j])**2)**(1/3)
+                d[j+1] = (c * self.k * ( (1-n[j+1])**2 / (n[j+1]**3) ))**(1/2)
+                error = abs(n[j+1]-n[j]+d[j+1]-d[j])
+                j = j + 1
+            n_r = n[j-1]
+            d5 = d[j-1]
+            return n_r, d5
+         
+        def getAlphaErrors(Kt):
+        # Errors as determined using bootstrap resampling confidence intervals [note that confidence interval is the 2.5th and 97.5th quantile]
+        # Error = [+ Delta alpha, - Delta alpha] = [added error, subtracted error]
+            a_error = [0, 0]
+            if Kt < .00000025:
+                a_error = [3.002, 1.144]
+            elif Kt > .00000025 and Kt <= .0000005:
+                a_error = [5.364, 1.258]
+            elif Kt > .0000005 and Kt <= .00000075:
+                a_error = [7.031, 1.366]
+            elif Kt > .00000075 and Kt <= .000001:
+                a_error = [6.728, 1.519]
+            elif Kt > .000001 and Kt <= .0000025:
+                a_error = [6.758, 2.072]
+            elif Kt > .0000025 and Kt <= .000005:
+                a_error = [6.607, 2.393]
+            elif Kt > .000005 and Kt <= .0000075:
+                a_error = [5.91,  2.985]
+            elif Kt > .0000075 and Kt <= .00001:
+                a_error = [5.643, 3.229]
+            elif Kt > .00001 and Kt <= .000025:
+                a_error = [4.84, 4.]
+            elif Kt > .000025 and Kt <= .00005:
+                a_error = [4.082, 4.233]
+            elif Kt > .00005 and Kt <= .000075:
+                a_error = [3.182, 4.486]
+            elif Kt > .000075 and Kt <= .0001:
+                a_error = [3.051, 5.03 ]
+            elif Kt > .0001 and Kt <= .0005:
+                a_error = [3.442, 5.483]
+            elif Kt > .0005:
+                a_error = [1.811, 2.858]
+            return a_error
+
+        def getNErrors(alpha_t): 
+        # Errors as determined using bootstrap resampling confidence intervals
+        # Error = [+ Delta n, - Delta n] = [added error, subtracted error]
+            if alpha_t < 1:
+                n_error = [2.836, 0.358]
+            elif alpha_t > 1 and alpha_t <= 2:
+                n_error = [3.061, 0.826]
+            elif alpha_t > 2 and alpha_t <= 3:
+                n_error = [3.481, 0.828]
+            elif alpha_t > 3 and alpha_t <= 4:
+                n_error = [3.182, 0.605]
+            elif alpha_t > 4 and alpha_t <= 5:
+                n_error = [1.905, 0.509]
+            elif alpha_t > 5 and alpha_t <= 6:
+                n_error = [1.184, 0.297]
+            elif alpha_t > 6 and alpha_t <= 7:
+                n_error = [4.032, 0.352]
+            elif alpha_t > 7 and alpha_t <= 8:
+                n_error = [1.385, 0.241]
+            elif alpha_t > 8 and alpha_t <= 9:
+                n_error = [1.017, 0.155]
+            elif alpha_t > 9:
+                n_error = [3.006, 0.377]   
+            return n_error
+        
+        def getResWaterContent(Kt):
+            if Kt < .00000025:
+                theta_rt = [0.097, 0.089, 0.198]
+            elif Kt >= .00000025 and Kt < .0000005:
+                theta_rt = [0.107, 0.097, 0.207]
+            elif Kt >= .0000005 and Kt < .00000075:
+                theta_rt = [0.099, 0.09, 0.227]
+            elif Kt >= .00000075 and Kt < .000001:
+                theta_rt = [0.102, 0.095, 0.221]
+            elif Kt >= .000001 and Kt < .0000025:
+                theta_rt = [0.098, 0.091, 0.216]
+            elif Kt >= .0000025 and Kt < .000005:
+                theta_rt = [0.097, 0.087, 0.227]
+            elif Kt >= .000005 and Kt < .0000075:
+                theta_rt = [0.111, 0.104, 0.212]
+            elif Kt >= .0000075 and Kt < .00001:
+                theta_rt = [0.108, 0.099, 0.219]
+            elif Kt >= .00001 and Kt < .000025:
+                theta_rt = [0.085, 0.079, 0.233]
+            elif Kt >= .000025 and Kt < .00005:
+                theta_rt = [0.087, 0.082, 0.226]
+            elif Kt >= .00005 and Kt < .000075:
+                theta_rt = [0.07, 0.067, 0.223]
+            elif Kt >= .000075 and Kt < .0001:
+                theta_rt = [0.11, 0.105, 0.23]
+            elif Kt >= .0001 and Kt < .0005:
+                theta_rt = [0.105, 0.096, 0.23]
+            elif Kt >= .0005:
+                theta_rt = [0.111, 0.068, 0.096]  
+            return theta_rt
+        
+        ### mathematical model of hypags
+        
+        ## calculation of k, d10, d20: 
+        
+        # CONDITION: in HYPAGS, either k, d10 or d20 have to be given
+        # case 0: k is given
+        # case 1: d10 is given
+        # case 2: d20 is given
+        if self.k is not None:
+            # mathematical model case 0
+            # check for non-valid input
+            if self.k > 2.6e-2 or self.k < 2.87e-7:
+                print("Warning: k out of hypags model limits.")
+            self.d10 = (self.k/Pi * c)**(.5) # calculation of d10
+            self.d20 = c1 * self.d10 # calculation of d20
+        elif self.d10 is not None:
+            # mathematical model case 1
+            if self.d10 > 8.3e-4 or self.d10 < 5.35e-5:
+                print("Warning: d10 out of hypags model limits.")       
+            self.k = (Pi * rho_f * g * self.d10**2)/mu # calculation of k
+            self.d20 = c1 * self.d10    # calculation of d20
+        elif self.d20 is not None:
+            # mathematical model case 2
+            if self.d20 > 1.2e-3 or self.d20 < 6.25e-5:
+                print("Warning: d20 out of hypags model limits.")
+            self.d10 = self.d20/c1 # calculation of d10
+            self.k = (Pi * rho_f * g * self.d10**2)/mu
+        else:
+            # error: if CONDITION is not true
+            raise ImportError(
+                "No parameter (k, d10, or d20) was provided for hypags routine."
+            )
+            
+        ## calculation of d50 and ne
+        
+        d50_0 = a3 * self.d20 # starting value for iterative approximation of d50
+        ne_0 = a1 * self.k**a2
+        self.ne, self.d50 = iterator(ne_0, d50_0, c)
+        
+        ## calculation of d60
+        
+        self.d60 = c2 * self.d50
+        
+        ## calculation of van Genuchten alpha
+        
+        if self.k <= 5e-5:
+            drep = self.d60
+        if self.k > 5e-5:
+            drep = .0001803 + self.k *  0.10
+        h = factor * divide(1, multiply(.5, drep**(1))) # Note the conversion of diameter to radius
+        alphat = divide(1, h)
+        
+        
+        ## calculation of van Genuchten n
+        
+        if alphat <= 1.9:
+            nt = 1.12411782 + (alphat) * 0.55750592
+        elif alphat > 1.9:
+            nt = (1.67561574 / ((alphat)-0.30307062)) + 1.16193138
+            
+        ## error range of van Genuchten parameters
+        
+        # van Genuchten alpha 
+        a_error = getAlphaErrors(self.k)
+        alpha_plus_dalphat = alphat + a_error[0]
+        alpha_minus_dalphat = alphat - a_error[1]
+        if alpha_minus_dalphat <= 0: # Condition in case negative values for alpha arise
+            alpha_minus_dalphat = .1
+        # van Genuchten n
+        n_error = getNErrors(alphat)
+        n_plus_dnt = nt + n_error[0]
+        n_minus_dnt = nt - n_error[1]  
+        if n_minus_dnt <= 0:
+            n_minus_dnt = .1
+
+        ## return van Genuchten parameters
+        
+        return Genuchten(
+            k_s=self.k,
+            theta_r=None,
+            theta_s=None,
+            alpha=alphat,
+            n=nt,
+#            d_alpha_upper=alpha_plus_dalphat,
+#            d_alpha_lower=alpha_minus_dalphat,
+#            d_n_upper=n_plus_dnt,
+#            d_n_lower=n_minus_dnt,
+        )
+        
+        ####
 @dataclass
 class Soil:
     name: str
