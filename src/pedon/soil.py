@@ -5,9 +5,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, Type
 
+from numpy import abs as npabs
 from numpy import (
-    abs,
     append,
+    array,
     array2string,
     cos,
     divide,
@@ -16,9 +17,9 @@ from numpy import (
     log,
     log10,
     multiply,
+    ndarray,
     zeros,
 )
-from numpy import abs as npabs
 from pandas import DataFrame, isna, read_csv
 from scipy.optimize import least_squares
 
@@ -546,14 +547,16 @@ class SoilSample:
         )  # dimensionless number Pi and c-coefficients --> [Kozeny-Carman-based parameterization]
 
         # hypags functions
-        def iterator(ne_i: float, d50_i: float, const: float) -> tuple[float, float]:
+        def iterator(
+            k: float, ne_i: float, d50_i: float, const: float
+        ) -> tuple[float, float]:
             """
             Iterative scheme to approximate d50 and effective porosity based on
             Kozeny-Carman equation.
 
             Parameters (Parametrization-dependent)
             ----------
-            K : input hydraulic conductivity
+            k : input hydraulic conductivity
             d2 : input d20
             a1 : input coefficient a1
             a2 : input coefficient a2
@@ -569,17 +572,15 @@ class SoilSample:
             # constants
             error = 10
             c = 180 * const
-            n = zeros(100)
-            d = zeros(100)
-            d[0] = d50_i
+            n = zeros((100, 1), dtype=float)
             n[0] = ne_i
+            d = zeros((100, 1), dtype=float)
+            d[0] = d50_i
             j = 0
             while error > 1e-10:
-                n[j + 1] = (self.k / (d[j] ** 2) * c * (1 - n[j]) ** 2) ** (1 / 3)
-                d[j + 1] = (c * self.k * ((1 - n[j + 1]) ** 2 / (n[j + 1] ** 3))) ** (
-                    1 / 2
-                )
-                error = abs(n[j + 1] - n[j] + d[j + 1] - d[j])
+                n[j + 1] = (k / (d[j] ** 2) * c * (1 - n[j]) ** 2) ** (1 / 3)
+                d[j + 1] = (c * k * ((1 - n[j + 1]) ** 2 / (n[j + 1] ** 3))) ** (1 / 2)
+                error = npabs(n[j + 1] - n[j] + d[j + 1] - d[j])
                 j = j + 1
             n_r = n[j - 1]
             d5 = d[j - 1]
@@ -727,17 +728,21 @@ class SoilSample:
         # mathematical model of hypags calculation of k, d10, d20:
         # CONDITION: in HYPAGS, either k, d10 or d20 have to be given
         if self.k is not None:
-            if isinstance(float, self.k):
+            if isinstance(self.k, float):
                 k = self.k
-            elif len(self.k) > 1:
-                logging.warning(
-                    "HYPAGS routine only accepts single k value, choosing the first k value in the array."
-                )
+            elif isinstance(self.k, ndarray):
+                if len(self.k) > 1:
+                    logging.warning(
+                        "HYPAGS routine only accepts single k value, choosing the first k value in the array."
+                    )
                 k = float(self.k[0])
+            else:
+                k = float(self.k)
+
             # case 0: mathematical model where k is given
             # check for non-valid input
             if k > 2.6e-2 or k < 2.87e-7:
-                logging.warning("k out of hypags model limits.")
+                logging.error("k out of hypags model limits.")
             logging.debug("Using case 0 of hypags model (k given).")
             self.d10 = (self.k / Pi * c) ** (0.5)  # calculation of d10
             self.d20 = c1 * self.d10  # calculation of d20
@@ -765,7 +770,7 @@ class SoilSample:
         # calculation of d50 and ne
         d50_0 = a3 * self.d20  # starting value for iterative approximation of d50
         ne_0 = a1 * k**a2
-        self.ne, self.d50 = iterator(ne_0, d50_0, c)
+        self.ne, self.d50 = iterator(k=k, ne_i=ne_0, d50_i=d50_0, const=c)
 
         # calculation of d60
         self.d60 = c2 * self.d50
