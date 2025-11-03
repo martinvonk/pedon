@@ -63,7 +63,7 @@ class SoilSample:
     h : FloatArray | None
         Pressure head measurements (array-like). Units should match the model
         expectations (commonly cm or m depending on the surrounding codebase).
-    k : FloatArray | float | None
+    k : FloatArray | None
         Hydraulic conductivity measurements. Can be a scalar or array-like
         depending on context; units must be consistent with the predictor used.
     theta : FloatArray | None
@@ -724,36 +724,39 @@ class SoilSample:
             i = bisect_right(bounds, k)
             return tuple(values[i - 1]) if i <= len(values) else default_value
 
-        ### mathematical model of hypags
-
-        ## calculation of k, d10, d20:
-
+        # mathematical model of hypags calculation of k, d10, d20:
         # CONDITION: in HYPAGS, either k, d10 or d20 have to be given
-        # case 0: k is given
-        # case 1: d10 is given
-        # case 2: d20 is given
         if self.k is not None:
-            # mathematical model case 0
+            if isinstance(float, self.k):
+                k = self.k
+            elif len(self.k) > 1:
+                logging.warning(
+                    "HYPAGS routine only accepts single k value, choosing the first k value in the array."
+                )
+                k = float(self.k[0])
+            # case 0: mathematical model where k is given
             # check for non-valid input
-            if self.k > 2.6e-2 or self.k < 2.87e-7:
+            if k > 2.6e-2 or k < 2.87e-7:
                 logging.warning("k out of hypags model limits.")
             logging.debug("Using case 0 of hypags model (k given).")
             self.d10 = (self.k / Pi * c) ** (0.5)  # calculation of d10
             self.d20 = c1 * self.d10  # calculation of d20
         elif self.d10 is not None:
-            # mathematical model case 1
+            # case 1: mathematical model where d10 is given
             if self.d10 > 8.3e-4 or self.d10 < 5.35e-5:
                 logging.warning("d10 out of hypags model limits.")
             logging.debug("Using case 1 of hypags model (d10 given).")
-            self.k = (Pi * rho_f * g * self.d10**2) / mu  # calculation of k
             self.d20 = c1 * self.d10  # calculation of d20
+            k = (Pi * rho_f * g * self.d10**2) / mu
+            self.k = array([k], dtype=float)  # calculation of k
         elif self.d20 is not None:
-            # mathematical model case 2
+            # case 2: mathematical model where d20 is given
             if self.d20 > 1.2e-3 or self.d20 < 6.25e-5:
                 logging.warning("d20 out of hypags model limits.")
             logging.debug("Using case 2 of hypags model (d20 given).")
             self.d10 = self.d20 / c1  # calculation of d10
-            self.k = (Pi * rho_f * g * self.d10**2) / mu
+            k = (Pi * rho_f * g * self.d10**2) / mu
+            self.k = array([k], dtype=float)  # calculation of k
         else:
             raise ValueError(
                 "No parameter (k, d10, or d20) was provided for hypags routine."
@@ -761,47 +764,46 @@ class SoilSample:
 
         # calculation of d50 and ne
         d50_0 = a3 * self.d20  # starting value for iterative approximation of d50
-        ne_0 = a1 * self.k**a2
+        ne_0 = a1 * k**a2
         self.ne, self.d50 = iterator(ne_0, d50_0, c)
 
         # calculation of d60
         self.d60 = c2 * self.d50
 
         # calculation of van Genuchten alpha
-        if self.k <= 5e-5:
-            drep = self.d60
-        if self.k > 5e-5:
-            drep = 0.0001803 + self.k * 0.10
+        drep = self.d60 if k <= 5e-5 else 0.0001803 + k * 0.10
         h = factor * divide(
             1, multiply(0.5, drep ** (1))
         )  # Note the conversion of diameter to radius
-        alphat = divide(1, h)
+        alpha = divide(1, h)
 
         # calculation of van Genuchten n
-        if alphat <= 1.9:
-            nt = 1.12411782 + (alphat) * 0.55750592
-        elif alphat > 1.9:
-            nt = (1.67561574 / ((alphat) - 0.30307062)) + 1.16193138
+        nt = (
+            1.12411782 + alpha * 0.55750592
+            if alpha <= 1.9
+            else 1.67561574 / (alpha - 0.30307062) + 1.16193138
+        )
 
         # error range of van Genuchten parameters.
         # TODO: implement if needed #https://github.com/martinvonk/pedon/issues/17
         # van Genuchten alpha
-        a_error = get_alpha_errors(self.k)
-        alpha_plus_dalphat = alphat + a_error[0]
-        # ensure a positive lower bound for alpha
-        alpha_minus_dalphat = max(alphat - a_error[1], 0.1)
+        alpha_errors = get_alpha_errors(k)
+        alpha_plus_dalpha = alpha + alpha_errors[0]
+        alpha_minus_dalpha = max(
+            alpha - alpha_errors[1], 0.1
+        )  # ensure a positive lower bound for alpha
         # van Genuchten n
-        n_error = get_n_errors(alphat)
-        n_plus_dnt = nt + n_error[0]
-        n_minus_dnt = nt - n_error[1]
-        if n_minus_dnt <= 0:
-            n_minus_dnt = 0.1
+        n_errors = get_n_errors(alpha)
+        n_plus_dnt = nt + n_errors[0]
+        n_minus_dnt = max(nt - n_errors[1], 0.1)  # ensure a positive lower bound for n
+        # residual water content theta_r
+        thetar_minus_dthetar, thetar, thetar_plus_dthetar = get_res_water_content(k)
 
         return Genuchten(
-            k_s=self.k,
+            k_s=k,
             theta_r=None,
             theta_s=None,
-            alpha=alphat,
+            alpha=alpha,
             n=nt,
         )
 
