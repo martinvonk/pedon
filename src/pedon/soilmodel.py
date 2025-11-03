@@ -50,12 +50,7 @@ class Genuchten:
     n: float
     l: float = 0.5  # noqa: E741
     m: float = field(init=False, repr=False)
-    #### AP1025: modification for HYPAGS
-#    d_alpha_upper: float # upper error range for van Genuchten alpha from HYPAGS
-#    d_alpha_lower: float # lower error range for van Genuchten alpha from HYPAGS
-#   d_n_upper: float # upper error range for van Genuchten alpha from HYPAGS
-#    d_n_lower: float # lower error range for van Genuchten alpha from HYPAGS
-    ####
+
     def __post_init__(self):
         self.m = 1 - 1 / self.n
 
