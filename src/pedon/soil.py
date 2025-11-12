@@ -759,13 +759,13 @@ class SoilSample:
         # calculation of d50 and ne
         d50_0 = a3 * self.d20  # starting value for iterative approximation of d50
         ne_0 = a1 * k**a2
-        self.ne, self.d50 = iterator(k=k, ne_i=ne_0, d50_i=d50_0, const=c)
+        ne, d50 = iterator(k=k, ne_i=ne_0, d50_i=d50_0, const=c)
 
         # calculation of d60
-        self.d60 = c2 * self.d50
+        d60 = c2 * d50
 
         # calculation of van Genuchten alpha
-        drep = self.d60 if k <= 5e-5 else 0.0001803 + k * 0.10
+        drep = d60 if k <= 5e-5 else 0.0001803 + k * 0.10
         h = factor * divide(
             1, multiply(0.5, drep ** (1))
         )  # Note the conversion of diameter to radius
@@ -795,8 +795,8 @@ class SoilSample:
 
         return Genuchten(
             k_s=k,
-            theta_r=None,
-            theta_s=None,
+            theta_r=thetar,
+            theta_s=ne,
             alpha=alpha,
             n=nt,
         )
