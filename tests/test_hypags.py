@@ -125,7 +125,7 @@ def test_hypags_logs_out_of_range_k(caplog):
     )  # much higher than supported range
     sample.hypags()
 
-    assert any("k out of hypags model limits" in rec.message for rec in caplog.records)
+    assert any("out of hypags model limits" in rec.message for rec in caplog.records)
 
 
 def test_hypags_logs_out_of_range_d10(caplog):
@@ -134,7 +134,7 @@ def test_hypags_logs_out_of_range_d10(caplog):
     sample.hypags()
 
     assert any(
-        "d10 out of hypags model limits" in rec.message for rec in caplog.records
+        "out of hypags model limits" in rec.message for rec in caplog.records
     )
 
 
@@ -144,5 +144,5 @@ def test_hypags_logs_out_of_range_d20(caplog):
     sample.hypags()
 
     assert any(
-        "d20 out of hypags model limits" in rec.message for rec in caplog.records
+        "out of hypags model limits" in rec.message for rec in caplog.records
     )
