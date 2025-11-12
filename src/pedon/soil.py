@@ -786,12 +786,21 @@ class SoilSample:
         alpha_minus_dalpha = max(
             alpha - alpha_errors[1], 0.1
         )  # ensure a positive lower bound for alpha
+        _, _ = (
+            alpha_plus_dalpha,
+            alpha_minus_dalpha,
+        )  # don't use for now, see TODO above
         # van Genuchten n
         n_errors = get_n_errors(alpha)
         n_plus_dnt = nt + n_errors[0]
         n_minus_dnt = max(nt - n_errors[1], 0.1)  # ensure a positive lower bound for n
+        _, _ = n_plus_dnt, n_minus_dnt  # don't use for now, see TODO above
         # residual water content theta_r
         thetar_minus_dthetar, thetar, thetar_plus_dthetar = get_res_water_content(k)
+        _, _ = (
+            thetar_minus_dthetar,
+            thetar_plus_dthetar,
+        )  # don't use for now, see TODO above
 
         return Genuchten(
             k_s=k,
