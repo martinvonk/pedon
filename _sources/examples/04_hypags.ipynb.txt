@@ -17,9 +17,9 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "import matplotlib.pyplot as plt\n",
+    "import pedon as pe\n",
     "\n",
-    "import pedon as pe"
+    "import matplotlib.pyplot as plt"
    ]
   },
   {
