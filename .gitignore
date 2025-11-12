@@ -5,10 +5,11 @@
 .ruff_cache/
 .tox/
 
-doc/examples/fig/
-doc/literature/
+docs/examples/fig/
+docs/literature/
+docs/_build/
+docs/_api/
 dist/
 src/pedon.egg-info/
 
-
-poetry.lock
+uv.lock
