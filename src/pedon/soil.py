@@ -529,10 +529,6 @@ class SoilSample:
         factor = (
             2 * gamma * cos(theta) / (rho_f * g)
         )  # factor Young-Laplace eq. (fluid properties, contact angle, surface tension)
-        crgd1, crgd2 = (
-            0.0001803,
-            0.10,
-        )  # coefficients for the calculation of the capillary-rise-representative grain diameter
         Pi, c1, c2 = (
             0.0009,
             1.2,
