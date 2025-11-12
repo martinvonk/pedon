@@ -533,13 +533,6 @@ class SoilSample:
             0.0001803,
             0.10,
         )  # coefficients for the calculation of the capillary-rise-representative grain diameter
-        vGn1, vGn2, vGn3, vGn4, vGn5 = (
-            1.12411782,
-            0.55750592,
-            1.67561574,
-            0.30307062,
-            1.16193138,
-        )  # coefficients for the calculation of van Genuchten n
         Pi, c1, c2 = (
             0.0009,
             1.2,
