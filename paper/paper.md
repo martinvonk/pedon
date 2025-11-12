@@ -17,8 +17,8 @@ affiliations:
    index: 1
  - name: Department of Water Management, Faculty of Civil Engineering and Geosciences, Delft University of Technology, Delft, South Holland, The Netherlands
    index: 2
- - name: Federal Institute for Geosciences and Natural Resources, Hannover,Lower Saxony, Germany
- - index: 3
+ - name: Federal Institute for Geosciences and Natural Resources, Hannover, Lower Saxony, Germany
+   index: 3
 
 date: 12 november 2025
 bibliography: paper.bib
