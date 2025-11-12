@@ -12,11 +12,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Test suite with py310-ubuntu
-            python: "3.10"
-            os: ubuntu-latest
-            toxenv: py310
-            experimental: false
           - name: Test suite with py311-ubuntu
             python: "3.11"
             os: ubuntu-latest
@@ -31,6 +26,11 @@ jobs:
             python: "3.13"
             os: ubuntu-latest
             toxenv: py313
+            experimental: false
+          - name: Test suite with py314-ubuntu
+            python: "3.14"
+            os: ubuntu-latest
+            toxenv: py314
             experimental: false
           - name: Formatting and linting with ruff
             python: "3.11"
@@ -52,10 +52,10 @@ jobs:
       # Pytest
       PYTEST_ADDOPTS: "--color=yes"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           check-latest: true

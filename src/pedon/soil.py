@@ -1,13 +1,26 @@
 # type: ignore
 import logging
+from bisect import bisect_right
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Type
+from typing import Literal, Self, Type
 
 from numpy import abs as npabs
-from numpy import append, array2string, exp, full, log, log10
+from numpy import (
+    append,
+    array,
+    array2string,
+    cos,
+    divide,
+    exp,
+    full,
+    log,
+    log10,
+    multiply,
+    ndarray,
+)
 from pandas import DataFrame, isna, read_csv
-from scipy.optimize import least_squares
+from scipy.optimize import fixed_point, least_squares
 
 from ._params import get_params
 from ._typing import FloatArray
@@ -16,6 +29,47 @@ from .soilmodel import Brooks, Genuchten, SoilModel, get_soilmodel
 
 @dataclass
 class SoilSample:
+    """
+    A container for measured soil properties and in-situ soil hydraulic data, with
+    convenience routines to predict hydraulic parameters using a range of pedo-
+    transfer functions and empirical models.
+
+    Attributes
+    ----------
+    sand_p : float | None
+        Sand fraction in percent (%).
+    silt_p : float | None
+        Silt fraction in percent (%).
+    clay_p : float | None
+        Clay fraction in percent (%).
+    rho : float | None
+        Bulk density (g cm^-3).
+    th33 : float | None
+        Water content at -33 kPa (cm).
+    th1500 : float | None
+        Water content at -1500 kPa (cm).
+    om_p : float | None
+        Organic matter content in percent (%).
+    m50 : float | None
+        Median sand fraction (μm).
+    d10 : float | None
+        Representative grain diameter from sieve curve (m).
+    d20 : float | None
+        Representative grain diameter from sieve curve (m).
+    h : FloatArray | None
+        Pressure head measurements (cm).
+    k : FloatArray | None
+        Hydraulic conductivity measurements (m s^-1 or cm d^-1).
+    theta : FloatArray | None
+        Measured volumetric water content (dimensionless).
+
+    Notes
+    -----
+        - Verify units before use as different methods expect specific conventions.
+        - Methods return soil hydraulic model instances (e.g., Genuchten, Brooks).
+        - Some methods make external API calls (rosetta) or use empirical relationships.
+    """
+
     sand_p: float | None = None  # sand %
     silt_p: float | None = None  # silt %
     clay_p: float | None = None  # clay %
@@ -24,6 +78,12 @@ class SoilSample:
     th1500: float | None = None  # cm
     om_p: float | None = None  # organic matter %
     m50: float | None = None  # median sand fraction
+    d10: float | None = (
+        None  # d10 representative grain diameter (e.g. from sieve curve) [m]
+    )
+    d20: float | None = (
+        None  # d20 representative grain diameter (e.g. from sieve curve) [m]
+    )
     h: FloatArray | None = field(default=None, repr=False)  # pressure head measurement
     k: FloatArray | None = field(
         default=None, repr=False
@@ -63,8 +123,20 @@ class SoilSample:
         k_s: float | None = None,
         silent: bool = True,
     ) -> SoilModel:
-        """Same method as RETC"""
+        """
+        Fit the provided SoilModel (e.g., van Genuchten, Brooks-Corey class) to the
+        stored measurements (theta, k, h) using nonlinear least squares. If
+        pbounds is not provided, default parameter bounds are retrieved for the
+        requested model name. The objective combines water retention and log10(k)
+        errors; weighting terms W1 and W2 control the relative contribution of k.
+        Returns a model instance with optimized parameters.
 
+        Notes
+        -----
+            - Requires theta and k (and optionally h) to be set.
+            - If k_s is provided it will be fixed during optimization.
+            - Input/outputs and bounds are expected in the units used by the soil model.
+        """
         theta = self.theta
         N = len(theta)
         k = self.k
@@ -396,9 +468,354 @@ class SoilSample:
             n=10 ** vgpar[3],
         )
 
+    def hypags(self) -> Genuchten:
+        """
+        Estimate van Genuchten parameters using the HYPAGS method.
+
+        Implements the Kozeny-Carman-based parameterization from Peche & Houben
+        (2023, 2024) to derive van Genuchten parameters and characteristic grain-size
+        metrics from hydraulic conductivity and/or grain size inputs.
+
+        The routine:
+        - Accepts k (hydraulic conductivity), d10, or d20 as input (at least one required)
+        - Iteratively estimates effective porosity (ne), d50, and d60
+        - Computes van Genuchten alpha and n parameters with bootstrap-derived errors
+        - Returns a Genuchten model with k_s, theta_r, theta_s, alpha, and n
+
+        Notes
+        -----
+        - Grain diameters should be in meters; k in m s^-1
+        - Input values outside empirically supported ranges trigger warnings
+        - theta_r is estimated from k; theta_s equals effective porosity (ne)
+
+        Returns
+        -------
+        Genuchten
+            Van Genuchten soil model with estimated parameters.
+
+        References
+        ----------
+        Peche, A., Houben, G., & Altfelder, S. (2024). Approximation of van Genuchten
+        Parameter Ranges from Hydraulic Conductivity Data. Groundwater, 62(3), 469-479.
+
+        Peche, A., & Houben, G. J. (2023). Estimating characteristic grain sizes and
+        effective porosity from hydraulic conductivity data. Groundwater, 61(4), 574-585.
+        """
+        # constants and coefficients
+        rho_f = 999.7  # fluid density [kg/m³] (assumed 20°C)
+        g = 9.81  # gravitational acceleration [m/s²]
+        mu = 1.1306e-3  # dynamic viscosity [kg/(m·s)]
+        c = mu / (rho_f * g)
+        a1, a2, a3 = 1.00401066e00, 1.50991411e-04, 5.78888587e-03  # alpha-coefficients
+        gamma = 0.0728  # surface tension [J/m²]
+        theta = 0.0  # contact angle, parameter for Young-Laplace eq.
+        factor = (
+            2 * gamma * cos(theta) / (rho_f * g)
+        )  # factor Young-Laplace eq. (fluid properties, contact angle, surface tension)
+        Pi, c1, c2 = (
+            0.0009,
+            1.2,
+            1.13,
+        )  # dimensionless number Pi and c-coefficients --> [Kozeny-Carman-based parameterization]
+
+        # hypags functions
+        def solve_kozeny_carman(
+            k: float, ne_i: float, d50_i: float, const: float
+        ) -> tuple[float, float]:
+            """
+            Solve for d50 and effective porosity based on Kozeny-Carman equation
+            using scipy's fixed_point for robust successive substitution iteration.
+
+            Parameters (Parametrization-dependent)
+            ----------
+            k : input hydraulic conductivity
+            ne_i : initial guess for effective porosity
+            d50_i : initial guess for d50
+            const : fluid properties and gravitational acceleration constant
+
+            Returns
+            -------
+            ne : effective porosity
+            d50 : d50
+            """
+            c = 180 * const
+
+            def update_func(vars):
+                """
+                Fixed-point iteration function.
+                Computes the next iteration values for [n, d] given current values.
+                """
+                n, d = vars
+                n_next = (k / (d**2) * c * (1 - n) ** 2) ** (1 / 3)
+                d_next = (c * k * ((1 - n_next) ** 2 / (n_next**3))) ** (1 / 2)
+                return array([n_next, d_next])
+
+            solution = fixed_point(
+                update_func, array([ne_i, d50_i]), xtol=1e-10, maxiter=100
+            )
+            ne, d50 = solution
+
+            return ne, d50
+
+        def get_alpha_errors(k: float) -> tuple[float, float]:
+            """
+            Return bootstrap confidence interval errors for a given k value.
+
+            Uses binary search to quickly find the corresponding [+Δα, -Δα] pair
+            based on predefined k thresholds.
+
+            Parameters
+            ----------
+            k : float
+                Hydraulic conductivity.
+
+            Returns
+            -------
+            tuple[float, float]
+                (added_error, subtracted_error)
+            """
+            bounds = [
+                0.00000025,
+                0.0000005,
+                0.00000075,
+                0.000001,
+                0.0000025,
+                0.000005,
+                0.0000075,
+                0.00001,
+                0.000025,
+                0.00005,
+                0.000075,
+                0.0001,
+                0.0005,
+            ]
+            errors = [
+                [3.002, 1.144],
+                [5.364, 1.258],
+                [7.031, 1.366],
+                [6.728, 1.519],
+                [6.758, 2.072],
+                [6.607, 2.393],
+                [5.91, 2.985],
+                [5.643, 3.229],
+                [4.84, 4.0],
+                [4.082, 4.233],
+                [3.182, 4.486],
+                [3.051, 5.03],
+                [3.442, 5.483],
+            ]
+            default_error = (1.811, 2.858)
+
+            i = bisect_right(bounds, k)
+            return tuple(errors[i - 1]) if i <= len(errors) else default_error
+
+        def get_n_errors(alpha: float) -> tuple[float, float]:
+            """
+            Return bootstrap confidence interval errors for a given alpha value.
+
+            Uses binary search to find the corresponding [+Δn, -Δn] pair
+            based on predefined alpha thresholds.
+
+            Parameters
+            ----------
+            alpha : float
+            Alpha parameter.
+
+            Returns
+            -------
+            tuple[float, float]
+            (added_error, subtracted_error)
+            """
+
+            bounds = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+            errors = [
+                [2.836, 0.358],
+                [3.061, 0.826],
+                [3.481, 0.828],
+                [3.182, 0.605],
+                [1.905, 0.509],
+                [1.184, 0.297],
+                [4.032, 0.352],
+                [1.385, 0.241],
+                [1.017, 0.155],
+            ]
+            default_error = (3.006, 0.377)
+
+            i = bisect_right(bounds, alpha)
+            return tuple(errors[i - 1]) if i <= len(errors) else default_error
+
+        def get_res_water_content(k: float) -> tuple[float, float, float]:
+            """
+            Return residual water content (θr) with lower and upper bounds for a given k value.
+
+            Uses binary search to find the corresponding [θr_lower, θr, θr_upper]
+            triple based on predefined k thresholds.
+
+            Parameters
+            ----------
+            k : float
+                Hydraulic conductivity.
+
+            Returns
+            -------
+            tuple[float, float, float]
+                [θr_lower, θr, θr_upper]
+            """
+            bounds = [
+                0.00000025,
+                0.0000005,
+                0.00000075,
+                0.000001,
+                0.0000025,
+                0.000005,
+                0.0000075,
+                0.00001,
+                0.000025,
+                0.00005,
+                0.000075,
+                0.0001,
+                0.0005,
+            ]
+            values = [
+                [0.089, 0.097, 0.198],
+                [0.097, 0.107, 0.207],
+                [0.09, 0.099, 0.227],
+                [0.095, 0.102, 0.221],
+                [0.091, 0.098, 0.216],
+                [0.087, 0.097, 0.227],
+                [0.104, 0.111, 0.212],
+                [0.099, 0.108, 0.219],
+                [0.079, 0.085, 0.233],
+                [0.082, 0.087, 0.226],
+                [0.067, 0.07, 0.223],
+                [0.105, 0.11, 0.23],
+                [0.096, 0.105, 0.23],
+            ]
+            default_value = (0.068, 0.111, 0.096)
+
+            i = bisect_right(bounds, k)
+            return tuple(values[i - 1]) if i <= len(values) else default_value
+
+        # mathematical model of hypags calculation of k, d10, d20:
+        # CONDITION: in HYPAGS, either k, d10 or d20 have to be given
+        if self.k is not None:
+            if isinstance(self.k, float):
+                k = self.k
+            elif isinstance(self.k, ndarray):
+                if len(self.k) > 1:
+                    logging.warning(
+                        "HYPAGS routine only accepts single k value, choosing the first k value in the array."
+                    )
+                k = float(self.k[0])
+            else:
+                k = float(self.k)
+
+            # case 0: mathematical model where k is given
+            # check for non-valid input
+            if k > 2.6e-2 or k < 2.87e-7:
+                logging.error("k out of hypags model limits.")
+            logging.debug("Using case 0 of hypags model (k given).")
+            self.d10 = (k / Pi * c) ** (0.5)  # calculation of d10
+            self.d20 = c1 * self.d10  # calculation of d20
+        elif self.d10 is not None:
+            # case 1: mathematical model where d10 is given
+            if not 5.35e-5 <= self.d10 <= 8.3e-4:
+                logging.error(
+                    f"d10 ({self.d10:.3e}) out of hypags model limits: 5.35e-5 to 8.3e-4."
+                )
+            logging.debug("Using case 1 of hypags model (d10 given).")
+            self.d20 = c1 * self.d10  # calculation of d20
+            k = (Pi * rho_f * g * self.d10**2) / mu
+            self.k = array([k], dtype=float)  # calculation of k
+        elif self.d20 is not None:
+            # case 2: mathematical model where d20 is given
+            if not 6.25e-5 <= self.d20 <= 1.2e-3:
+                logging.error(
+                    f"d20 ({self.d20:.3e}) out of hypags model limits: 6.25e-5 to 1.2e-3."
+                )
+            logging.debug("Using case 2 of hypags model (d20 given).")
+            self.d10 = self.d20 / c1  # calculation of d10
+            k = (Pi * rho_f * g * self.d10**2) / mu
+            self.k = array([k], dtype=float)  # calculation of k
+        else:
+            raise ValueError(
+                "No parameter (k, d10, or d20) was provided for hypags routine."
+            )
+
+        # calculation of d50 and ne
+        d50_0 = a3 * self.d20  # starting value for iterative approximation of d50
+        ne_0 = a1 * k**a2
+        ne, d50 = solve_kozeny_carman(k=k, ne_i=ne_0, d50_i=d50_0, const=c)
+
+        # calculation of d60
+        d60 = c2 * d50
+
+        # calculation of van Genuchten alpha
+        drep = d60 if k <= 5e-5 else 0.0001803 + k * 0.10
+        h = factor * divide(
+            1, multiply(0.5, drep ** (1))
+        )  # Note the conversion of diameter to radius
+        alpha = divide(1, h)
+
+        # calculation of van Genuchten n
+        nt = (
+            1.12411782 + alpha * 0.55750592
+            if alpha <= 1.9
+            else 1.67561574 / (alpha - 0.30307062) + 1.16193138
+        )
+
+        # error range of van Genuchten parameters.
+        # TODO: implement if needed #https://github.com/martinvonk/pedon/issues/17
+        # van Genuchten alpha
+        alpha_errors = get_alpha_errors(k)
+        alpha_plus_dalpha = alpha + alpha_errors[0]
+        alpha_minus_dalpha = max(
+            alpha - alpha_errors[1], 0.1
+        )  # ensure a positive lower bound for alpha
+        _, _ = (
+            alpha_plus_dalpha,
+            alpha_minus_dalpha,
+        )  # don't use for now, see TODO above
+        # van Genuchten n
+        n_errors = get_n_errors(alpha)
+        n_plus_dnt = nt + n_errors[0]
+        n_minus_dnt = max(nt - n_errors[1], 0.1)  # ensure a positive lower bound for n
+        _, _ = n_plus_dnt, n_minus_dnt  # don't use for now, see TODO above
+        # residual water content theta_r
+        thetar_minus_dthetar, thetar, thetar_plus_dthetar = get_res_water_content(k)
+        _, _ = (
+            thetar_minus_dthetar,
+            thetar_plus_dthetar,
+        )  # don't use for now, see TODO above
+
+        return Genuchten(
+            k_s=k,
+            theta_r=thetar,
+            theta_s=ne,
+            alpha=alpha,
+            n=nt,
+        )
+
 
 @dataclass
 class Soil:
+    """
+    A class representing soil properties and models.
+
+    Attributes
+    ----------
+    name : str
+        The name identifier for the soil.
+    model : SoilModel | None, optional
+        The soil model instance containing hydraulic parameters, by default None.
+    sample : SoilSample | None, optional
+        The soil sample data associated with this soil, by default None.
+    source : str | None, optional
+        The data source for the soil parameters (e.g., 'HYDRUS', 'Staring_2018'), by default None.
+    description : str | None, optional
+        A text description of the soil type, by default None.
+    """
+
     name: str
     model: SoilModel | None = None
     sample: SoilSample | None = None
@@ -407,7 +824,8 @@ class Soil:
 
     def from_name(
         self, sm: Type[SoilModel] | SoilModel | str, source: str | None = None
-    ) -> "Soil":
+    ) -> Self:
+        """Load soil parameters from a CSV database by soil name and model type."""
         if isinstance(sm, SoilModel):
             if hasattr(sm, "__name__"):
                 smn = sm.__name__
@@ -457,6 +875,7 @@ class Soil:
 
     @staticmethod
     def list_names(sm: Type[SoilModel] | SoilModel | str) -> list[str]:
+        """Return a list of available soil names for a given soil model."""
         if isinstance(sm, SoilModel):
             if hasattr(sm, "__name__"):
                 smn = sm.__name__
@@ -478,7 +897,8 @@ class Soil:
 
         return names[names["soilmodel"] == smn].loc[:, "name"].unique().tolist()
 
-    def from_staring(self, year: str = "2018") -> "Soil":
+    def from_staring(self, year: str = "2018") -> Self:
+        """Load soil parameters from the Staring series database."""
         if year not in ("2001", 2001, "2018", 2018):
             raise ValueError(f"Year must either be '2001' or '2018', not {year}")
 

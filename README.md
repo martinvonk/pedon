@@ -7,7 +7,7 @@
 [![Code Size](https://img.shields.io/github/languages/code-size/martinvonk/pedon?style=flat-square)](https://pypi.org/project/pedon/)
 [![PyPi Downloads](https://img.shields.io/pypi/dm/pedon?style=flat-square) ![License](https://img.shields.io/pypi/l/pedon?style=flat-square)](https://pypi.org/project/pedon/)
 
-[![Tests](https://img.shields.io/github/actions/workflow/status/martinvonk/pedon/tests.yaml?style=flat-square)](https://github.com/martinvonk/pedon/actions/workflows/tests.yaml)
+[![Tests](https://img.shields.io/github/actions/workflow/status/martinvonk/pedon/tests.yml?style=flat-square)](https://github.com/martinvonk/pedon/actions/workflows/tests.yml)
 [![MyPy](https://img.shields.io/badge/type_checker-mypy-2A6DB2?style=flat-square)](https://mypy-lang.org/)
 [![ruff](https://img.shields.io/badge/linter-ruff-red?style=flat-square)](https://github.com/charliermarsh/ruff)
 
