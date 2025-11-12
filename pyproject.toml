@@ -35,7 +35,13 @@ typing = ["mypy", "pandas-stubs"]
 rosetta = ["httpx"]
 pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar", "pedon[rosetta]"]
 coveraging = ["coverage"]
-documentation = ["sphinx>=8.2", "myst-parser", "nbsphinx", "ipykernel"]
+documentation = [
+        "sphinx>=8.2",
+        "myst-parser",
+        "nbsphinx",
+        "ipykernel",
+        "pandoc",
+]
 dev = ["pedon[ruffing,typing,pytesting]", "tox"]
 
 
