@@ -733,7 +733,7 @@ class SoilSample:
             if k > 2.6e-2 or k < 2.87e-7:
                 logging.error("k out of hypags model limits.")
             logging.debug("Using case 0 of hypags model (k given).")
-            self.d10 = (self.k / Pi * c) ** (0.5)  # calculation of d10
+            self.d10 = (k / Pi * c) ** (0.5)  # calculation of d10
             self.d20 = c1 * self.d10  # calculation of d20
         elif self.d10 is not None:
             # case 1: mathematical model where d10 is given
