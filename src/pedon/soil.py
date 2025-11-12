@@ -18,10 +18,9 @@ from numpy import (
     log10,
     multiply,
     ndarray,
-    zeros,
 )
 from pandas import DataFrame, isna, read_csv
-from scipy.optimize import least_squares
+from scipy.optimize import fixed_point, least_squares
 
 from ._params import get_params
 from ._typing import FloatArray
@@ -536,44 +535,43 @@ class SoilSample:
         )  # dimensionless number Pi and c-coefficients --> [Kozeny-Carman-based parameterization]
 
         # hypags functions
-        def iterator(
+        def solve_kozeny_carman(
             k: float, ne_i: float, d50_i: float, const: float
         ) -> tuple[float, float]:
             """
-            Iterative scheme to approximate d50 and effective porosity based on
-            Kozeny-Carman equation.
+            Solve for d50 and effective porosity based on Kozeny-Carman equation
+            using scipy's fixed_point for robust successive substitution iteration.
 
             Parameters (Parametrization-dependent)
             ----------
             k : input hydraulic conductivity
-            d2 : input d20
-            a1 : input coefficient a1
-            a2 : input coefficient a2
-            a3 : input coefficient a3
-            const : fluid properties and gravitaiotnal acceleration constant
+            ne_i : initial guess for effective porosity
+            d50_i : initial guess for d50
+            const : fluid properties and gravitational acceleration constant
 
             Returns
             -------
-            n_r : effective porosity
-            d5 : d50
+            ne : effective porosity
+            d50 : d50
             """
-            # iterative scheme to approximate d50 and effective porosity
-            # constants
-            error = 10
             c = 180 * const
-            n = zeros((100, 1), dtype=float)
-            n[0] = ne_i
-            d = zeros((100, 1), dtype=float)
-            d[0] = d50_i
-            j = 0
-            while error > 1e-10:
-                n[j + 1] = (k / (d[j] ** 2) * c * (1 - n[j]) ** 2) ** (1 / 3)
-                d[j + 1] = (c * k * ((1 - n[j + 1]) ** 2 / (n[j + 1] ** 3))) ** (1 / 2)
-                error = npabs(n[j + 1] - n[j] + d[j + 1] - d[j])
-                j = j + 1
-            n_r = n[j - 1]
-            d5 = d[j - 1]
-            return n_r, d5
+
+            def update_func(vars):
+                """
+                Fixed-point iteration function.
+                Computes the next iteration values for [n, d] given current values.
+                """
+                n, d = vars
+                n_next = (k / (d**2) * c * (1 - n) ** 2) ** (1 / 3)
+                d_next = (c * k * ((1 - n_next) ** 2 / (n_next**3))) ** (1 / 2)
+                return array([n_next, d_next])
+
+            solution = fixed_point(
+                update_func, array([ne_i, d50_i]), xtol=1e-10, maxiter=100
+            )
+            ne, d50 = solution
+
+            return ne, d50
 
         def get_alpha_errors(k: float) -> tuple[float, float]:
             """
@@ -759,7 +757,7 @@ class SoilSample:
         # calculation of d50 and ne
         d50_0 = a3 * self.d20  # starting value for iterative approximation of d50
         ne_0 = a1 * k**a2
-        ne, d50 = iterator(k=k, ne_i=ne_0, d50_i=d50_0, const=c)
+        ne, d50 = solve_kozeny_carman(k=k, ne_i=ne_0, d50_i=d50_0, const=c)
 
         # calculation of d60
         d60 = c2 * d50
