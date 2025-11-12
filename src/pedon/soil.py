@@ -3,7 +3,7 @@ import logging
 from bisect import bisect_right
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Type
+from typing import Literal, Self, Type
 
 from numpy import abs as npabs
 from numpy import (
@@ -45,44 +45,29 @@ class SoilSample:
     rho : float | None
         Bulk density (g cm^-3).
     th33 : float | None
-        Water content at -33 kPa (cm or same units used in the dataset; used by
-        some external predictors). Use -9.9 to indicate unavailable when calling
-        some external APIs that expect sentinel values.
+        Water content at -33 kPa (cm).
     th1500 : float | None
-        Water content at -1500 kPa (cm or same units used in the dataset).
+        Water content at -1500 kPa (cm).
     om_p : float | None
         Organic matter content in percent (%).
     m50 : float | None
-        Median sand fraction (unit consistent with dataset; used by some predictors).
-    d10, d20, d50, d60 : float | None
-        Representative grain diameters from a sieve curve (m). d10 and d20 are
-        explicitly supported as inputs to the HYPAGS routine; d50/d60 may be
-        estimated by internal algorithms.
-    ne : float | None
-        Effective porosity (fraction, dimensionless).
+        Median sand fraction (μm).
+    d10 : float | None
+        Representative grain diameter from sieve curve (m).
+    d20 : float | None
+        Representative grain diameter from sieve curve (m).
     h : FloatArray | None
-        Pressure head measurements (array-like). Units should match the model
-        expectations (commonly cm or m depending on the surrounding codebase).
+        Pressure head measurements (cm).
     k : FloatArray | None
-        Hydraulic conductivity measurements. Can be a scalar or array-like
-        depending on context; units must be consistent with the predictor used.
+        Hydraulic conductivity measurements (m s^-1 or cm d^-1).
     theta : FloatArray | None
-        Measured volumetric water content (array-like).
+        Measured volumetric water content (dimensionless).
 
     Notes
     -----
-        - Many prediction routines expect particular units for input fields. Verify
-        units (e.g., k in m s^-1 or cm d^-1) before use. Some methods convert units
-        internally (documented per-method).
-        - Several methods return instances of soil hydraulic model classes defined
-        elsewhere in the package (e.g., Genuchten, Brooks). Those return objects can
-        be used to compute theta(h) or k(h) etc.
-        - Some methods make external API calls (rosetta) or rely on empirical
-        relationships derived from literature (Wösten, Cosby, HYPAGS). Read the
-        method docstrings for model-specific caveats and assumptions.
-        - Validate unit consistency between measured data and the parameterization
-        you choose. Pay special attention to k unit conventions (m s^-1, cm d^-1, etc.)
-        since several methods convert units internally.
+        - Verify units before use as different methods expect specific conventions.
+        - Methods return soil hydraulic model instances (e.g., Genuchten, Brooks).
+        - Some methods make external API calls (rosetta) or use empirical relationships.
     """
 
     sand_p: float | None = None  # sand %
@@ -485,28 +470,36 @@ class SoilSample:
 
     def hypags(self) -> Genuchten:
         """
-        Implement the HYPAGS procedures to estimate van Genuchten parameters and
-        characteristic grain-size metrics from hydraulic conductivity and/or grain
-        size inputs. The routine implements the Kozeny-Carman-based
-        parameterization from Peche & Houben (2023, 2024) and:
-        - Accepts as inputs: k (preferred) or d10 or d20 (grain diameters in m).
-        - Iteratively estimates effective porosity (ne), d50, and d60 from the
-        Kozeny-Carman relationships.
-        - Estimates a capillary-rise representative grain diameter and computes
-        alpha and n (van Genuchten parameters) with bootstrap-derived error
-        ranges available in the original algorithm.
-        - Genuchten-like object with k_s, alpha, n populated. theta_r and theta_s
-        may rudimentary estimated as with a seperate routine and the effective
-        porosity respectively left None because HYPAGS focuses on k/alpha/n estimation.
-        - The method expects physical units consistent with the HYPAGS formulation:
-        grain diameters in meters, k in m s^-1. Input values outside empirically
-        supported ranges will trigger warnings but the routine will still attempt
-        computation.
+        Estimate van Genuchten parameters using the HYPAGS method.
+
+        Implements the Kozeny-Carman-based parameterization from Peche & Houben
+        (2023, 2024) to derive van Genuchten parameters and characteristic grain-size
+        metrics from hydraulic conductivity and/or grain size inputs.
+
+        The routine:
+        - Accepts k (hydraulic conductivity), d10, or d20 as input (at least one required)
+        - Iteratively estimates effective porosity (ne), d50, and d60
+        - Computes van Genuchten alpha and n parameters with bootstrap-derived errors
+        - Returns a Genuchten model with k_s, theta_r, theta_s, alpha, and n
+
+        Notes
+        -----
+        - Grain diameters should be in meters; k in m s^-1
+        - Input values outside empirically supported ranges trigger warnings
+        - theta_r is estimated from k; theta_s equals effective porosity (ne)
+
+        Returns
+        -------
+        Genuchten
+            Van Genuchten soil model with estimated parameters.
 
         References
         ----------
-            - Peche, A., Houben, G., & Altfelder, S. (2024). Approximation of van Genuchten Parameter Ranges from Hydraulic Conductivity Data. Groundwater, 62(3), 469-479.
-            - Peche, A., & Houben, G. J. (2023). Estimating characteristic grain sizes and effective porosity from hydraulic conductivity data. Groundwater, 61(4), 574-585.
+        Peche, A., Houben, G., & Altfelder, S. (2024). Approximation of van Genuchten
+        Parameter Ranges from Hydraulic Conductivity Data. Groundwater, 62(3), 469-479.
+
+        Peche, A., & Houben, G. J. (2023). Estimating characteristic grain sizes and
+        effective porosity from hydraulic conductivity data. Groundwater, 61(4), 574-585.
         """
         # constants and coefficients
         rho_f = 999.7  # fluid density [kg/m³] (assumed 20°C)
@@ -806,6 +799,23 @@ class SoilSample:
 
 @dataclass
 class Soil:
+    """
+    A class representing soil properties and models.
+
+    Attributes
+    ----------
+    name : str
+        The name identifier for the soil.
+    model : SoilModel | None, optional
+        The soil model instance containing hydraulic parameters, by default None.
+    sample : SoilSample | None, optional
+        The soil sample data associated with this soil, by default None.
+    source : str | None, optional
+        The data source for the soil parameters (e.g., 'HYDRUS', 'Staring_2018'), by default None.
+    description : str | None, optional
+        A text description of the soil type, by default None.
+    """
+
     name: str
     model: SoilModel | None = None
     sample: SoilSample | None = None
@@ -814,7 +824,8 @@ class Soil:
 
     def from_name(
         self, sm: Type[SoilModel] | SoilModel | str, source: str | None = None
-    ) -> "Soil":
+    ) -> Self:
+        """Load soil parameters from a CSV database by soil name and model type."""
         if isinstance(sm, SoilModel):
             if hasattr(sm, "__name__"):
                 smn = sm.__name__
@@ -864,6 +875,7 @@ class Soil:
 
     @staticmethod
     def list_names(sm: Type[SoilModel] | SoilModel | str) -> list[str]:
+        """Return a list of available soil names for a given soil model."""
         if isinstance(sm, SoilModel):
             if hasattr(sm, "__name__"):
                 smn = sm.__name__
@@ -885,7 +897,8 @@ class Soil:
 
         return names[names["soilmodel"] == smn].loc[:, "name"].unique().tolist()
 
-    def from_staring(self, year: str = "2018") -> "Soil":
+    def from_staring(self, year: str = "2018") -> Self:
+        """Load soil parameters from the Staring series database."""
         if year not in ("2001", 2001, "2018", 2018):
             raise ValueError(f"Year must either be '2001' or '2018', not {year}")
 
