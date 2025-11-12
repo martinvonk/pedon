@@ -34,6 +34,7 @@ typing = ["mypy", "pandas-stubs"]
 rosetta = ["httpx"]
 pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar", "pedon[rosetta]"]
 coveraging = ["coverage"]
+documentation = ["sphinx>=8.2", "myst-parser", "nbsphinx", "ipykernel"]
 dev = ["pedon[ruffing,typing,pytesting]", "tox"]
 
 
@@ -102,3 +103,8 @@ commands = [
 description = "run type checks"
 extras = ["typing"]
 commands = [["mypy", "src"]]
+
+[tool.tox.env.docu]
+description = "build documentation"
+extras = ["documentation"]
+commands = [["sphinx-build", "-M", "html", "docs", "docs/_build"]]
