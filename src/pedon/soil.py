@@ -738,7 +738,7 @@ class SoilSample:
         elif self.d10 is not None:
             # case 1: mathematical model where d10 is given
             if self.d10 > 8.3e-4 or self.d10 < 5.35e-5:
-                logging.warning("d10 out of hypags model limits.")
+                logging.error("d10 out of hypags model limits.")
             logging.debug("Using case 1 of hypags model (d10 given).")
             self.d20 = c1 * self.d10  # calculation of d20
             k = (Pi * rho_f * g * self.d10**2) / mu
@@ -746,7 +746,7 @@ class SoilSample:
         elif self.d20 is not None:
             # case 2: mathematical model where d20 is given
             if self.d20 > 1.2e-3 or self.d20 < 6.25e-5:
-                logging.warning("d20 out of hypags model limits.")
+                logging.error("d20 out of hypags model limits.")
             logging.debug("Using case 2 of hypags model (d20 given).")
             self.d10 = self.d20 / c1  # calculation of d10
             k = (Pi * rho_f * g * self.d10**2) / mu
