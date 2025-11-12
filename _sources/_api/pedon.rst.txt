@@ -1,0 +1,19 @@
+pedon package
+=============
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 2
+
+   pedon.soil
+   pedon.soilmodel
+
+Module contents
+---------------
+
+.. automodule:: pedon
+   :members:
+   :show-inheritance:
+   :undoc-members:

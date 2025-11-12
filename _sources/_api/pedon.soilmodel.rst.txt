@@ -1,0 +1,7 @@
+pedon.soilmodel module
+======================
+
+.. automodule:: pedon.soilmodel
+   :members:
+   :show-inheritance:
+   :undoc-members:

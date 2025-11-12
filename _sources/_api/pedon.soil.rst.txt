@@ -1,0 +1,7 @@
+pedon.soil module
+=================
+
+.. automodule:: pedon.soil
+   :members:
+   :show-inheritance:
+   :undoc-members:

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>&lt;no title&gt; &#8212; pedon 0.0.8 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <script src="../_static/documentation_options.js?v=53b53b71"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <p><strong>Soil Parameter Datasets</strong></p>
+<p>Generally either the Brooks-Corey or Mualem-van Genuchten soil models are used. Pedon has some built-in datasets with parameter sets that can be used for both soil models.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pedon</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pe</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># list all soil types for van genuchten</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="o">.</span><span class="n">list_names</span><span class="p">(</span><span class="n">pe</span><span class="o">.</span><span class="n">Genuchten</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;Sand&#39;,
+ &#39;Loamy Sand&#39;,
+ &#39;Sandy Loam&#39;,
+ &#39;Loam&#39;,
+ &#39;Silt&#39;,
+ &#39;Silt Loam&#39;,
+ &#39;Sandy Clay Loam&#39;,
+ &#39;Clay Loam&#39;,
+ &#39;Silty Clay Loam&#39;,
+ &#39;Sandy Clay&#39;,
+ &#39;Silty Clay&#39;,
+ &#39;Clay&#39;,
+ &#39;B01&#39;,
+ &#39;B02&#39;,
+ &#39;B03&#39;,
+ &#39;B04&#39;,
+ &#39;B05&#39;,
+ &#39;B06&#39;,
+ &#39;B07&#39;,
+ &#39;B08&#39;,
+ &#39;B09&#39;,
+ &#39;B10&#39;,
+ &#39;B11&#39;,
+ &#39;B12&#39;,
+ &#39;B13&#39;,
+ &#39;B14&#39;,
+ &#39;B15&#39;,
+ &#39;B16&#39;,
+ &#39;B17&#39;,
+ &#39;B18&#39;,
+ &#39;O01&#39;,
+ &#39;O02&#39;,
+ &#39;O03&#39;,
+ &#39;O04&#39;,
+ &#39;O05&#39;,
+ &#39;O06&#39;,
+ &#39;O07&#39;,
+ &#39;O08&#39;,
+ &#39;O09&#39;,
+ &#39;O10&#39;,
+ &#39;O11&#39;,
+ &#39;O12&#39;,
+ &#39;O13&#39;,
+ &#39;O14&#39;,
+ &#39;O15&#39;,
+ &#39;O16&#39;,
+ &#39;O17&#39;,
+ &#39;O18&#39;,
+ &#39;Medium Sand&#39;,
+ &#39;Del Monte Sand&#39;,
+ &#39;Fresno Medium Sand&#39;,
+ &#39;Unconsolidated Sand&#39;,
+ &#39;Fine Sand&#39;,
+ &#39;Columbia Sandy Loam&#39;,
+ &#39;Touchet Silt Loam&#39;,
+ &#39;Hygiene Sandstone&#39;,
+ &#39;Adelanto Loam&#39;,
+ &#39;Limon Silt&#39;,
+ &#39;Yolo Light Clay&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get the HYDRUS sand</span>
+<span class="n">soil</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Sand&quot;</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">sm</span><span class="o">=</span><span class="n">pe</span><span class="o">.</span><span class="n">Genuchten</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;HYDRUS&quot;</span><span class="p">)</span>
+<span class="n">soil</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Soil(name=&#39;Sand&#39;, model=Genuchten(k_s=712.8, theta_r=0.045, theta_s=0.43, alpha=0.145, n=2.68, l=0.5), sample=None, source=&#39;HYDRUS&#39;, description=nan)
+</pre></div></div>
+</div>
+<p>Note that we now have a different class; the soil class. This class has some other attributes such as the name. If the name is in the dataset (<code class="docutils literal notranslate"><span class="pre">pe.Soil.list_names(pe.Genuchten)</span></code>), the <code class="docutils literal notranslate"><span class="pre">from_name()</span></code> can retrieve the soil model. Note that we have to parse the soil model <code class="docutils literal notranslate"><span class="pre">sm</span></code> as an attribute since some soil models are available both as a Genuchten and Brooks dataset.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get from the Staring series</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="p">(</span><span class="s2">&quot;O18&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">from_staring</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="s2">&quot;2001&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Soil(name=&#39;O18&#39;, model=Genuchten(k_s=35.95, theta_r=0.01, theta_s=0.58, alpha=0.0127, n=1.32, l=-0.786), sample=SoilSample(sand_p=None, silt_p=0.0, clay_p=0.0, rho=1.1, th33=None, th1500=None, om_p=22.5, m50=nan), source=&#39;Staring_2001&#39;, description=&#39;moerige tussenlaag&#39;)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get for both genuchten and brooks</span>
+<span class="n">ls_gen</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="p">(</span><span class="s2">&quot;Limon Silt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">sm</span><span class="o">=</span><span class="n">pe</span><span class="o">.</span><span class="n">Genuchten</span><span class="p">)</span>
+<span class="n">ls_bro</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="p">(</span><span class="s2">&quot;Limon Silt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">sm</span><span class="o">=</span><span class="n">pe</span><span class="o">.</span><span class="n">Brooks</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">ls_gen</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">ls_bro</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">ls_gen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0.5, 1.0, &#39;Limon Silt&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_02_datasets_6_1.png" src="../_images/examples_02_datasets_6_1.png" />
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pedon</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../_api/modules.html">pedon</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Martin Vonk.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/examples/02_datasets.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
