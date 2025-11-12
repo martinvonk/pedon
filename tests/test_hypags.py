@@ -133,9 +133,7 @@ def test_hypags_logs_out_of_range_d10(caplog):
     sample = SoilSample(d10=1e-3)
     sample.hypags()
 
-    assert any(
-        "out of hypags model limits" in rec.message for rec in caplog.records
-    )
+    assert any("out of hypags model limits" in rec.message for rec in caplog.records)
 
 
 def test_hypags_logs_out_of_range_d20(caplog):
@@ -143,6 +141,4 @@ def test_hypags_logs_out_of_range_d20(caplog):
     sample = SoilSample(d20=1e-6)
     sample.hypags()
 
-    assert any(
-        "out of hypags model limits" in rec.message for rec in caplog.records
-    )
+    assert any("out of hypags model limits" in rec.message for rec in caplog.records)
