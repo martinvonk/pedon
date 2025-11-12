@@ -8,6 +8,6 @@ Below you can find examples of how pedon can be used. These Jupyter Notbooks can
 00_pedon_structure
 01_soil_models
 02_datasets
-03_pedotranfer_functions
+03_pedotransfer_functions
 04_curve_fitting
 ```
