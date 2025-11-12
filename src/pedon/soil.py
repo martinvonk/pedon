@@ -93,21 +93,12 @@ class SoilSample:
     th1500: float | None = None  # cm
     om_p: float | None = None  # organic matter %
     m50: float | None = None  # median sand fraction
-    #### AP1025: modification for HYPAGS
     d10: float | None = (
         None  # d10 representative grain diameter (e.g. from sieve curve) [m]
     )
     d20: float | None = (
         None  # d20 representative grain diameter (e.g. from sieve curve) [m]
     )
-    d50: float | None = (
-        None  # d50 (mean) representative grain diameter (e.g. from sieve curve) [m]
-    )
-    d60: float | None = (
-        None  # d60 representative grain diameter (e.g. from sieve curve) [m]
-    )
-    ne: float | None = None  # effective porosity [-]
-    ####
     h: FloatArray | None = field(default=None, repr=False)  # pressure head measurement
     k: FloatArray | None = field(
         default=None, repr=False
@@ -505,12 +496,12 @@ class SoilSample:
         alpha and n (van Genuchten parameters) with bootstrap-derived error
         ranges available in the original algorithm.
         - Genuchten-like object with k_s, alpha, n populated. theta_r and theta_s
-        may be left None because HYPAGS focuses on k/alpha/n estimation.
-        Raises
+        may rudimentary estimated as with a seperate routine and the effective
+        porosity respectively left None because HYPAGS focuses on k/alpha/n estimation.
         - The method expects physical units consistent with the HYPAGS formulation:
-        grain diameters in meters, k in m s^-1 (or converted internally as
-        described in the code). Input values outside empirically supported ranges
-        will trigger warnings but the routine will still attempt computation.
+        grain diameters in meters, k in m s^-1. Input values outside empirically
+        supported ranges will trigger warnings but the routine will still attempt
+        computation.
 
         References
         ----------
@@ -735,16 +726,20 @@ class SoilSample:
             self.d20 = c1 * self.d10  # calculation of d20
         elif self.d10 is not None:
             # case 1: mathematical model where d10 is given
-            if self.d10 > 8.3e-4 or self.d10 < 5.35e-5:
-                logging.error("d10 out of hypags model limits.")
+            if not 5.35e-5 <= self.d10 <= 8.3e-4:
+                logging.error(
+                    f"d10 ({self.d10:.3e}) out of hypags model limits: 5.35e-5 to 8.3e-4."
+                )
             logging.debug("Using case 1 of hypags model (d10 given).")
             self.d20 = c1 * self.d10  # calculation of d20
             k = (Pi * rho_f * g * self.d10**2) / mu
             self.k = array([k], dtype=float)  # calculation of k
         elif self.d20 is not None:
             # case 2: mathematical model where d20 is given
-            if self.d20 > 1.2e-3 or self.d20 < 6.25e-5:
-                logging.error("d20 out of hypags model limits.")
+            if not 6.25e-5 <= self.d20 <= 1.2e-3:
+                logging.error(
+                    f"d20 ({self.d20:.3e}) out of hypags model limits: 6.25e-5 to 1.2e-3."
+                )
             logging.debug("Using case 2 of hypags model (d20 given).")
             self.d10 = self.d20 / c1  # calculation of d10
             k = (Pi * rho_f * g * self.d10**2) / mu
