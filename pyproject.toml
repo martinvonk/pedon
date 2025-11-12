@@ -9,11 +9,10 @@ authors = [{ name = "Martin Vonk", email = "vonk.mart@gmail.com" }]
 description = "Python package for (unsaturated) soil properties including pedotransfer functions"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = ["numpy", "matplotlib", "pandas", "scipy"]
 classifiers = [
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: 3.13',
@@ -80,7 +79,7 @@ fix = true
 
 [tool.tox]
 requires = ["tox>=4"]
-env_list = ["py310", "py311", "py312", "py313", "py314", "type", "ruff"]
+env_list = ["py311", "py312", "py313", "py314", "type", "ruff"]
 
 [tool.tox.env_run_base]
 description = "run unit tests"
