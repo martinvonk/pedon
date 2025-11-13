@@ -29,6 +29,19 @@ def gar() -> pe.soilmodel.SoilModel:
     return pe.Gardner(k_s=10, theta_r=0.01, theta_s=0.43, a=0.02, b=1.0, m=1.1)
 
 
+@pytest.fixture
+def hav() -> pe.soilmodel.SoilModel:
+    # Example parameters similar in style to other model tests
+    return pe.soilmodel.Haverkamp(
+        k_s=10.0,
+        theta_r=0.01,
+        theta_s=0.43,
+        alpha=0.02,
+        beta=1.2,
+        a=0.5,
+    )
+
+
 def test_theta_genuchten(gen: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
     gen.theta(h=h)
 
@@ -91,3 +104,29 @@ def test_k_gardner(gar: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
 
 def test_h_gardner(gar: pe.soilmodel.SoilModel, theta: FloatArray = theta) -> None:
     gar.h(theta=theta)
+
+
+def test_theta_haverkamp(hav: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    hav.theta(h=h)
+
+
+def test_s_haverkamp(hav: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    hav.s(h=h)
+
+
+def test_k_haverkamp(hav: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    hav.k(h=h)
+
+
+def test_k_r_haverkamp_rejects_s_kwarg(
+    hav: pe.soilmodel.SoilModel, h: FloatArray = h
+) -> None:
+    with pytest.raises(NotImplementedError):
+        hav.k_r(h=h, s=array([0.1, 0.2, 0.3]))
+
+
+def test_h_haverkamp_not_implemented(
+    hav: pe.soilmodel.SoilModel, theta: FloatArray = theta
+) -> None:
+    with pytest.raises(NotImplementedError):
+        hav.h(theta=theta)

@@ -18,6 +18,7 @@ Python package for (unsaturated) soil properties including pedotransfer function
   - [Fredlund & Xing](https://projects.mans.edu.eg/heepf/ilppp/cources/12/pdf%20course/1/pressure/osmotic%20soilsalinity22.pdf)
   - Gardner
   - Panday ([Modflow-USG](https://www.gsienv.com/product/modflow-usg/))
+  - [Haverkamp](https://doi.org/10.2136/sssaj1977.03615995004100020024x)
 
 This package can fit soil water retention curves and  using least squares (same as [RETC](https://www.pc-progress.com/Documents/programs/retc.pdf)) to measurements.
 

@@ -150,6 +150,51 @@ class Brooks:
 
 
 @dataclass
+class Haverkamp:
+    """Haverkamp Soil Model
+
+    Haverkamp, R., Vauclin, M., Touma, J., Wierenga, P. J., & Vachaud, G. (1977).
+    A comparison of numerical simulation models for one-dimensional infiltration.
+    """
+
+    k_s: float
+    theta_r: float
+    theta_s: float
+    alpha: float
+    beta: float
+    a: float
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        return (
+            self.theta_r
+            + self.alpha * (self.theta_s - self.theta_r) / self.alpha
+            + npabs(h) ** self.beta
+        )
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is not None:
+            raise NotImplementedError(
+                "Can only calculate the hydraulic conductivity"
+                "using the pressure head, not the saturation"
+            )
+        return self.a / (self.a + npabs(h) ** self.beta)
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        raise NotImplementedError(
+            "Inverse function h(theta) is not implemented for Haverkamp model."
+        )
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
+@dataclass
 class Gardner:
     """Gardner Soil Model
 
