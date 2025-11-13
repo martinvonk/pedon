@@ -26,16 +26,20 @@ bibliography: paper.bib
 ---
 
 # Summary
-pedon is a Python package describing unsaturated soil properties would be most useful as a standardized, ready-to-use database and tools for groundwater, environmental, and agricultural modelling. The package can tie together pedotransfer functions, soil physics models, parameter estimation, visualization and allows for integration with groundwater models via Python.
+Pedon is a Python package designed to describe and analyse unsaturated soil properties. The package offers an object-oriented modelling framework, complemented by tools for parameter retrieval from soil databases, implementation of pedotransfer functions, and optimisation routines for parameter fitting.
 
 # Statement of need
-<!-- Easy handling of soil models, object oriented approach -->
+Researchers and engineers working with unsaturated soils often need estimations of their soil parameters for their groundwater models. Pedon solves this by providing a modern, Python-native toolkit that brings together commonly used soil models, parameter databases, pedotransfer functions, and fitting routines. This makes soil analysis faster, more reproducible, and easier to integrate into existing modelling pipelines.
 
 # Soil Models
-<!-- Figure with different soil water retention curves and their hydraulic conductivity functions -->
+Pedon can be installed via `pypi` using `pip install pedon` and imported using `import pedon as pe`. Different soil models are available in Pedon:
+- Mualem-van Genuchten: `Genuchten` [@genuchten_mualem_1980]
+- Brooks-Corey: `pe.Brooks` [@brooks_corey_1964]
+- Gardner: `pe.Gardner` []
+- Fredlund-Xing `pe.Fredlund` []
 
 ## Available datasets
-<!-- Small description of HYDRUS, Staring and VS2D datasets -->
+Small description of HYDRUS, Staring and VS2D datasets
 
 ## Estimation of these curves via pedotranfser functions
 <!-- List of pedotransfer functions and their effects on the estimation of the soil water retention curves -->
