@@ -166,9 +166,10 @@ class Haverkamp:
 
     def theta(self, h: FloatArray) -> FloatArray:
         return (
-            self.theta_r
-            + self.alpha * (self.theta_s - self.theta_r) / self.alpha
-            + npabs(h) ** self.beta
+            self.alpha
+            * (self.theta_s - self.theta_r)
+            / (self.alpha + npabs(h) ** self.beta)
+            + self.theta_r
         )
 
     def s(self, h: FloatArray) -> FloatArray:
@@ -176,19 +177,15 @@ class Haverkamp:
 
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is not None:
-            raise NotImplementedError(
-                "Can only calculate the hydraulic conductivity"
-                "using the pressure head, not the saturation"
-            )
+            return (self.a * s) / (self.a * s + self.alpha * (1.0 - s))
         return self.a / (self.a + npabs(h) ** self.beta)
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        raise NotImplementedError(
-            "Inverse function h(theta) is not implemented for Haverkamp model."
-        )
+        s = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        return (self.alpha * ((1.0 / s) - 1.0)) ** (1.0 / self.beta)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
