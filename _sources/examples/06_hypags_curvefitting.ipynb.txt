@@ -164,7 +164,7 @@
    "outputs": [],
    "source": [
     "pbounds = pe.get_params(\"Gardner\")\n",
-    "pbounds.loc[\"k_s\"] = [k_cmd, k_cmd-100.0, k_cmd+10.0]\n",
+    "pbounds.loc[\"k_s\"] = [k_cmd, k_cmd - 100.0, k_cmd + 10.0]\n",
     "pbounds.loc[\"theta_s\"] = [genuchten.theta_s, 0.2, 0.3]\n",
     "pbounds.loc[\"c\"] = [0.15, 0.0001, 0.5]\n",
     "pbounds.loc[\"m\"] = [0.3, 0.0001, 0.5]\n",
@@ -211,7 +211,7 @@
     "    pe.Gardner,\n",
     "    pbounds=pbounds,\n",
     "    # k_s=k_cmd,  # fix option to fix k_s and only fit k_r\n",
-    "    W1=0.1, # how to weight k vs theta data\n",
+    "    W1=0.1,  # how to weight k vs theta data\n",
     ")\n",
     "gardner"
    ]

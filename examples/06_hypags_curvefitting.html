@@ -166,7 +166,7 @@ Genuchten(k_s=100.0, theta_r=0.108, theta_s=np.float64(0.260064701261806), alpha
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pbounds</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">get_params</span><span class="p">(</span><span class="s2">&quot;Gardner&quot;</span><span class="p">)</span>
-<span class="n">pbounds</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;k_s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k_cmd</span><span class="p">,</span> <span class="n">k_cmd</span><span class="o">-</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">k_cmd</span><span class="o">+</span><span class="mf">10.0</span><span class="p">]</span>
+<span class="n">pbounds</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;k_s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">k_cmd</span><span class="p">,</span> <span class="n">k_cmd</span> <span class="o">-</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">k_cmd</span> <span class="o">+</span> <span class="mf">10.0</span><span class="p">]</span>
 <span class="n">pbounds</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;theta_s&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">genuchten</span><span class="o">.</span><span class="n">theta_s</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]</span>
 <span class="n">pbounds</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.0001</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
 <span class="n">pbounds</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;m&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.0001</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
@@ -280,7 +280,7 @@ WARNING:root:No default parameter bounds for SoilModel type Gardner
     <span class="n">pe</span><span class="o">.</span><span class="n">Gardner</span><span class="p">,</span>
     <span class="n">pbounds</span><span class="o">=</span><span class="n">pbounds</span><span class="p">,</span>
     <span class="c1"># k_s=k_cmd,  # fix option to fix k_s and only fit k_r</span>
-    <span class="n">W1</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="c1"># how to weight k vs theta data</span>
+    <span class="n">W1</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># how to weight k vs theta data</span>
 <span class="p">)</span>
 <span class="n">gardner</span>
 </pre></div>
@@ -292,7 +292,7 @@ WARNING:root:No default parameter bounds for SoilModel type Gardner
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Gardner(k_s=np.float64(1.714007081626811), theta_s=np.float64(0.22527115097890602), c=np.float64(0.30552460416223887), m=np.float64(0.025716662207413928))
+Gardner(k_s=np.float64(1.7140071722156542), theta_s=np.float64(0.22527115097043976), c=np.float64(0.30552460530699266), m=np.float64(0.02571666219679933))
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
