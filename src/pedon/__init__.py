@@ -5,6 +5,7 @@ from ._version import __version__ as __version__
 from .soil import Soil as Soil
 from .soil import SoilSample as SoilSample
 from .soilmodel import Brooks as Brooks
+from .soilmodel import Fredlund as Fredlund
 from .soilmodel import Gardner as Gardner
 from .soilmodel import Genuchten as Genuchten
 from .soilmodel import Haverkamp as Haverkamp

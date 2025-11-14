@@ -296,7 +296,7 @@ class Fredlund:
     def s(self, h: FloatArray) -> FloatArray:
         return self.theta(h) / self.theta_s
 
-    def k_r(self, h: FloatArray, s: FloatArray | None = None):
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is not None:
             raise NotImplementedError(
                 "Can only calculate the hydraulic conductivity"
