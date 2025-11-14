@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from numpy import abs as npabs
 from numpy import exp, full, linspace, log, log10, logspace
 
-from ._typing import FloatArray
+from ._typing import FloatArray, SoilModelNames
 
 
 @runtime_checkable
@@ -347,13 +347,16 @@ class Fredlund:
         return plot_swrc(self, ax=ax)
 
 
-def get_soilmodel(soilmodel_name: str) -> Type[SoilModel]:
+def get_soilmodel(
+    soilmodel_name: SoilModelNames,
+) -> Type[SoilModel]:
     sms = {
         "Genuchten": Genuchten,
         "Brooks": Brooks,
         "Gardner": Gardner,
         "Panday": Panday,
         "Fredlund": Fredlund,
+        "Haverkamp": Haverkamp,
     }
     return sms[soilmodel_name]
 
