@@ -2,6 +2,7 @@
 from . import _params, soil, soilmodel  # noqa: F401
 from ._params import get_params as get_params
 from ._version import __version__ as __version__
+from ._version import show_versions as show_versions
 from .soil import Soil as Soil
 from .soil import SoilSample as SoilSample
 from .soilmodel import Brooks as Brooks
