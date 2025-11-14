@@ -7,6 +7,7 @@ from .soil import SoilSample as SoilSample
 from .soilmodel import Brooks as Brooks
 from .soilmodel import Gardner as Gardner
 from .soilmodel import Genuchten as Genuchten
+from .soilmodel import Haverkamp as Haverkamp
 from .soilmodel import Panday as Panday
 from .soilmodel import plot_hcf as plot_hcf
 from .soilmodel import plot_swrc as plot_swrc

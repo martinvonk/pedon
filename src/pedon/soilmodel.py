@@ -150,6 +150,48 @@ class Brooks:
 
 
 @dataclass
+class Haverkamp:
+    """Haverkamp Soil Model
+
+    Haverkamp, R., Vauclin, M., Touma, J., Wierenga, P. J., & Vachaud, G. (1977).
+    A comparison of numerical simulation models for one-dimensional infiltration.
+    """
+
+    k_s: float
+    theta_r: float
+    theta_s: float
+    alpha: float
+    beta: float
+    a: float
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        return (
+            self.alpha
+            * (self.theta_s - self.theta_r)
+            / (self.alpha + npabs(h) ** self.beta)
+            + self.theta_r
+        )
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is not None:
+            return (self.a * s) / (self.a * s + self.alpha * (1.0 - s))
+        return self.a / (self.a + npabs(h) ** self.beta)
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        s = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        return (self.alpha * ((1.0 / s) - 1.0)) ** (1.0 / self.beta)
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
+@dataclass
 class Gardner:
     """Gardner Soil Model
 
