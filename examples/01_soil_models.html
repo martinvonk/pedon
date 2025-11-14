@@ -5,12 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Soil Models &#8212; pedon 0.0.9 documentation</title>
+    <title>Soil Models &#8212; pedon 0.0.10 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
-    <script src="../_static/documentation_options.js?v=f7cdbf68"></script>
+    <script src="../_static/documentation_options.js?v=a83ce22a"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -102,7 +102,8 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">alpha</span> <span class="o">=</span> <span class="mf">1.611e6</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># haverkamp</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="mf">1.611e6</span>
 <span class="n">beta</span> <span class="o">=</span> <span class="mf">3.96</span>
 <span class="n">a</span> <span class="o">=</span> <span class="mf">1.175e6</span>
 <span class="n">hav</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Haverkamp</span><span class="p">(</span>
@@ -116,14 +117,45 @@
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Gardner-Kozeny</span>
+<span class="n">c</span> <span class="o">=</span> <span class="mf">0.005</span>  <span class="c1"># shape parameter k curve</span>
+<span class="n">m</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c1"># shape parameter theta curve</span>
+<span class="n">gar</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Gardner</span><span class="p">(</span><span class="n">k_s</span><span class="o">=</span><span class="n">k_s</span><span class="p">,</span> <span class="n">theta_s</span><span class="o">=</span><span class="n">theta_s</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fredlund-Xing</span>
+<span class="n">a</span> <span class="o">=</span> <span class="mf">10.0</span>  <span class="c1"># shape parameter</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mf">5.0</span>  <span class="c1"># shape parameter</span>
+<span class="n">m</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># shape parameter</span>
+<span class="n">fre</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Fredlund</span><span class="p">(</span>
+    <span class="n">k_s</span><span class="o">=</span><span class="n">k_s</span><span class="p">,</span>
+    <span class="n">theta_s</span><span class="o">=</span><span class="n">theta_s</span><span class="p">,</span>
+    <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
+    <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
+    <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Quick plot method</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 <span class="n">bro</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">gar</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 <span class="n">hav</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">fre</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </pre></div>
@@ -133,44 +165,57 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_01_soil_models_7_0.png" src="../_images/examples_01_soil_models_7_0.png" />
+<img alt="../_images/examples_01_soil_models_9_0.png" src="../_images/examples_01_soil_models_9_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># More extensive plot method</span>
-<span class="n">f</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
 
 <span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">bro</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\N{GREEK SMALL LETTER PSI}</span><span class="s2"> [cm]&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">gar</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">hav</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">fre</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Soil Water Retention Curve&quot;</span><span class="p">)</span>
 <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\N{GREEK SMALL LETTER THETA}</span><span class="s2"> [-]&quot;</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
 
 <span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">bro</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\N{GREEK CAPITAL LETTER PSI}</span><span class="s2"> [cm]&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">gar</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">hav</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">fre</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Hydraulic Conductivity Function&quot;</span><span class="p">)</span>
 <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Ks [cm/d]&quot;</span><span class="p">)</span>
 <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
 <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">)</span>
 
-<span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;|</span><span class="se">\N{GREEK SMALL LETTER PSI}</span><span class="s2">| [cm]&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0, 0.5, &#39;|ψ| [cm]&#39;)
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_01_soil_models_8_0.png" src="../_images/examples_01_soil_models_8_0.png" />
+<img alt="../_images/examples_01_soil_models_10_1.png" src="../_images/examples_01_soil_models_10_1.png" />
 </div>
 </div>
-<p>Other soil models that are available are Panday (combination of Genuchten and Brooks-Corey), Fredlund and Gardner.</p>
+<p>Other soil models that are available are Panday (combination of Genuchten and Brooks-Corey).</p>
 </section>
 
 
@@ -207,6 +252,7 @@
 <li class="toctree-l2"><a class="reference internal" href="03_pedotransfer_functions.html">Pedotransfer Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="04_hypags.html">From k-value to van Genuchten via HYPAGS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="05_curve_fitting.html">Curve Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06_hypags_curvefitting.html">From k value to Gardner via HYPAGS</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../_api/modules.html">pedon</a></li>

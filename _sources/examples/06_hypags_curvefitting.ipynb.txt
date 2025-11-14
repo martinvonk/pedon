@@ -1,0 +1,257 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "92fe4842",
+   "metadata": {},
+   "source": [
+    "# From k value to Gardner via HYPAGS\n",
+    "\n",
+    "*Martin Vonk - 2025*"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9c52e27f",
+   "metadata": {},
+   "source": [
+    "## Setup"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e8c2b6e8",
+   "metadata": {},
+   "source": [
+    "### Imports"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6c5e347e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "import numpy as np\n",
+    "\n",
+    "import pedon as pe\n",
+    "\n",
+    "pe.show_versions()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cff77c90",
+   "metadata": {},
+   "source": [
+    "### Helper plot"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "14ca8132",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def plot_compare(\n",
+    "    soilsample: pe.SoilSample, soilmodel: pe.soilmodel.SoilModel\n",
+    ") -> np.typing.NDArray[plt.Axes]:\n",
+    "    f, ax = plt.subplots(1, 2, sharey=True, figsize=(7.0, 6.0))\n",
+    "    ax[0].scatter(soilsample.theta, soilsample.h, c=\"k\", s=10, label=\"Soil Sample\")\n",
+    "    _ = pe.soilmodel.plot_swrc(\n",
+    "        soilmodel, ax=ax[0], label=f\"Soil Model {soilmodel.__class__.__name__}\"\n",
+    "    )\n",
+    "    ax[0].set_yscale(\"log\")\n",
+    "    ax[0].set_xlim(0, 0.5)\n",
+    "    ax[0].set_yticks(soilsample.h)\n",
+    "    ax[0].set_xticks(np.linspace(0, 0.5, 6))\n",
+    "    ax[0].set_ylim(min(soilsample.h), max(soilsample.h))\n",
+    "    ax[1].scatter(soilsample.k, soilsample.h, c=\"k\", s=10)\n",
+    "    _ = pe.soilmodel.plot_hcf(soilmodel, ax=ax[1])\n",
+    "\n",
+    "    ax[1].set_yscale(\"log\")\n",
+    "    ax[1].set_xscale(\"log\")\n",
+    "\n",
+    "    k_left = 10 ** (np.floor(np.log10(min(soilsample.k))) - 1)\n",
+    "    k_right = 10 ** (np.ceil(np.log10(max(soilsample.k))) + 1)\n",
+    "    ax[1].set_xlim(k_left, k_right)\n",
+    "    ax[0].set_ylabel(r\"|$\\psi$| [cm]\")\n",
+    "    ax[0].set_xlabel(r\"$\\theta$ [-]\")\n",
+    "    ax[1].set_xlabel(r\"$K_s$ [cm/d]\")\n",
+    "    ncol = 3\n",
+    "    ax[0].legend(\n",
+    "        loc=(-0.02, 1),\n",
+    "        fontsize=6,\n",
+    "        frameon=False,\n",
+    "        ncol=ncol,\n",
+    "        columnspacing=0.8,\n",
+    "        handlelength=2.5,\n",
+    "    )\n",
+    "\n",
+    "    f.align_xlabels()\n",
+    "    return ax"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "364af67c",
+   "metadata": {},
+   "source": [
+    "## Estimate Genuchten parameters via HYPAGS"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "24f8d4a4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "k_cmd = 100.0  # cm/d\n",
+    "k_ms = k_cmd / 86400 / 100  # m/s since HYPAGS expects that\n",
+    "genuchten = pe.SoilSample(k=np.array([k_ms])).hypags()\n",
+    "genuchten.k_s = k_cmd  # convert back to cm/d\n",
+    "genuchten"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f8d6a59a",
+   "metadata": {},
+   "source": [
+    "## Estimate Gardner model from Genuchten curve"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a794e0c7",
+   "metadata": {},
+   "source": [
+    "### Sample Genchten curve for data points"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "79faf394",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "h = np.logspace(\n",
+    "    -4, 4, 9\n",
+    ")  # carefull with sampling h since k goes to zero very fast for large h which gives trouble with logs\n",
+    "k = genuchten.k(h)\n",
+    "theta = genuchten.theta(h)\n",
+    "soilsample = pe.SoilSample(h=h, k=k, theta=theta)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e4ebeda5",
+   "metadata": {},
+   "source": [
+    "### Set initial parameters and bounds"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7006da85",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pbounds = pe.get_params(\"Gardner\")\n",
+    "pbounds.loc[\"k_s\", \"p_ini\"] = k_cmd\n",
+    "pbounds.loc[\"theta_s\"] = [genuchten.theta_s, 0.2, 0.3]\n",
+    "pbounds.loc[\"c\"] = [0.02, 0.0001, 0.5]\n",
+    "pbounds.loc[\"m\"] = [0.02, 0.0001, 0.5]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d7985f8d",
+   "metadata": {},
+   "source": [
+    "#### Show fit for initial bounds"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a2b63118",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# compare initial guesses with genuchten\n",
+    "gardner_ini = pe.Gardner(**pbounds[\"p_ini\"].to_dict())\n",
+    "axes = plot_compare(soilsample, gardner_ini)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d08db099",
+   "metadata": {},
+   "source": [
+    "### Fit"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7bbd1087",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "gardner = soilsample.fit(\n",
+    "    pe.Gardner,\n",
+    "    pbounds=pbounds.drop(\"k_s\"),\n",
+    "    k_s=k_cmd,  # fix k_s since we know it\n",
+    ")\n",
+    "gardner"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bf957645",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# compare initial guesses with genuchten\n",
+    "plot_compare(soilsample, gardner)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "748a28a3",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "pedon (3.13.5)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.13.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

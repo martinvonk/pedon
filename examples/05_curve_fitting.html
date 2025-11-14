@@ -5,12 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Curve Fitting &#8212; pedon 0.0.9 documentation</title>
+    <title>Curve Fitting &#8212; pedon 0.0.10 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
-    <script src="../_static/documentation_options.js?v=f7cdbf68"></script>
+    <script src="../_static/documentation_options.js?v=a83ce22a"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -18,7 +18,7 @@
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pedon" href="../_api/modules.html" />
+    <link rel="next" title="From k value to Gardner via HYPAGS" href="06_hypags_curvefitting.html" />
     <link rel="prev" title="From k-value to van Genuchten via HYPAGS" href="04_hypags.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -159,7 +159,7 @@ SoilSample(sand_p=None, silt_p=None, clay_p=None, rho=None, th33=None, th1500=No
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Panday(k_s=np.float64(571.7078156187506), alpha=np.float64(0.1461801663438697), beta=np.float64(2.652658738002386), brook=np.float64(3.797936684894613), sr=np.float64(0.10452835568601604))
+Panday(k_s=np.float64(571.7082734658234), alpha=np.float64(0.1461801619285099), beta=np.float64(2.6526588374857303), brook=np.float64(3.797937441596011), sr=np.float64(0.10452835613889336))
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -203,7 +203,7 @@ Panday(k_s=np.float64(571.7078156187506), alpha=np.float64(0.1461801663438697), 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Panday(k_s=np.float64(712.7999894094452), alpha=np.float64(0.146576240032721), beta=np.float64(2.6437586663356663), brook=np.float64(3.8328530393163147), sr=np.float64(0.1044868309190726))
+Panday(k_s=np.float64(712.7999894094452), alpha=np.float64(0.14657623411049972), beta=np.float64(2.6437587979256927), brook=np.float64(3.8328536708431717), sr=np.float64(0.10448683153152591))
 </pre></div></div>
 </div>
 <p>It is also possible to provide bounds for the parameter space. By default, the bounds argument is <code class="docutils literal notranslate"><span class="pre">None</span></code> which takes the stored parameter bounds per soil model:</p>
@@ -302,7 +302,7 @@ Panday(k_s=np.float64(712.7999894094452), alpha=np.float64(0.146576240032721), b
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Panday(k_s=np.float64(650.0024880543596), alpha=np.float64(0.1464113679720208), beta=np.float64(2.6474466153495744), brook=np.float64(3.8182833616159635), sr=np.float64(0.10450412459737611))
+Panday(k_s=np.float64(650.0024881306313), alpha=np.float64(0.14641136203923166), beta=np.float64(2.64744674802969), brook=np.float64(3.8182839905828785), sr=np.float64(0.10450412521086855))
 </pre></div></div>
 </div>
 <p>Other available option are to print the optimization result.</p>
@@ -323,18 +323,18 @@ SciPy Optimization Result
       message: `gtol` termination condition is satisfied.
      success: True
       status: 1
-         fun: [ 2.220e-05  2.220e-05 ... -8.046e-05 -2.758e-04]
+         fun: [ 2.220e-05  2.220e-05 ... -8.042e-05 -2.758e-04]
            x: [ 5.717e+02  4.495e-02  4.300e-01  1.462e-01  2.653e+00
                 3.798e+00]
-        cost: 5.557020028701556e-07
+        cost: 5.556972728926372e-07
          jac: [[ 0.000e+00  0.000e+00 ...  0.000e+00  0.000e+00]
                [ 0.000e+00  0.000e+00 ...  0.000e+00  0.000e+00]
                ...
                [ 1.946e-06  0.000e+00 ... -4.053e-02 -1.764e-02]
                [ 1.946e-06  0.000e+00 ... -5.026e-02 -2.187e-02]]
-        grad: [ 1.603e-14  3.304e-09 -3.686e-10  5.777e-09  1.076e-09
-                5.670e-11]
-  optimality: 1.777937219387221e-09
+        grad: [ 1.630e-14  3.304e-09 -3.688e-10  5.776e-09  1.076e-09
+                5.679e-11]
+  optimality: 1.777636707528239e-09
  active_mask: [0 0 0 0 0 0]
         nfev: 10
         njev: 10
@@ -377,6 +377,7 @@ SciPy Optimization Result
 <li class="toctree-l2"><a class="reference internal" href="03_pedotransfer_functions.html">Pedotransfer Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="04_hypags.html">From k-value to van Genuchten via HYPAGS</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Curve Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06_hypags_curvefitting.html">From k value to Gardner via HYPAGS</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../_api/modules.html">pedon</a></li>
@@ -388,7 +389,7 @@ SciPy Optimization Result
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="index.html">Examples</a><ul>
       <li>Previous: <a href="04_hypags.html" title="previous chapter">From k-value to van Genuchten via HYPAGS</a></li>
-      <li>Next: <a href="../_api/modules.html" title="next chapter">pedon</a></li>
+      <li>Next: <a href="06_hypags_curvefitting.html" title="next chapter">From k value to Gardner via HYPAGS</a></li>
   </ul></li>
   </ul></li>
 </ul>
