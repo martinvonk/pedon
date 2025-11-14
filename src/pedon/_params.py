@@ -1,5 +1,5 @@
 import logging
-from dataclasses import fields
+from dataclasses import MISSING, fields
 from typing import Type
 
 from numpy import inf, nan
@@ -12,7 +12,9 @@ from pedon.soilmodel import SoilModel, get_soilmodel
 def _get_default_params(sm: Type[SoilModel]) -> DataFrame:
     """Return an empty DataFrame with the same structure as parameter DataFrames."""
     index = [
-        f.name for f in fields(sm) if f.init and f.default is f.default_factory is None
+        f.name
+        for f in fields(sm)
+        if f.init and f.default is MISSING and f.default_factory is MISSING
     ]
     df = DataFrame(
         data={"p_ini": nan, "p_min": -inf, "p_max": inf},
@@ -35,7 +37,7 @@ def get_params(
         sm = get_soilmodel(smn)
     else:
         raise ValueError(
-            f"Argument must either be Type[SoilModel] | SoilModel | str,not {type(sm)}"
+            f"Argument must either be Type[SoilModel] | SoilModel | str, not {type(sm)}"
         )
 
     params = _get_default_params(sm)
