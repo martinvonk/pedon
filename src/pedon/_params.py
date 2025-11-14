@@ -1,89 +1,44 @@
 from typing import Literal
-
+from numpy import nan, inf
 from pandas import DataFrame
+from dataclasses import fields
+from pedon.soilmodel import Genuchten, Brooks, Panday
+import logging
 
-pGenuchten = DataFrame(
-    data={
-        "p_ini": {
-            "k_s": 10.0,
-            "theta_r": 0.01,
-            "theta_s": 0.40,
-            "alpha": 0.02,
-            "n": 2.0,
-            "l": 0.5,
-        },
-        "p_min": {
-            "k_s": 0.001,
-            "theta_r": 0.0,
-            "theta_s": 0.2,
-            "alpha": 0.001,
-            "n": 1.000001,
-            "l": -7.0,
-        },
-        "p_max": {
-            "k_s": 100000.0,
-            "theta_r": 0.2,
-            "theta_s": 0.9,
-            "alpha": 0.20,
-            "n": 12.0,
-            "l": 8.0,
-        },
-    },
-    dtype=float,
-)
+def get_default_params(model: pe.soilmodel.SoilModel) -> DataFrame:
+    """Return an empty DataFrame with the same structure as parameter DataFrames."""
+    index = [f.name for f in fields(model) if f.init]
+    df = DataFrame(
+        data={"p_ini": nan, "p_min": -inf, "p_max": inf},
+        index=index,
+        columns=["p_ini", "p_min", "p_max"],
+        dtype=float,
+    )
+    return df
 
-pBrooks = DataFrame(
-    data={
-        "p_ini": {"k_s": 50.0, "theta_r": 0.02, "theta_s": 0.4, "h_b": 0.003, "l": 1.5},
-        "p_min": {
-            "k_s": 0.001,
-            "theta_r": 0.0,
-            "theta_s": 0.2,
-            "h_b": 0.0001,
-            "l": 0.1,
-        },
-        "p_max": {
-            "k_s": 100000.0,
-            "theta_r": 0.2,
-            "theta_s": 0.5,
-            "h_b": 100.0,
-            "l": 5.0,
-        },
-    },
-    dtype=float,
-)
-pPanday = DataFrame(
-    data={
-        "p_ini": {
-            "k_s": 50.0,
-            "theta_r": 0.02,
-            "theta_s": 0.4,
-            "alpha": 0.02,
-            "beta": 2.3,
-            "brook": 10.0,
-        },
-        "p_min": {
-            "k_s": 0.001,
-            "theta_r": 1e-5,
-            "theta_s": 0.2,
-            "alpha": 0.001,
-            "beta": 1.0,
-            "brook": 1.0,
-        },
-        "p_max": {
-            "k_s": 100000.0,
-            "theta_r": 0.2,
-            "theta_s": 0.5,
-            "alpha": 0.30,
-            "beta": 12.0,
-            "brook": 50.0,
-        },
-    },
-    dtype=float,
-)
-
-
-def get_params(sm_name: Literal["Genuchten", "Brooks", "Panday"]) -> DataFrame:
+def get_default_bounds(model: pe.soilmodel.SoilModel) -> DataFrame:
     """Get the parameter bounds for a specific soil model."""
-    params = {"Genuchten": pGenuchten, "Brooks": pBrooks, "Panday": pPanday}
-    return params[sm_name].copy()
+    params = get_default_params(type(model))
+    if isinstance(model, Genuchten):
+        params.loc["k_s"] = [10.0, 0.001, 100000.0]
+        params.loc["theta_r"] = [0.01, 0.0, 0.2]
+        params.loc["theta_s"] = [0.40, 0.2, 0.9]
+        params.loc["alpha"] = [0.02, 0.001, 0.20]
+        params.loc["n"] = [2.0, 1.000001, 12.0]
+        params.loc["l"] = [0.5, -7.0, 8.0]
+    elif isinstance(model, Brooks):
+        params.loc["k_s"] = [50.0, 0.001, 100000.0]
+        params.loc["theta_r"] = [0.02, 0.0, 0.2]
+        params.loc["theta_s"] = [0.4, 0.2, 0.5]
+        params.loc["h_b"] = [0.003, 0.0001, 100.0]
+        params.loc["l"] = [1.5, 0.1, 5.0]
+    elif isinstance(model, Panday):
+        params.loc["k_s"] = [50.0, 0.001, 100000.0]
+        params.loc["theta_r"] = [0.02, 1e-5, 0.2]
+        params.loc["theta_s"] = [0.4, 0.2, 0.5]
+        params.loc["alpha"] = [0.02, 0.001, 0.30]
+        params.loc["beta"] = [2.3, 1.0, 12.0]
+        params.loc["brook"] = [10.0, 1.0, 50.0]
+    else:
+        logging.warning(f"No default parameter bounds for model type {type(model)}")
+    return params
