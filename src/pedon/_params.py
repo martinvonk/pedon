@@ -29,7 +29,9 @@ def get_params(
     sm: Type[SoilModel] | SoilModel | SoilModelNames,
 ) -> DataFrame:
     """Get the parameter bounds for a specific soil model."""
-    if isinstance(sm, SoilModel):
+    if isinstance(sm, type) and issubclass(sm, SoilModel):
+        smn = sm.__name__
+    elif isinstance(sm, SoilModel):
         smn = getattr(sm, "__name__", sm.__class__.__name__)
         sm = type(sm)
     elif isinstance(sm, str):

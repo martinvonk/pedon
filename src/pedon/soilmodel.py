@@ -219,7 +219,7 @@ class Gardner:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        return (1.0 / self.m) * log(theta / self.theta_s)
+        return -(1.0 / self.m) * log(theta / self.theta_s)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
