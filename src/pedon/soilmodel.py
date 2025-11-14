@@ -151,35 +151,33 @@ class Brooks:
 
 @dataclass
 class Gardner:
-    """Gardner Soil Model
+    """Gardner(-Kozeny) Soil Model
 
-    Gardner et al (1970) - Post-irrigation movement of soil water
+    Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
+    moisture flow equation with application to evaporation from soils
+    Bakker and Nieber (2009) - Damping of Sinusoidal Surface Flux Fluctuations
+    with Soil Depth
     """
 
     k_s: float
-    theta_r: float
     theta_s: float
-    a: float
-    b: float
+    c: float
     m: float
 
     def theta(self, h: FloatArray) -> FloatArray:
-        return self.a * npabs(h) ** -self.b
+        return self.theta_s * exp(-self.m * npabs(h))
 
     def s(self, h: FloatArray) -> FloatArray:
-        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+        return self.theta(h) / self.theta_s
 
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
-        if s is not None:
-            theta = s * (self.theta_s - self.theta_r) + self.theta_r
-            return self.a * theta**self.m
-        return self.a / (self.b + npabs(h) ** self.m)
+        return exp(-self.c * npabs(h))
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        return (npabs(theta) / self.a) ** (-1 / self.b)
+        return (1.0 / self.m) * log(theta / self.theta_s)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)

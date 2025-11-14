@@ -26,7 +26,7 @@ def sor() -> pe.soilmodel.SoilModel:
 
 @pytest.fixture
 def gar() -> pe.soilmodel.SoilModel:
-    return pe.Gardner(k_s=10, theta_r=0.01, theta_s=0.43, a=0.02, b=1.0, m=1.1)
+    return pe.Gardner(k_s=10, theta_s=0.43, c=0.02, m=1.1)
 
 
 def test_theta_genuchten(gen: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
