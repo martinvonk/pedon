@@ -7,6 +7,7 @@ Python package for (unsaturated) soil properties including pedotransfer function
 - Fredlund & Xing
 - Gardner
 - Panday (Modflow-USG)
+- Haverkamp
 
 This package can fit soil water retention curves and using least squares (same as RETC) to measurements. Measurements for different soil properties and parameters are available from these datasets:
 
