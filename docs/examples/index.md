@@ -11,4 +11,5 @@ Below you can find examples of how pedon can be used. These Jupyter Notbooks can
 03_pedotransfer_functions
 04_hypags
 05_curve_fitting
+06_hypags_curvefitting
 ```
