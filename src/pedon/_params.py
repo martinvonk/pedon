@@ -11,7 +11,9 @@ from pedon.soilmodel import SoilModel, get_soilmodel
 
 def _get_default_params(sm: Type[SoilModel]) -> DataFrame:
     """Return an empty DataFrame with the same structure as parameter DataFrames."""
-    index = [f.name for f in fields(sm) if f.init]
+    index = [
+        f.name for f in fields(sm) if f.init and f.default is f.default_factory is None
+    ]
     df = DataFrame(
         data={"p_ini": nan, "p_min": -inf, "p_max": inf},
         index=index,
