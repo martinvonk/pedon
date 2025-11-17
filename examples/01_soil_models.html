@@ -117,7 +117,7 @@
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
@@ -127,6 +127,21 @@
 <span class="n">gar</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Gardner</span><span class="p">(</span><span class="n">k_s</span><span class="o">=</span><span class="n">k_s</span><span class="p">,</span> <span class="n">theta_s</span><span class="o">=</span><span class="n">theta_s</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">TypeError</span>                                 Traceback (most recent call last)
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[6]</span><span class="ansi-green-fg">, line 4</span>
+<span class="ansi-green-fg">      2</span> c = <span class="ansi-green-fg">0.005</span>  <span style="color: rgb(95,135,135)"># shape parameter k curve</span>
+<span class="ansi-green-fg">      3</span> m = <span class="ansi-green-fg">0.01</span>  <span style="color: rgb(95,135,135)"># shape parameter theta curve</span>
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">4</span> gar = <span class="ansi-yellow-bg">pe</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">Gardner</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">k_s</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">k_s</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">theta_s</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">theta_s</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">c</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">c</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">m</span><span class="ansi-yellow-bg">=</span><span class="ansi-yellow-bg">m</span><span class="ansi-yellow-bg">)</span>
+
+<span class="ansi-red-fg">TypeError</span>: Gardner.__init__() missing 1 required positional argument: &#39;theta_r&#39;
+</pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -161,11 +176,28 @@
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[8]</span><span class="ansi-green-fg">, line 4</span>
+<span class="ansi-green-fg">      2</span> ax = gen.plot()
+<span class="ansi-green-fg">      3</span> bro.plot(ax=ax)
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">4</span> <span class="ansi-yellow-bg">gar</span>.plot(ax=ax)
+<span class="ansi-green-fg">      5</span> hav.plot(ax=ax)
+<span class="ansi-green-fg">      6</span> fre.plot(ax=ax)
+
+<span class="ansi-red-fg">NameError</span>: name &#39;gar&#39; is not defined
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_01_soil_models_9_0.png" src="../_images/examples_01_soil_models_9_0.png" />
+<img alt="../_images/examples_01_soil_models_9_1.png" src="../_images/examples_01_soil_models_9_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -200,12 +232,20 @@
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Text(0, 0.5, &#39;|ψ| [cm]&#39;)
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[9]</span><span class="ansi-green-fg">, line 6</span>
+<span class="ansi-green-fg">      4</span> pe.plot_swrc(gen, ax=axs[<span class="ansi-green-fg">0</span>])
+<span class="ansi-green-fg">      5</span> pe.plot_swrc(bro, ax=axs[<span class="ansi-green-fg">0</span>])
+<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">6</span> pe.plot_swrc(<span class="ansi-yellow-bg">gar</span>, ax=axs[<span class="ansi-green-fg">0</span>])
+<span class="ansi-green-fg">      7</span> pe.plot_swrc(hav, ax=axs[<span class="ansi-green-fg">0</span>])
+<span class="ansi-green-fg">      8</span> pe.plot_swrc(fre, ax=axs[<span class="ansi-green-fg">0</span>])
+
+<span class="ansi-red-fg">NameError</span>: name &#39;gar&#39; is not defined
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
