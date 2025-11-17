@@ -203,11 +203,12 @@ class Gardner:
 
     k_s: float
     theta_s: float
+    theta_r: float
     c: float
     m: float
 
     def theta(self, h: FloatArray) -> FloatArray:
-        return self.theta_s * exp(-self.m * npabs(h))
+        return self.theta_r + (self.theta_s - self.theta_r) * exp(-self.m * npabs(h))
 
     def s(self, h: FloatArray) -> FloatArray:
         return self.theta(h) / self.theta_s
