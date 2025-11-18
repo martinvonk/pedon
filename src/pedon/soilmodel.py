@@ -209,10 +209,10 @@ class Gardner:
 
     def theta(self, h: FloatArray) -> FloatArray:
         # mathematical formulation from Hwang & Powers (2003) https://doi.org/10.1016/S0309-1708(02)00107-0
-        return self.theta_r  +  (self.theta_s - self.theta_r) * ( (1 + .5 * self.c * npabs(h)) * exp(-.5 * self.c * npabs(h)) )
+        return self.theta_r  +  (self.theta_s - self.theta_r) * ( ( (1 + .5 * self.c * npabs(h)) * exp(-.5 * self.c * npabs(h)) )**( 2/(self.m + 2) ) )
 
     def s(self, h: FloatArray) -> FloatArray:
-        return self.theta(h) / self.theta_s
+        return (self.theta(h) -  self.theta_r) / (self.theta_s - self.theta_r)
 
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return exp(-self.c * npabs(h))
