@@ -224,6 +224,43 @@ class Gardner:
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
+class Mod_Gardner:
+    """Gardner(-Kozeny) Soil Model - mathematical formulation as described in Rucker et al. (2005)
+
+    Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
+    moisture flow equation with application to evaporation from soils
+    Bakker and Nieber (2009) - Damping of Sinusoidal Surface Flux Fluctuations
+    with Soil Depth
+    Rucker, D. F., Warrick, A. W., & Ferré, T. P. (2005). Parameter equivalence for the Gardner
+    and van Genuchten soil hydraulic conductivity functions for steady vertical flow with inclusions. 
+    Advances in Water Resources, 28(7), 689-699.
+    
+    """
+
+    k_s: float
+    theta_s: float
+    theta_r: float
+    c: float
+    m: float
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        # mathematical formulation from Rucker et al. (2005) https://doi.org/10.1016/j.advwatres.2005.01.004
+        return self.theta_r  +  (self.theta_s - self.theta_r) * ( ( (1 + .5 * self.c * npabs(h)) * exp(-.5 * self.c * npabs(h)) )**( 2/(self.m + 2) ) )
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return (self.theta(h) -  self.theta_r) / (self.theta_s - self.theta_r)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return exp(-self.c * npabs(h))
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        return -(1.0 / self.m) * log(theta / self.theta_s)
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
 
 @dataclass
 class Panday:
