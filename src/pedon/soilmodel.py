@@ -246,10 +246,10 @@ class Mod_Gardner:
 
     def theta(self, h: FloatArray) -> FloatArray:
         # mathematical formulation from Rucker et al. (2005) https://doi.org/10.1016/j.advwatres.2005.01.004
-        return self.theta_r  +  (self.theta_s - self.theta_r) * ( ( (1 + .5 * self.c * npabs(h)) * exp(-.5 * self.c * npabs(h)) )**( 2/(self.m + 2) ) )
+        return self.theta_r + (self.theta_s - self.theta_r) * (((1 + .5 * self.c * npabs(h)) * exp(-.5 * self.c * npabs(h)))**(2/(self.m + 2)))
 
     def s(self, h: FloatArray) -> FloatArray:
-        return (self.theta(h) -  self.theta_r) / (self.theta_s - self.theta_r)
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
 
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return exp(-self.c * npabs(h))
