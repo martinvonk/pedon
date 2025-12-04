@@ -98,10 +98,10 @@
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">ModuleNotFoundError</span>                       Traceback (most recent call last)
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/pedon/pedon/.tox/docu/lib/python3.11/site-packages/pedon/soil.py:434</span>, in <span class="ansi-cyan-fg">SoilSample.rosetta</span><span class="ansi-blue-fg">(self, version)</span>
-<span class="ansi-green-fg">    433</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
-<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">434</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">httpx</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,135,0)">import</span> post <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> httpx_post
-<span class="ansi-green-fg">    435</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>:
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/pedon/pedon/.tox/docu/lib/python3.11/site-packages/pedon/soil.py:435</span>, in <span class="ansi-cyan-fg">SoilSample.rosetta</span><span class="ansi-blue-fg">(self, version)</span>
+<span class="ansi-green-fg">    434</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">435</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">httpx</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,135,0)">import</span> post <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> httpx_post
+<span class="ansi-green-fg">    436</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>:
 
 <span class="ansi-red-fg">ModuleNotFoundError</span>: No module named &#39;httpx&#39;
 
@@ -113,19 +113,19 @@ During handling of the above exception, another exception occurred:
 <span class="ansi-green-fg">     13</span> <span style="color: rgb(95,135,135)"># rosetta database (options between version 1, 2 and 3)</span>
 <span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">14</span> ros = <span class="ansi-yellow-bg">ss</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">rosetta</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">version</span><span class="ansi-yellow-bg">=</span><span class="ansi-green-fg ansi-yellow-bg">3</span><span class="ansi-yellow-bg">)</span>
 
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/pedon/pedon/.tox/docu/lib/python3.11/site-packages/pedon/soil.py:436</span>, in <span class="ansi-cyan-fg">SoilSample.rosetta</span><span class="ansi-blue-fg">(self, version)</span>
-<span class="ansi-green-fg">    434</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">httpx</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,135,0)">import</span> post <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> httpx_post
-<span class="ansi-green-fg">    435</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>:
-<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">436</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>(
-<span class="ansi-green-fg">    437</span>         <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">httpx is required for the rosetta method to make api calls. </span><span class="ansi-yellow-fg">&#34;</span>
-<span class="ansi-green-fg">    438</span>         <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">Please install it with </span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">pip install httpx</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">.</span><span class="ansi-yellow-fg">&#34;</span>
-<span class="ansi-green-fg">    439</span>     )
-<span class="ansi-green-fg">    441</span> soildata = [
-<span class="ansi-green-fg">    442</span>     <span style="color: rgb(0,135,0)">self</span>.sand_p,  <span style="color: rgb(95,135,135)"># %</span>
-<span class="ansi-green-fg">    443</span>     <span style="color: rgb(0,135,0)">self</span>.silt_p,  <span style="color: rgb(95,135,135)"># %</span>
-<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    447</span>     -<span class="ansi-green-fg">9.9</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span>.th1500 <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> <span style="color: rgb(0,135,0)">self</span>.th1500,  <span style="color: rgb(95,135,135)"># [-]</span>
-<span class="ansi-green-fg">    448</span> ]
-<span class="ansi-green-fg">    450</span> data = {<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">soildata</span><span class="ansi-yellow-fg">&#34;</span>: [soildata]}
+<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/pedon/pedon/.tox/docu/lib/python3.11/site-packages/pedon/soil.py:437</span>, in <span class="ansi-cyan-fg">SoilSample.rosetta</span><span class="ansi-blue-fg">(self, version)</span>
+<span class="ansi-green-fg">    435</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">httpx</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,135,0)">import</span> post <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> httpx_post
+<span class="ansi-green-fg">    436</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>:
+<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">437</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>(
+<span class="ansi-green-fg">    438</span>         <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">httpx is required for the rosetta method to make api calls. </span><span class="ansi-yellow-fg">&#34;</span>
+<span class="ansi-green-fg">    439</span>         <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">Please install it with </span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">pip install httpx</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">.</span><span class="ansi-yellow-fg">&#34;</span>
+<span class="ansi-green-fg">    440</span>     )
+<span class="ansi-green-fg">    442</span> soildata = [
+<span class="ansi-green-fg">    443</span>     <span style="color: rgb(0,135,0)">self</span>.sand_p,  <span style="color: rgb(95,135,135)"># %</span>
+<span class="ansi-green-fg">    444</span>     <span style="color: rgb(0,135,0)">self</span>.silt_p,  <span style="color: rgb(95,135,135)"># %</span>
+<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    448</span>     -<span class="ansi-green-fg">9.9</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span>.th1500 <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> <span style="color: rgb(0,135,0)">self</span>.th1500,  <span style="color: rgb(95,135,135)"># [-]</span>
+<span class="ansi-green-fg">    449</span> ]
+<span class="ansi-green-fg">    451</span> data = {<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">soildata</span><span class="ansi-yellow-fg">&#34;</span>: [soildata]}
 
 <span class="ansi-red-fg">ImportError</span>: httpx is required for the rosetta method to make api calls. Please install it with &#39;pip install httpx&#39;.
 </pre></div></div>
