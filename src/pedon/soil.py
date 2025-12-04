@@ -3,7 +3,8 @@ import logging
 from bisect import bisect_right
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Self, Type
+from typing import Literal, Type
+from typing_extensions import Self
 
 from numpy import abs as npabs
 from numpy import (

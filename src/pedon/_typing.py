@@ -9,6 +9,7 @@ SoilModelNames = Literal[
     "Brooks",
     "Panday",
     "Gardner",
+    "Mod_Gardner",
     "Haverkamp",
     "Fredlund",
 ]

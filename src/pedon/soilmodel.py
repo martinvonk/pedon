@@ -224,6 +224,7 @@ class Gardner:
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
 
+@dataclass
 class Mod_Gardner:
     """Gardner(-Kozeny) Soil Model - mathematical formulation as described in Rucker et al. (2005)
 
@@ -391,6 +392,7 @@ def get_soilmodel(
         "Genuchten": Genuchten,
         "Brooks": Brooks,
         "Gardner": Gardner,
+        "Mod_Gardner": Mod_Gardner,
         "Panday": Panday,
         "Fredlund": Fredlund,
         "Haverkamp": Haverkamp,
