@@ -106,6 +106,24 @@ def test_h_gardner(gar: pe.soilmodel.SoilModel, theta: FloatArray = theta) -> No
     gar.h(theta=theta)
 
 
+def test_theta_gardner_rucker(gr: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    gr.theta(h=h)
+
+
+def test_s_gardner_rucker(gr: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    gr.s(h=h)
+
+
+def test_k_gardner_rucker(gr: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    gr.k(h=h)
+
+
+def test_h_gardner_rucker(
+    gr: pe.soilmodel.SoilModel, theta: FloatArray = theta
+) -> None:
+    gr.h(theta=theta)
+
+
 def test_theta_haverkamp(hav: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
     hav.theta(h=h)
 
