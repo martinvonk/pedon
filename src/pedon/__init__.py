@@ -8,6 +8,7 @@ from .soil import SoilSample as SoilSample
 from .soilmodel import Brooks as Brooks
 from .soilmodel import Fredlund as Fredlund
 from .soilmodel import Gardner as Gardner
+from .soilmodel import GardnerRucker as GardnerRucker
 from .soilmodel import Genuchten as Genuchten
 from .soilmodel import GenuchtenGardner as GenuchtenGardner
 from .soilmodel import Haverkamp as Haverkamp

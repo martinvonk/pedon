@@ -229,6 +229,50 @@ class Gardner:
 
 
 @dataclass
+class GardnerRucker:
+    """Gardner(-Rucker) Soil Model
+
+    Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
+    moisture flow equation with application to evaporation from soils
+    Rucker, D. F., Warrick, A. W., & Ferré, T. P. (2005). Parameter equivalence
+    for the Gardner and van Genuchten soil hydraulic conductivity functions
+    for steady vertical flow with inclusions.
+    """
+
+    k_s: float
+    theta_r: float
+    theta_s: float
+    m: float
+    c: float
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        return self.theta_r + (self.theta_s - self.theta_r) * (
+            ((1 + 0.5 * self.c * npabs(h)) * exp(-0.5 * self.c * npabs(h)))
+            ** (2 / (self.m + 2))
+        )
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is not None:
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            h = self.h(theta)
+        return exp(-self.c * npabs(h))
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        return -(1.0 / self.m) * log(
+            (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        )
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
+@dataclass
 class Panday:
     """Panday Soil Model (MODFLOW-USG)
 
@@ -409,6 +453,7 @@ def get_soilmodel(
         "Brooks": Brooks,
         "Haverkamp": Haverkamp,
         "Gardner": Gardner,
+        "GardnerRucker": GardnerRucker,
         "Panday": Panday,
         "Fredlund": Fredlund,
         "GenuchtenGardner": GenuchtenGardner,
