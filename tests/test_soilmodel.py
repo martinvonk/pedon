@@ -104,7 +104,8 @@ def test_k_gardner(gar: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
 
 def test_h_gardner(gar: pe.soilmodel.SoilModel, theta: FloatArray = theta) -> None:
     gar.h(theta=theta)
-    
+
+
 def test_theta_genuchten_gardner(gg: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
     gg.theta(h=h)
 
@@ -121,9 +122,6 @@ def test_h_genuchten_gardner(
     gg: pe.soilmodel.SoilModel, theta: FloatArray = theta
 ) -> None:
     gg.h(theta=theta)
-
-
-
 
 
 def test_theta_haverkamp(hav: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:

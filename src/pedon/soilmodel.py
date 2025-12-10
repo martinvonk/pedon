@@ -345,7 +345,8 @@ class Fredlund:
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
-        
+
+
 @dataclass
 class GenuchtenGardner:
     """Combination of van Genuchten retention curve and Gardner relative conduictivity curve
@@ -377,16 +378,16 @@ class GenuchtenGardner:
             / (1 + npabs(self.alpha * h) ** self.n) ** self.m
         )
         return theta
-        
+
     def s(self, h: FloatArray) -> FloatArray:
         return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
-    
+
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
-        return exp(-self.c * npabs(h))    
-    
+        return exp(-self.c * npabs(h))
+
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
-        
+
     def h(self, theta: FloatArray) -> FloatArray:
         se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
         h = 1 / self.alpha * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
@@ -394,8 +395,8 @@ class GenuchtenGardner:
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
-    
-        
+
+
 def get_soilmodel(
     soilmodel_name: SoilModelNames,
 ) -> Type[SoilModel]:
