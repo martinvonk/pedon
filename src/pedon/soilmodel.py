@@ -345,13 +345,63 @@ class Fredlund:
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
+        
+@dataclass
+class GenuchtenGardner:
+    """Combination of van Genuchten retention curve and Gardner relative conduictivity curve
 
+    Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
+    moisture flow equation with application to evaporation from soils
+    Bakker and Nieber (2009) - Damping of Sinusoidal Surface Flux Fluctuations
+    with Soil Depth
+    van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
+    Hydraulic Conductivity of Unsaturated Soil
+    """
 
+    k_s: float
+    theta_s: float
+    theta_r: float
+    c: float
+    alpha: float
+    n: float
+    l: float = 0.5  # noqa: E741
+    m: float = field(init=False, repr=False)
+
+    def __post_init__(self):
+        self.m = 1 - 1 / self.n
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        theta = (
+            self.theta_r
+            + (self.theta_s - self.theta_r)
+            / (1 + npabs(self.alpha * h) ** self.n) ** self.m
+        )
+        return theta
+        
+    def s(self, h: FloatArray) -> FloatArray:
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+    
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return exp(-self.c * npabs(h))    
+    
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+        
+    def h(self, theta: FloatArray) -> FloatArray:
+        se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        h = 1 / self.alpha * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
+        return h
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+    
+        
 def get_soilmodel(
     soilmodel_name: SoilModelNames,
 ) -> Type[SoilModel]:
     sms = {
         "Genuchten": Genuchten,
+        "GenuchtenGardner": GenuchtenGardner,
         "Brooks": Brooks,
         "Gardner": Gardner,
         "Panday": Panday,
