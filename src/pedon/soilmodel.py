@@ -362,10 +362,9 @@ class GenuchtenGardner:
     k_s: float
     theta_s: float
     theta_r: float
-    c: float
     alpha: float
     n: float
-    l: float = 0.5  # noqa: E741
+    c: float
     m: float = field(init=False, repr=False)
 
     def __post_init__(self):
