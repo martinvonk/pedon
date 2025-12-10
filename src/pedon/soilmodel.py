@@ -382,6 +382,9 @@ class GenuchtenGardner:
         return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
 
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is not None:
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            h = self.h(theta)
         return exp(-self.c * npabs(h))
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
@@ -401,12 +404,12 @@ def get_soilmodel(
 ) -> Type[SoilModel]:
     sms = {
         "Genuchten": Genuchten,
-        "GenuchtenGardner": GenuchtenGardner,
         "Brooks": Brooks,
+        "Haverkamp": Haverkamp,
         "Gardner": Gardner,
         "Panday": Panday,
         "Fredlund": Fredlund,
-        "Haverkamp": Haverkamp,
+        "GenuchtenGardner": GenuchtenGardner,
     }
     return sms[soilmodel_name]
 
