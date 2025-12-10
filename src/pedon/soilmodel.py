@@ -349,12 +349,11 @@ class Fredlund:
 
 @dataclass
 class GenuchtenGardner:
-    """Combination of van Genuchten retention curve and Gardner relative conduictivity curve
+    """Combination soil model using the van Genuchten soil water retention
+    curve and the Gardner hydraulic conductivity function.
 
     Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
     moisture flow equation with application to evaporation from soils
-    Bakker and Nieber (2009) - Damping of Sinusoidal Surface Flux Fluctuations
-    with Soil Depth
     van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
     Hydraulic Conductivity of Unsaturated Soil
     """
