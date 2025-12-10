@@ -27,6 +27,10 @@ def sor() -> pe.soilmodel.SoilModel:
 @pytest.fixture
 def gar() -> pe.soilmodel.SoilModel:
     return pe.Gardner(k_s=10, theta_s=0.43, c=0.02, m=1.1)
+    
+@pytest.fixture
+def gg() -> pe.soilmodel.SoilModel:
+    return pe.GenuchtenGardner(k_s=10, theta_s=0.43, theta_r=0.01, c=0.02, alpha=0.04, n=1.4)
 
 
 @pytest.fixture
