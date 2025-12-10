@@ -10,6 +10,7 @@ from .soilmodel import Fredlund as Fredlund
 from .soilmodel import Gardner as Gardner
 from .soilmodel import GardnerRucker as GardnerRucker
 from .soilmodel import Genuchten as Genuchten
+from .soilmodel import GenuchtenGardner as GenuchtenGardner
 from .soilmodel import Haverkamp as Haverkamp
 from .soilmodel import Panday as Panday
 from .soilmodel import plot_hcf as plot_hcf
