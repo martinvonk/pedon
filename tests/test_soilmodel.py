@@ -30,6 +30,11 @@ def gar() -> pe.soilmodel.SoilModel:
 
 
 @pytest.fixture
+def gr() -> pe.soilmodel.SoilModel:
+    return pe.GardnerRucker(k_s=10, theta_r=0.01, theta_s=0.43, c=0.02, m=1.1)
+
+
+@pytest.fixture
 def gg() -> pe.soilmodel.SoilModel:
     return pe.GenuchtenGardner(
         k_s=10, theta_s=0.43, theta_r=0.01, c=0.02, alpha=0.04, n=1.4
@@ -130,7 +135,7 @@ def test_h_gardner_rucker(
 ) -> None:
     gr.h(theta=theta)
 
-    
+
 def test_theta_genuchten_gardner(gg: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
     gg.theta(h=h)
 

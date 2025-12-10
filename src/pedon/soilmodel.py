@@ -242,8 +242,8 @@ class GardnerRucker:
     k_s: float
     theta_r: float
     theta_s: float
-    c: float
     m: float
+    c: float
 
     def theta(self, h: FloatArray) -> FloatArray:
         return self.theta_r + (self.theta_s - self.theta_r) * (
@@ -255,13 +255,18 @@ class GardnerRucker:
         return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
 
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is not None:
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            h = self.h(theta)
         return exp(-self.c * npabs(h))
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        return -(1.0 / self.m) * log(theta / self.theta_s)
+        return -(1.0 / self.m) * log(
+            (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        )
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
