@@ -360,8 +360,8 @@ class GenuchtenGardner:
     """
 
     k_s: float
-    theta_s: float
     theta_r: float
+    theta_s: float
     alpha: float
     n: float
     c: float
