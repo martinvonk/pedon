@@ -1,5 +1,5 @@
 import pytest
-from numpy import array, logspace
+from numpy import allclose, array, logspace
 
 import pedon as pe
 from pedon._typing import FloatArray
@@ -26,7 +26,32 @@ def sor() -> pe.soilmodel.SoilModel:
 
 @pytest.fixture
 def gar() -> pe.soilmodel.SoilModel:
-    return pe.Gardner(k_s=10, theta_r=0.01, theta_s=0.43, a=0.02, b=1.0, m=1.1)
+    return pe.Gardner(k_s=10, theta_s=0.43, c=0.02, m=1.1)
+
+
+@pytest.fixture
+def gr() -> pe.soilmodel.SoilModel:
+    return pe.GardnerRucker(k_s=10, theta_r=0.01, theta_s=0.43, c=0.02, m=1.1)
+
+
+@pytest.fixture
+def gg() -> pe.soilmodel.SoilModel:
+    return pe.GenuchtenGardner(
+        k_s=10, theta_s=0.43, theta_r=0.01, c=0.02, alpha=0.04, n=1.4
+    )
+
+
+@pytest.fixture
+def hav() -> pe.soilmodel.Haverkamp:
+    # Example parameters similar in style to other model tests
+    return pe.Haverkamp(
+        k_s=10.0,
+        theta_r=0.01,
+        theta_s=0.43,
+        alpha=0.02,
+        beta=1.2,
+        a=0.5,
+    )
 
 
 def test_theta_genuchten(gen: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
@@ -91,3 +116,70 @@ def test_k_gardner(gar: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
 
 def test_h_gardner(gar: pe.soilmodel.SoilModel, theta: FloatArray = theta) -> None:
     gar.h(theta=theta)
+
+
+def test_theta_gardner_rucker(gr: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    gr.theta(h=h)
+
+
+def test_s_gardner_rucker(gr: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    gr.s(h=h)
+
+
+def test_k_gardner_rucker(gr: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    gr.k(h=h)
+
+
+def test_h_gardner_rucker(
+    gr: pe.soilmodel.SoilModel, theta: FloatArray = theta
+) -> None:
+    gr.h(theta=theta)
+
+
+def test_theta_genuchten_gardner(gg: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    gg.theta(h=h)
+
+
+def test_s_genuchten_gardner(gg: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    gg.s(h=h)
+
+
+def test_k_genuchten_gardner(gg: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    gg.k(h=h)
+
+
+def test_h_genuchten_gardner(
+    gg: pe.soilmodel.SoilModel, theta: FloatArray = theta
+) -> None:
+    gg.h(theta=theta)
+
+
+def test_theta_haverkamp(hav: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    hav.theta(h=h)
+
+
+def test_s_haverkamp(hav: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    hav.s(h=h)
+
+
+def test_k_haverkamp(hav: pe.soilmodel.SoilModel, h: FloatArray = h) -> None:
+    hav.k(h=h)
+
+
+def test_k_r_haverkamp_accepts_s_kwarg(
+    hav: pe.soilmodel.Haverkamp,
+) -> None:
+    s = array([0.1, 0.2, 0.3])
+    # Expect k_r(s) = (a*s)/(a*s + alpha*(1-s))
+    expected = (hav.a * s) / (hav.a * s + hav.alpha * (1.0 - s))
+    got = hav.k_r(h=array([1.0, 2.0, 3.0]), s=s)
+    assert allclose(got, expected)
+
+
+def test_h_haverkamp_inverse(
+    hav: pe.soilmodel.Haverkamp, theta: FloatArray = theta
+) -> None:
+    # Check theta(h(h(theta))) ≈ theta
+    h_out = hav.h(theta=theta)
+    theta_back = hav.theta(h=h_out)
+    assert allclose(theta_back, theta)
