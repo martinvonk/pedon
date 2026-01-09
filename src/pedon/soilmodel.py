@@ -229,7 +229,7 @@ class Gardner:
 
 
 @dataclass
-class GardnerRucker:
+class Rucker:
     """Gardner(-Rucker) Soil Model
 
     Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
@@ -453,7 +453,7 @@ def get_soilmodel(
         "Brooks": Brooks,
         "Haverkamp": Haverkamp,
         "Gardner": Gardner,
-        "GardnerRucker": GardnerRucker,
+        "Rucker": Rucker,
         "Panday": Panday,
         "Fredlund": Fredlund,
         "GenuchtenGardner": GenuchtenGardner,

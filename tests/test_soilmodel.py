@@ -31,7 +31,7 @@ def gar() -> pe.soilmodel.SoilModel:
 
 @pytest.fixture
 def gr() -> pe.soilmodel.SoilModel:
-    return pe.GardnerRucker(k_s=10, theta_r=0.01, theta_s=0.43, c=0.02, m=1.1)
+    return pe.Rucker(k_s=10, theta_r=0.01, theta_s=0.43, c=0.02, m=1.1)
 
 
 @pytest.fixture
