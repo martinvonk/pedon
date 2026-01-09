@@ -75,14 +75,14 @@ k = mg.k(h)  # hydraulic conductivity (cm/d) at pressure head values
 In Pedon there is a dataset available with Brooks-Corey and Mualem-van Genuchten parameters for different soils. These parameters are obtained from a few databases:
 
 - Average values for selected soil water retention and hydraulic conductivity parameters for 12 major soil textural groups as defined by @carsel_dataset_1988. This dataset is also used in the popular software HYDRUS [@simunek_hydrus1d_2009] that simulates water, heat, and solute movement in one-, two- and three-dimensional variably saturated media.
-- The Staring series (Staringreeks in Dutch) is a database of soil water retention curves and hydraulic conductivity functions in the Netherlands [@wosten_staringreeks_2001; @heinen_staringreeks_2020]. It contains both a description of top soils and bottom soils based on hundreds of samples. These samples were processed to obtain the Mualem-van Genuchten soil models [@genuchten_mualem_1980].
 - Dataset obtained from the VS2D software [@healy_vs2d_1990] containing both Brooks-Corey and Mualem-van Genuchten parameters.
+- The Staring series (Staringreeks in Dutch) is a database of soil water retention curves and hydraulic conductivity functions in the Netherlands [@wosten_staringreeks_2001; @heinen_staringreeks_2020]. It contains both a description of top soils and bottom soils based on hundreds of samples. These samples were processed to obtain the Mualem-van Genuchten soil models [@genuchten_mualem_1980].
 
 The databases can be called via the following code:
 ```python
 hydrus = pe.Soil("Sand").from_name(pe.Genuchten, source="HYDRUS")
-staring = pe.Soil("B01").from_name(pe.Genuchten, source="Staring_2018")
 vs2d = pe.Soil("Sand").from_name(pe.Brooks, source="VS2D")
+staring = pe.Soil("B01").from_name(pe.Genuchten, source="Staring_2018")
 ```
 
 ## Parameter estimation
@@ -93,12 +93,12 @@ When direct measurements are unavailable, soil hydraulic parameters can be estim
 
 ```python
 # Estimate parameters using Cosby's pedotransfer function
-sand_p = 40.0 # sand (%)
-clay_p = 10.0 # clay (%)
+sand_p = 40.0  # sand (%)
+clay_p = 10.0  # clay (%)
 cosby: pe.Brooks = pe.SoilSample(sand_p=sand_p, clay_p=clay_p).cosby()
 
 # Estimate parameters from saturated conductivity via HYPAGS
-ks = 1e-2 # saturated hydraulic conductivity (m/d)
+ks = 1e-2  # saturated hydraulic conductivity (m/d)
 hypags: pe.Genuchten = pe.SoilSample(k=ks).hypags()
 ```
 
