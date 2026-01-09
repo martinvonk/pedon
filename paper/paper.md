@@ -36,9 +36,9 @@ Researchers and engineers working with unsaturated soils often need estimations 
 Pedon can be installed via `pypi` using `pip install pedon` and imported using `import pedon as pe`. Different soil models are available in Pedon. A soil model is a parametric description of the soil water retention curve (SWRC) and the hydraulic conductivity function (HCF), linking soil water content and flow to pressure head or saturation for use in unsaturated flow simulations. By default the following soil models are available:
 - Mualem-van Genuchten [@genuchten_mualem_1980]: `pe.Genuchten`
 - Brooks-Corey [@brooks_corey_1964]: `pe.Brooks`
-- Combination of the van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992;@panday_mfusgt_2025]: `pe.Panday`
-- Fredlund-Xing  [@fredlund_xing_1994]: `pe.Fredlund`
-- Gardner-Kozeny  [@gardner_params_1970;brutsaert_kozeny_1967;bakker_gardner_2009;mathias_gardner_2006]: `pe.Gardner`
+- Combination of the van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2025]: `pe.Panday`
+- Fredlund-Xing [@fredlund_xing_1994]: `pe.Fredlund`
+- Gardner-Kozeny [@gardner_params_1970; @brutsaert_kozeny_1967; @bakker_gardner_2009; @mathias_gardner_2006]: `pe.Gardner`
 - Gardner-Rucker [@rucker_gardner_2005]: `pe.Rucker`
 
 The soil models are implemented as Python classes, providing a clear structure in which model-specific methods can be consistently defined and extended.
@@ -61,9 +61,9 @@ k = mg.k(h)  # hydraulic conductivity (cm/d) at pressure head values
 
 ## Parameter datasets
 In Pedon there is a dataset available with Brooks-Corey and Mualem-van Genuchten parameters for different soils. These parameters are obtained from a few databases:
-  - Average values for selected soil water retention and hydraulic conductivity parameters for 12 major soil textural groups as defined by @carsel_dataset_1988. This dataset is also used in the popular software HYDRUS [@simunek_hydrus1d_2009] that simulates water, heat, and solute movement in one-, two- and three-dimensional variably saturated media.
-  - The Staring series (Staringreeks in Dutch) is a database of soil water retention curves and hydraulic conductivity functions in the Netherlands [@wosten_staringreeks_2001,@heinen_staringreeks_2020]. It contains both a description of top soils and bottom soils based on hundreds of samples. These samples were processed to obtain the Mualem-van Genuchten soil models [@genuchten_mualem_1980].
-  - Dataset obtained from the VS2D software [@healy_vs2d_1990] containing both Brooks-Corey and Mualem-van Genuchten parameters.
+- Average values for selected soil water retention and hydraulic conductivity parameters for 12 major soil textural groups as defined by @carsel_dataset_1988. This dataset is also used in the popular software HYDRUS [@simunek_hydrus1d_2009] that simulates water, heat, and solute movement in one-, two- and three-dimensional variably saturated media.
+- The Staring series (Staringreeks in Dutch) is a database of soil water retention curves and hydraulic conductivity functions in the Netherlands [@wosten_staringreeks_2001; @heinen_staringreeks_2020]. It contains both a description of top soils and bottom soils based on hundreds of samples. These samples were processed to obtain the Mualem-van Genuchten soil models [@genuchten_mualem_1980].
+- Dataset obtained from the VS2D software [@healy_vs2d_1990] containing both Brooks-Corey and Mualem-van Genuchten parameters.
 
 ## Parameter estimation
 Estimates of unsaturated soil hydraulic parameters are required for modeling water flow in the unsaturated zone, yet direct measurements are often scarce, expensive, or incomplete. Pedon therefore provides multiple, complementary approaches to obtain soil model parameters from available measurements.
