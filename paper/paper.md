@@ -38,7 +38,7 @@ Pedon can be installed via `pypi` using `pip install pedon` and imported using `
 - Gardner-Kozeny  [@gardner_params_1970;brutsaert_kozeny_1967;bakker_gardner_2009;mathias_gardner_2006]: `pe.Gardner`
 - Fredlund-Xing  [@fredlund_xing_1994]: `pe.Fredlund`
 - Combination of the van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992;@panday_mfusgt_2025]: `pe.Panday`
-- Gardner-Rucker [@rucker_gardner_2005]: `pe.GardnerRucker`
+- Gardner-Rucker [@rucker_gardner_2005]: `pe.Rucker`
 
 ## Available datasets
 There are a few datasets available with Brooks-Corey and Mualem-van Genuchten parameters for different soils. These parameters are obtained from a few databases:
@@ -48,10 +48,10 @@ There are a few datasets available with Brooks-Corey and Mualem-van Genuchten pa
   - Dataset obtained from the VS2D software [@healy_vs2d_1990] containing both Brooks-Corey and Mualem-vanGenuchten parameters.
 
 ## Soil model parameter estimation
-### Pedotransfer functions
-Pedotranfer functions are equations that predict the soil model parameters based on easy to measure soil properties. [@bouma_pedotransfer_1989]. Different pedotransfer functions are avalaible from @wosten_pedotranfer_1999, @wosten_staringreeks_2001, @cosby_pedotransfer_1984, @cooper_pedotransfer_2021.
-### Databases
-Databases that are based on statistical relations such as Rosetta @schaap_rosetta_2001 and HYPAGS @peche_hypags_2024
+Via the pedon package different ways are present to obtain the soil model parameters based on soil properties or measurements of the soil water retention and hydraulic conductivily for different pressure heads.
+
+### Databases and pedotransfer functions
+Pedotranfer functions are equations that predict the soil model parameters based on easy to measure soil properties. [@bouma_pedotransfer_1989]. Different pedotransfer functions are avalaible from @wosten_pedotranfer_1999, @wosten_staringreeks_2001, @cosby_pedotransfer_1984 and @cooper_pedotransfer_2021. Additionaly Pedon hosts a few databases that are based on statistical relations such as Rosetta @schaap_rosetta_2001 and HYPAGS @peche_hypags_2024. The latter can estimate the Mualem-van Genuchten parameters based on only the hydraulic conductivity
 
 ## Estimation from sample measurements
 Same routine as RETC @genuchten_retc_1991.
