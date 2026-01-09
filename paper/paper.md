@@ -52,7 +52,8 @@ Pedon can be installed via `pypi` using `pip install pedon` and imported using `
 - Gardner-Kozeny [@gardner_params_1970; @brutsaert_kozeny_1967; @bakker_gardner_2009; @mathias_gardner_2006]: `pe.Gardner`
 - Gardner-Rucker [@rucker_gardner_2005]: `pe.Rucker`
 
-The soil models are implemented as Python classes, providing a clear structure in which model-specific methods can be consistently defined and extended.
+The soil models are implemented as Python classes, providing a clear structure in which model-specific methods can be consistently defined and extended. For instance for a Mualem-van Genuchten the code would look like the following:
+
 ```python
 import numpy as np
 import pedon as pe
@@ -77,20 +78,41 @@ In Pedon there is a dataset available with Brooks-Corey and Mualem-van Genuchten
 - The Staring series (Staringreeks in Dutch) is a database of soil water retention curves and hydraulic conductivity functions in the Netherlands [@wosten_staringreeks_2001; @heinen_staringreeks_2020]. It contains both a description of top soils and bottom soils based on hundreds of samples. These samples were processed to obtain the Mualem-van Genuchten soil models [@genuchten_mualem_1980].
 - Dataset obtained from the VS2D software [@healy_vs2d_1990] containing both Brooks-Corey and Mualem-van Genuchten parameters.
 
+The databases can be called via the following code:
+```python
+hydrus = pe.Soil("Sand").from_name(pe.Genuchten, source="HYDRUS")
+staring = pe.Soil("B01").from_name(pe.Genuchten, source="Staring_2018")
+vs2d = pe.Soil("Sand").from_name(pe.Brooks, source="VS2D")
+```
+
 ## Parameter estimation
 Estimates of unsaturated soil hydraulic parameters are required for modeling water flow in the unsaturated zone, yet direct measurements are often scarce, expensive, or incomplete. Pedon therefore provides multiple, complementary approaches to obtain soil model parameters from available measurements.
 
 ### Databases and pedotransfer functions
 When direct measurements are unavailable, soil hydraulic parameters can be estimated using pedotransfer functions, which relate easily measured soil properties (e.g. texture, bulk density, organic matter) to soil model parameters [@bouma_pedotransfer_1989]. Pedon implements some pedotransfer functions from the literature, including those of @wosten_pedotransfer_1999, @wosten_staringreeks_2001, @cosby_pedotransfer_1984, and @cooper_pedotransfer_2021. In addition, Pedon provides access to soil model parameter databases such as Rosetta [@schaap_rosetta_2001] and HYPAGS [@peche_hypags_2024], the latter of which enables parameter estimation based solely on saturated hydraulic conductivity.
 
+```python
+# Estimate parameters using Cosby's pedotransfer function
+sand_p = 40.0 # sand (%)
+clay_p = 10.0 # clay (%)
+cosby: pe.Brooks = pe.SoilSample(sand_p=sand_p, clay_p=clay_p).cosby()
+
+# Estimate parameters from saturated conductivity via HYPAGS
+ks = 1e-2 # saturated hydraulic conductivity (m/d)
+hypags: pe.Genuchten = pe.SoilSample(k=ks).hypags()
+```
+
 ## Estimation from sample measurements
 When laboratory measurements of soil water retention and/or unsaturated hydraulic conductivity are available, Pedon supports direct parameter estimation through inverse modeling. Soil model parameters are obtained by fitting analytical retention and conductivity functions to observed data using nonlinear least-squares optimization available through SciPy [@scipy_paper_2020]. This approach minimizes the mismatch between measured and simulated values and follows the existing methodology implemented in the RETC software [@genuchten_retc_1991].
 
 ### Soil model conversion
 The same fitting framework can be used to translate between different soil hydraulic models. Retention and conductivity curves generated from one model can be sampled over a range of pressure heads and refitted using another model formulation, facilitating model comparison and integration with external simulation tools.
+
 ```python
+# Fitting a Brooks-Corey soil model to existing Mualem-van Genuchten soil model
 bc = pe.SoilSample(h=h, theta=theta, k=k).fit(pe.Brooks)
 ```
+
 ![Resulting fit of the Brooks-Corey soil model on the Mualem-van Genuchten soil model \label{fig:swrc_fit}](figures/swrc_fit.png)
 
 
