@@ -39,7 +39,7 @@ class SoilModel(Protocol):
 class Genuchten:
     """Mualem-van Genuchten Soil Model
 
-    van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
+    van Genuchten, M. Th. (1980) - A Closed-form Equation for Predicting the
     Hydraulic Conductivity of Unsaturated Soil
     """
 
