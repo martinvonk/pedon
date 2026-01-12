@@ -401,7 +401,7 @@ class GenuchtenGardner:
 
     Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
     moisture flow equation with application to evaporation from soils
-    van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
+    van Genuchten, M. Th. (1980) - A Closed-form Equation for Predicting the
     Hydraulic Conductivity of Unsaturated Soil
     """
 
