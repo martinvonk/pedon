@@ -4,9 +4,9 @@ tags:
   - hydrology
   - unsaturated zone
   - vadose zone
-  - Python
   - groundwater modeling
   - soil hydraulic properties
+  - Python
 authors:
   - name: Martin A. Vonk
     orcid: 0009-0007-3528-2991
@@ -42,18 +42,18 @@ docker run --rm \
 Pedon is a Python package designed to describe and analyze unsaturated soil hydraulic properties. The package offers an object-oriented modeling framework, complemented by tools for parameter retrieval from soil databases, implementation of pedotransfer functions, and optimization routines for parameter fitting. It leverages Python’s object-oriented strengths and its well-maintained scientific ecosystem, including NumPy [@numpy_article_2020], SciPy [@scipy_paper_2020], Matplotlib [@matplotlib_paper_2007], and Pandas [@pandas_software_2020; @pandas_paper_2010].
 
 # Statement of need
-Researchers and engineers working with unsaturated soils often need estimates of soil parameters for their unsaturated groundwater flow models. Pedon addresses this need by providing a modern Python toolkit that brings together commonly used soil hydraulic models, parameter databases, pedotransfer functions, and fitting routines. This makes soil analysis faster, more reproducible, and easier to integrate into existing modeling pipelines.
+Researchers and engineers working with unsaturated soils often need estimates of soil parameters for their variably saturated groundwater flow models. Pedon addresses this need by providing a modern Python toolkit that brings together commonly used soil hydraulic models, parameter databases, pedotransfer functions, and fitting routines. This makes soil analysis faster, more reproducible, and easier to integrate into existing groundwater modeling workflows.
 
 # Soil hydraulic models
-Different soil hydraulic models (hereafter referred to as soil models) are available in Pedon. A soil model is a parametric description of soil hydraulic functions, namely the soil water retention curve (SWRC) and the (unsaturated) hydraulic conductivity function (HCF). These link the soil water content and flow to pressure head or saturation for use in unsaturated groundwater flow simulations. At this time, the following soil models are available:
+Different soil hydraulic models (hereafter referred to as soil models) are available in Pedon. A soil model is a parametric description of soil hydraulic functions, namely the soil water retention curve (SWRC) and the (unsaturated) hydraulic conductivity function (HCF). These link the soil water content and flow to pressure head or saturation for use in variably saturated groundwater flow simulations. At this time, the following soil models are available:
 
-- Mualem-van Genuchten [@genuchten_mualem_1980]: `pe.Genuchten`
-- Brooks-Corey [@brooks_corey_1964]: `pe.Brooks`
-- Combination of the van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2025]: `pe.Panday`
-- Fredlund-Xing [@fredlund_xing_1994]: `pe.Fredlund`
-- Gardner-Kozeny [@gardner_params_1970; @brutsaert_kozeny_1967; @bakker_gardner_2009; @mathias_gardner_2006]: `pe.Gardner`
-- Gardner-Rucker [@rucker_gardner_2005]: `pe.Rucker`
-- Combination of the van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_params_1970]: `pe.GenuchtenGardner`
+- Mualem-van Genuchten [@genuchten_mualem_1980]: `pedon.Genuchten`
+- Brooks-Corey [@brooks_corey_1964]: `pedon.Brooks`
+- Combination of the van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2025]: `pedon.Panday`
+- Fredlund-Xing [@fredlund_xing_1994]: `pedon.Fredlund`
+- Gardner-Kozeny [@gardner_params_1970; @brutsaert_kozeny_1967; @bakker_gardner_2009; @mathias_gardner_2006]: `pedon.Gardner`
+- Gardner-Rucker [@rucker_gardner_2005]: `pedon.Rucker`
+- Combination of the van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_params_1970]: `pedon.GenuchtenGardner`
 
 The soil models are implemented as Python classes, providing a clear and consistent structure in which model-specific methods, such as those for evaluating the SWRC and HCF, are defined. For example, the Mualem–van Genuchten model can be instantiated and used as follows:
 
@@ -76,12 +76,15 @@ k = mg.k(h)  # hydraulic conductivity (cm/d) at pressure head values
 
 Thanks to its object-oriented design, Pedon allows users to define their own soil model classes, in which they can implement custom or literature-based soil water retention curves and hydraulic conductivity functions.
 
-## Soil hydraulic parameter datasets
+# Soil hydraulic parameters
+Soil hydraulic parameters define the behavior of a soil model by determining the shape of its soil water retention curve and hydraulic conductivity function. These parameters are therefore essential inputs for variably saturated groundwater flow models. In practice, the parameters are rarely measured directly and are often derived from reference datasets, empirical relationships or laboratory observations. Pedon provides a framework for working with soil hydraulic parameters by linking them directly to soil models and offering tools to obtain and fit these parameters from existing datasets, easily measured soil properties, and direct measurements of soil water content and hydraulic conductivity.
+
+## Parameter datasets
 Pedon includes a dataset of Brooks–Corey and Mualem–van Genuchten parameters for a wide range of soils. At present, this dataset is compiled from three established soil hydraulic parameter databases:
 
 - Average values for selected soil hydraulic function parameters for 12 major soil textural groups as defined by @carsel_dataset_1988. This dataset is also used in the popular software HYDRUS [@simunek_hydrus1d_2009] that simulates water, heat, and solute movement in one-, two- and three-dimensional variably saturated media.
 - Dataset obtained from the VS2D software [@healy_vs2d_1990] containing both Brooks–Corey and Mualem–van Genuchten parameters.
-- The Staring series (Staringreeks in Dutch) is a database of soil hydraulic functions in the Netherlands [@wosten_staringreeks_2001; @heinen_staringreeks_2020; @heinen_bofek_2022]. It contains descriptions of both topsoils and subsoils based on hundreds of samples. These samples were processed to obtain parameters for the Mualem-van Genuchten soil model [@genuchten_mualem_1980; @wosten_texture_1988].
+- The Staring series (Staringreeks in Dutch) is a database of soil hydraulic functions in the Netherlands [@wosten_staringreeks_2001; @heinen_staringreeks_2020; @heinen_bofek_2022]. It contains descriptions of both topsoils (`B_`) and subsoils (`O_`) based on hundreds of samples. These samples were processed to obtain parameters for the Mualem-van Genuchten soil model [@genuchten_mualem_1980; @wosten_texture_1988].
 
 The databases can be called via the following code:
 ```python
@@ -90,10 +93,10 @@ vs2d = pe.Soil("Sand").from_name(pe.Brooks, source="VS2D")
 staring = pe.Soil("B01").from_name(pe.Genuchten, source="Staring_2018")
 ```
 
-## Soil hydraulic parameter estimation
-Pedon provides two approaches for obtaining soil model parameters from available soil measurements. The first approach uses databases and pedotransfer functions based on easily measured soil properties. The second approach relies on direct measurements of soil water content and hydraulic conductivity. Both methods are described below.
+## Parameters estimation
+Pedon provides two approaches for obtaining soil model parameters from available soil measurements. The first approach uses pedotransfer functions based on easily measured soil properties. The second approach relies on direct measurements of soil water content and hydraulic conductivity. Both methods are described below.
 
-### Databases and pedotransfer functions
+### Pedotransfer functions
 When direct measurements are unavailable, soil hydraulic parameters can be estimated using pedotransfer functions, which relate easily measured soil properties (e.g. texture, bulk density, organic matter content) to soil model parameters [@bouma_pedotransfer_1989]. Pedon implements some pedotransfer functions from the literature, including those of @wosten_pedotransfer_1999, @wosten_staringreeks_2001, @cosby_pedotransfer_1984, and @cooper_pedotransfer_2021. In addition, Pedon provides access to soil model parameter databases such as Rosetta [@schaap_rosetta_2001] and HYPAGS [@peche_hypags_2024], the latter of which enables parameter estimation based solely on single values of saturated hydraulic conductivity or representative grain diameters.
 
 ```python
@@ -107,11 +110,11 @@ ks = 1e-4  # saturated hydraulic conductivity (m/s)
 hypags: pe.Genuchten = pe.SoilSample(k=ks).hypags()
 ```
 
-### Estimation from sample measurements
+### Soil hydraulic measurements
 When laboratory measurements of soil water retention and/or unsaturated hydraulic conductivity are available, Pedon can estimate soil model parameters directly from these data. A soil model, together with its SWRC and HCF, is fitted to the measured values by minimizing the difference between measured and simulated data. This fitting procedure uses the nonlinear least-squares optimization provided by SciPy [@scipy_paper_2020] and follows the well-established methodology implemented in the RETC software [@genuchten_retc_1991].
 
-#### Soil model conversion
-The same fitting framework can also be used to translate between different soil hydraulic models. The SWRC and HCF generated by one model can be sampled over a range of pressure heads and then refitted using a different soil model formulation. This enables direct model comparison and facilitates integration with external simulation tools when another soil model formulation is required.
+### Soil model conversion
+The same fitting framework for sample measurements can also be used to translate between different soil hydraulic models. The SWRC and HCF generated by one model can be sampled over a range of pressure heads and then refitted using a different soil model formulation. This enables direct model comparison (Figure \ref{fig:swrc_fit}) and facilitates integration with external modeling tools when another soil model formulation is required.
 
 ```python
 # Fitting a Brooks-Corey soil model to existing Mualem-van Genuchten soil model
