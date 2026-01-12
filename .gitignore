@@ -13,3 +13,5 @@ dist/
 src/pedon.egg-info/
 
 uv.lock
+*.pdf
+*.jats
