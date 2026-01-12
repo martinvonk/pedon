@@ -39,7 +39,7 @@ class SoilModel(Protocol):
 class Genuchten:
     """Mualem-van Genuchten Soil Model
 
-    van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
+    van Genuchten, M. Th. (1980) - A Closed-form Equation for Predicting the
     Hydraulic Conductivity of Unsaturated Soil
     """
 
@@ -203,8 +203,8 @@ class Gardner:
 
     k_s: float
     theta_s: float
-    c: float
     m: float
+    c: float
 
     def theta(self, h: FloatArray) -> FloatArray:
         return self.theta_s * exp(-self.m * npabs(h))
@@ -213,6 +213,9 @@ class Gardner:
         return self.theta(h) / self.theta_s
 
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is not None:
+            theta = s * self.theta_s
+            h = self.h(theta)
         return exp(-self.c * npabs(h))
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
@@ -220,6 +223,50 @@ class Gardner:
 
     def h(self, theta: FloatArray) -> FloatArray:
         return -(1.0 / self.m) * log(theta / self.theta_s)
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
+@dataclass
+class Rucker:
+    """Gardner(-Rucker) Soil Model
+
+    Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
+    moisture flow equation with application to evaporation from soils
+    Rucker, D. F., Warrick, A. W., & Ferré, T. P. (2005). Parameter equivalence
+    for the Gardner and van Genuchten soil hydraulic conductivity functions
+    for steady vertical flow with inclusions.
+    """
+
+    k_s: float
+    theta_r: float
+    theta_s: float
+    m: float
+    c: float
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        return self.theta_r + (self.theta_s - self.theta_r) * (
+            ((1 + 0.5 * self.c * npabs(h)) * exp(-0.5 * self.c * npabs(h)))
+            ** (2 / (self.m + 2))
+        )
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is not None:
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            h = self.h(theta)
+        return exp(-self.c * npabs(h))
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        return -(1.0 / self.m) * log(
+            (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        )
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
@@ -347,16 +394,69 @@ class Fredlund:
         return plot_swrc(self, ax=ax)
 
 
+@dataclass
+class GenuchtenGardner:
+    """Combination soil model using the van Genuchten soil water retention
+    curve and the Gardner hydraulic conductivity function.
+
+    Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
+    moisture flow equation with application to evaporation from soils
+    van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
+    Hydraulic Conductivity of Unsaturated Soil
+    """
+
+    k_s: float
+    theta_r: float
+    theta_s: float
+    alpha: float
+    n: float
+    c: float
+    m: float = field(init=False, repr=False)
+
+    def __post_init__(self):
+        self.m = 1 - 1 / self.n
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        theta = (
+            self.theta_r
+            + (self.theta_s - self.theta_r)
+            / (1 + npabs(self.alpha * h) ** self.n) ** self.m
+        )
+        return theta
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is not None:
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            h = self.h(theta)
+        return exp(-self.c * npabs(h))
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        h = 1 / self.alpha * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
+        return h
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
 def get_soilmodel(
     soilmodel_name: SoilModelNames,
 ) -> Type[SoilModel]:
     sms = {
         "Genuchten": Genuchten,
         "Brooks": Brooks,
+        "Haverkamp": Haverkamp,
         "Gardner": Gardner,
+        "Rucker": Rucker,
         "Panday": Panday,
         "Fredlund": Fredlund,
-        "Haverkamp": Haverkamp,
+        "GenuchtenGardner": GenuchtenGardner,
     }
     return sms[soilmodel_name]
 
