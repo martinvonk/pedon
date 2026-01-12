@@ -77,12 +77,12 @@ k = mg.k(h)  # hydraulic conductivity (cm/d) at pressure head values
 Thanks to its object-oriented design, Pedon allows users to define their own soil model classes, in which they can implement custom or literature-based soil water retention curves and hydraulic conductivity functions.
 
 # Soil hydraulic parameters
-Soil hydraulic parameters define the behavior of a soil model by determining the shape of its soil water retention curve and hydraulic conductivity function. These parameters are therefore essential inputs for variably saturated groundwater flow models. In practice, the parameters are rarely measured directly and are often derived from reference datasets, empirical relationships or laboratory observations. Pedon provides a framework for working with soil hydraulic parameters by linking them directly to soil models and offering tools to obtain and fit these parameters from existing datasets, easily measured soil properties, and direct measurements of soil water content and hydraulic conductivity.
+Soil hydraulic parameters define the behavior of a soil model by determining the shape of its soil water retention curve and hydraulic conductivity function. These parameters are therefore essential inputs for variably saturated groundwater flow models. In practice, the parameters are rarely measured directly and are often derived from reference datasets, empirical relationships or laboratory measurements. Pedon provides a framework for working with soil hydraulic parameters by linking them directly to soil models and offering tools to obtain and fit these parameters from existing datasets, easily measured soil properties, and direct measurements of soil water content and hydraulic conductivity.
 
 ## Parameter datasets
 Pedon includes a dataset of Brooks–Corey and Mualem–van Genuchten parameters for a wide range of soils. At present, this dataset is compiled from three established soil hydraulic parameter databases:
 
-- Average values for selected soil hydraulic function parameters for 12 major soil textural groups as defined by @carsel_dataset_1988. This dataset is also used in the popular software HYDRUS [@simunek_hydrus1d_2009] that simulates water, heat, and solute movement in one-, two- and three-dimensional variably saturated media.
+- Average values of selected soil hydraulic parameters for 12 major soil textural groups, as defined by @carsel_dataset_1988. This dataset is also used in the popular variably saturated flow modeling HYDRUS software [@simunek_hydrus1d_2009].
 - Dataset obtained from the VS2D software [@healy_vs2d_1990] containing both Brooks–Corey and Mualem–van Genuchten parameters.
 - The Staring series (Staringreeks in Dutch) is a database of soil hydraulic functions in the Netherlands [@wosten_staringreeks_2001; @heinen_staringreeks_2020; @heinen_bofek_2022]. It contains descriptions of both topsoils (`B_`) and subsoils (`O_`) based on hundreds of samples. These samples were processed to obtain parameters for the Mualem-van Genuchten soil model [@genuchten_mualem_1980; @wosten_texture_1988].
 
@@ -94,10 +94,10 @@ staring = pe.Soil("B01").from_name(pe.Genuchten, source="Staring_2018")
 ```
 
 ## Parameters estimation
-Pedon provides two approaches for obtaining soil model parameters from available soil measurements. The first approach uses pedotransfer functions based on easily measured soil properties. The second approach relies on direct measurements of soil water content and hydraulic conductivity. Both methods are described below.
+Pedon provides two approaches for obtaining soil hydraulic parameters from available soil measurements. The first approach uses pedotransfer functions based on easily measured soil properties. The second approach relies on direct measurements of soil water content and hydraulic conductivity. Both methods are described below.
 
 ### Pedotransfer functions
-When direct measurements are unavailable, soil hydraulic parameters can be estimated using pedotransfer functions, which relate easily measured soil properties (e.g. texture, bulk density, organic matter content) to soil model parameters [@bouma_pedotransfer_1989]. Pedon implements some pedotransfer functions from the literature, including those of @wosten_pedotransfer_1999, @wosten_staringreeks_2001, @cosby_pedotransfer_1984, and @cooper_pedotransfer_2021. In addition, Pedon provides access to soil model parameter databases such as Rosetta [@schaap_rosetta_2001] and HYPAGS [@peche_hypags_2024], the latter of which enables parameter estimation based solely on single values of saturated hydraulic conductivity or representative grain diameters.
+When direct measurements are unavailable, soil hydraulic parameters can be estimated using pedotransfer functions, which relate easily measured soil properties (e.g. sand, silt, or clay percentage, bulk density and organic matter content) to soil hydraulic parameters [@bouma_pedotransfer_1989]. Pedon implements some pedotransfer functions from the literature, including those of @wosten_pedotransfer_1999, @wosten_staringreeks_2001, @cosby_pedotransfer_1984, and @cooper_pedotransfer_2021. In addition, Pedon provides access to soil hydraulic parameter databases such as Rosetta [@schaap_rosetta_2001] and HYPAGS [@peche_hypags_2024], the latter of which enables parameter estimation based solely on single values of saturated hydraulic conductivity or representative grain diameters.
 
 ```python
 # Estimate parameters using Cosby's pedotransfer function
@@ -111,7 +111,7 @@ hypags: pe.Genuchten = pe.SoilSample(k=ks).hypags()
 ```
 
 ### Soil hydraulic measurements
-When laboratory measurements of soil water retention and/or unsaturated hydraulic conductivity are available, Pedon can estimate soil model parameters directly from these data. A soil model, together with its SWRC and HCF, is fitted to the measured values by minimizing the difference between measured and simulated data. This fitting procedure uses the nonlinear least-squares optimization provided by SciPy [@scipy_paper_2020] and follows the well-established methodology implemented in the RETC software [@genuchten_retc_1991].
+Pedon can estimate soil hydraulic parameters directly from these data when measurements of soil water retention and/or unsaturated hydraulic conductivity are available. A soil model, together with its SWRC and HCF, is fitted to the measured values by minimizing the difference between measured and simulated data. This fitting procedure uses the nonlinear least-squares optimization provided by SciPy [@scipy_paper_2020] and follows the well-established methodology implemented in the RETC software [@genuchten_retc_1991].
 
 ### Soil model conversion
 The same fitting framework for sample measurements can also be used to translate between different soil hydraulic models. The SWRC and HCF generated by one model can be sampled over a range of pressure heads and then refitted using a different soil model formulation. This enables direct model comparison (Figure \ref{fig:swrc_fit}) and facilitates integration with external modeling tools when another soil model formulation is required.
