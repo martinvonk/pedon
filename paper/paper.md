@@ -54,7 +54,7 @@ Different soil hydraulic models (hereafter referred to as soil models) are avail
 - Haverkamp [@haverkamp_model_1977]: `pedon.Haverkamp`
 - Gardner(-Kozeny) [@gardner_model_1958; @brutsaert_kozeny_1967; @bakker_gardner_2009; @mathias_gardner_2006]: `pedon.Gardner`
 - Gardner-Rucker [@rucker_gardner_2005]: `pedon.Rucker`
-- Combination of the van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_params_1970]: `pedon.GenuchtenGardner`
+- Combination of the van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_model_1958]: `pedon.GenuchtenGardner`
 
 The soil models are implemented as Python classes, providing a clear and consistent structure in which model-specific methods, such as those for evaluating the SWRC and HCF, are defined. For example, the Mualem–van Genuchten model can be instantiated and used as follows:
 
