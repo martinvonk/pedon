@@ -16,9 +16,9 @@ authors:
     affiliation: "3"
 
 affiliations:
- - name: Artesia B.V., Schoonhoven, South Holland, The Netherlands
-   index: 1
  - name: Department of Water Management, Faculty of Civil Engineering and Geosciences, Delft University of Technology, Delft, South Holland, The Netherlands
+   index: 1
+ - name: Artesia B.V., Schoonhoven, South Holland, The Netherlands
    index: 2
  - name: Federal Institute for Geosciences and Natural Resources (BGR), Hannover, Lower Saxony, Germany
    index: 3
