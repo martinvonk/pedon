@@ -51,6 +51,7 @@ Different soil hydraulic models (hereafter referred to as soil models) are avail
 - Brooks-Corey [@brooks_corey_1964]: `pedon.Brooks`
 - Combination of the van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2025]: `pedon.Panday`
 - Fredlund-Xing [@fredlund_xing_1994]: `pedon.Fredlund`
+- Haverkamp [@haverkamp_model_1977]: `pedon.Haverkamp`
 - Gardner-Kozeny [@gardner_params_1970; @brutsaert_kozeny_1967; @bakker_gardner_2009; @mathias_gardner_2006]: `pedon.Gardner`
 - Gardner-Rucker [@rucker_gardner_2005]: `pedon.Rucker`
 - Combination of the van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_params_1970]: `pedon.GenuchtenGardner`
