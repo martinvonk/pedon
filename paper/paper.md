@@ -45,7 +45,7 @@ docker run --rm \
 Researchers and engineers working with unsaturated soils often need estimates of soil parameters for their variably saturated groundwater flow models. `pedon` addresses this need by providing a modern Python toolkit that brings together commonly used soil hydraulic models, parameter databases, pedotransfer functions, and fitting routines. This makes soil analysis faster, more reproducible, and easier to integrate into existing groundwater modeling workflows.
 
 # Soil hydraulic models
-Different soil hydraulic models (hereafter referred to as soil models) are available in `pedon`. A soil model is a parametric description of soil hydraulic functions, namely the soil water retention curve (SWRC) and the (unsaturated) hydraulic conductivity function (HCF). These link the soil water content and flow to pressure head or saturation for use in variably saturated groundwater flow simulations. At this time, the following soil models are available:
+Different soil hydraulic models (hereafter referred to as soil models) are available in `pedon`. A soil model is a parametric description of soil hydraulic functions, namely the soil water retention curve (SWRC) and the (unsaturated) hydraulic conductivity function (HCF). These link the soil water content and flow to pressure head or saturation for use in variably saturated groundwater flow models. At this time, the following soil models are available:
 
 - Mualem-van Genuchten [@genuchten_mualem_1980]: `pedon.Genuchten`
 - Brooks-Corey [@brooks_corey_1964]: `pedon.Brooks`
