@@ -28,16 +28,6 @@ bibliography: paper.bib
 
 ---
 
-<!--
-local docker run:
-docker run --rm \
-    --volume $PWD/paper:/data \
-    --user $(id -u):$(id -g) \
-    --env JOURNAL=joss \
-    openjournals/inara
--->
-
-
 # Summary
 `pedon` is a Python package for describing and analyzing unsaturated soil hydraulic properties. It provides a framework for soil hydraulic models, along with tools for retrieving parameters from soil databases, applying pedotransfer functions, and fitting model parameters to measurements.
 
