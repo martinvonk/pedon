@@ -29,24 +29,24 @@ bibliography: paper.bib
 ---
 
 # Summary
-`pedon` is a Python package for describing and analyzing unsaturated soil hydraulic properties. It provides a framework for soil hydraulic models, along with tools for retrieving parameters from soil databases, applying pedotransfer functions, and fitting model parameters to measurements.
+`pedon` is a Python package for describing and analyzing unsaturated soil hydraulic properties. It provides a framework for soil hydraulic models, along with tools for retrieving parameters from soil databases, applying pedotransfer functions, and fitting soil hydraulic parameters to measurements.
 
 # Statement of need
 Researchers and engineers working with unsaturated soils need estimates of soil parameters for variably saturated groundwater flow models. `pedon` provides a Python toolkit that brings together soil hydraulic models, parameter databases, pedotransfer functions, and fitting routines, making soil analysis faster, more reproducible, and easier to integrate into existing groundwater modeling workflows.
 
 # Soil hydraulic models
-`pedon` provides several soil hydraulic models. A soil model is a parametric description of soil hydraulic functions: the soil water retention curve (SWRC) and the unsaturated hydraulic conductivity function (HCF). These relate soil water content and flow to pressure head for use in variably saturated groundwater flow models. At this time, the following soil models are available:
+A soil hydraulic model is a parametric description of soil hydraulic functions: the soil water retention curve (SWRC) and the unsaturated hydraulic conductivity function (HCF). These relate soil water content and flow to pressure head and vice versa for use in variably saturated groundwater flow models. At this time, `pedon` provides the following soil models:
 
-- Mualem-van Genuchten [@genuchten_mualem_1980]: `pedon.Genuchten`
-- Brooks-Corey [@brooks_corey_1964]: `pedon.Brooks`
-- Mualem-van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2025]: `pedon.Panday`
-- Fredlund-Xing [@fredlund_xing_1994]: `pedon.Fredlund`
-- Haverkamp [@haverkamp_model_1977]: `pedon.Haverkamp`
-- Gardner(-Kozeny) [@gardner_model_1958; @brutsaert_kozeny_1967; @bakker_gardner_2009; @mathias_gardner_2006]: `pedon.Gardner`
-- Gardner-Rucker [@rucker_gardner_2005]: `pedon.Rucker`
-- Mualem-van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_model_1958]: `pedon.GenuchtenGardner`
+- `pedon.Genuchten`: Mualem-van Genuchten [@genuchten_mualem_1980]
+- `pedon.Brooks`: Brooks-Corey [@brooks_corey_1964]
+- `pedon.Panday`: Mualem-van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2025]
+- `pedon.Fredlund`: Fredlund-Xing [@fredlund_xing_1994]
+- `pedon.Haverkamp`: Haverkamp [@haverkamp_model_1977]
+- `pedon.Gardner`: Gardner(-Kozeny) [@gardner_model_1958; @brutsaert_kozeny_1967; @bakker_gardner_2009; @mathias_gardner_2006]
+- `pedon.Rucker`: Gardner-Rucker [@rucker_gardner_2005]
+- `pedon.GenuchtenGardner`: Mualem-van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_model_1958]
 
-# Software design
+## Software design
 The soil models are implemented as Python classes with model-specific methods for evaluating the SWRC and HCF. For example, the Mualem–van Genuchten model can be used as follows:
 
 ```python
@@ -66,7 +66,7 @@ theta = mg.theta(h)  # water content (-) at pressure head values
 k = mg.k(h)  # hydraulic conductivity (cm/d) at pressure head values
 ```
 
-The object-oriented design and duck typing provides a clear and consistent structure in which users can define custom soil model classes. Additionally, `pedon` depends Python's well-maintained scientific ecosystem: NumPy [@numpy_article_2020], SciPy [@scipy_paper_2020], Matplotlib [@matplotlib_paper_2007], and Pandas [@pandas_software_2020; @pandas_paper_2010].
+The object-oriented design and duck typing provides a clear and consistent structure in which users can define custom soil model classes. Additionally, `pedon` only depends on well-maintained packages in the Python scientific ecosystem such as NumPy [@numpy_article_2020], SciPy [@scipy_paper_2020], Matplotlib [@matplotlib_paper_2007], and Pandas [@pandas_software_2020; @pandas_paper_2010].
 
 # Soil hydraulic parameters
 Soil hydraulic parameters depend on soil type and determine the shape of a soil model’s SWRC and HCF. They are rarely measured directly and are usually derived from reference datasets, empirical relationships, or laboratory measurements. `pedon` links these parameters to soil models and provides a framework to obtain them from existing datasets, easily measured soil properties, and direct measurements of soil water content and hydraulic conductivity.
@@ -106,17 +106,17 @@ hypags: pe.Genuchten = pe.SoilSample(k=ks).hypags()
 `pedon` can estimate parameters directly when measurements of soil water retention and/or unsaturated hydraulic conductivity are available. A soil model, together with its SWRC and HCF, is fitted to the data by minimizing the difference between measured and simulated values. This uses nonlinear least-squares algorithm from SciPy [@scipy_paper_2020] and follows the well-established methodology of the RETC software [@genuchten_retc_1991].
 
 ### Soil model conversion
-The same fitting framework can translate between soil hydraulic models. The SWRC and HCF generated by one model are sampled over a range of pressure heads and refitted using another formulation. This enables direct model comparison (Figure \ref{fig:swrc_fit}) and facilitates integration with external tools when a different model is required.
+The same fitting procedure can translate between soil models. The SWRC and HCF generated by one model are sampled over a range of pressure heads and refitted using another formulation. This enables direct model comparison (Figure \ref{fig:swrc_fit}) and facilitates integration with external tools when a different model is required.
 
 ```python
 # Fitting a Brooks-Corey soil model to existing Mualem-van Genuchten soil model
 bc = pe.SoilSample(h=h, theta=theta, k=k).fit(pe.Brooks)
 ```
 
-![Resulting Brooks-Corey SWRC from the Mualem-van Genuchten soil model \label{fig:swrc_fit}](figures/swrc_fit.png)
+![Resulting Brooks-Corey SWRC after fitting on the Mualem-van Genuchten soil model \label{fig:swrc_fit}](figures/swrc_fit.png){height=7.5cm}
 
 # Research impact statement
-Soil hydraulic functions and their parameters are essential for simulating variably saturated groundwater flow. Determining these parameters experimentally is difficult, time-consuming, and uncertain [@genuchten_retc_1991; @brandhorst_uncertain_2017]. Therefore, parameters are often approximated or estimated from reference databases. `pedon` bundles soil hydraulic models and parameter sources in a single framework, enabling efficient parameter derivation without extensive literature searches or ad hoc reimplementation. `pedon` is already used in scientific workflows for variably saturated groundwater flow modeling, including published studies by @vonk_nonlinear_2024 and @collenteur_signatures_2025. It is also a dependency of the Python package [`dutchsoils`](https://github.com/markvdbrink/dutchsoils), which is used in a academic context to process Dutch soil datasets [@heinen_bofek_2022].
+Soil hydraulic functions and their parameters are essential for simulating variably saturated groundwater flow. Determining these parameters experimentally is difficult, time-consuming, and uncertain [@genuchten_retc_1991; @brandhorst_uncertainty_2017]. Therefore, parameters are often approximated or estimated from reference databases. `pedon` bundles soil hydraulic models and parameter sources in a single framework, enabling efficient parameter derivation without extensive literature searches or ad hoc reimplementation. `pedon` is already used in scientific workflows for variably saturated groundwater flow modeling, including published studies by @vonk_nonlinear_2024 and @collenteur_signatures_2025. It is also a dependency of the Python package [`dutchsoils`](https://github.com/markvdbrink/dutchsoils), which is used in a academic context to process Dutch soil datasets [@heinen_bofek_2022].
 
 # AI usage disclosure
 GitHub Copilot was used during development for reviewing pull requests, writing unit tests, providing code completion, and sanity-checking proposed bug fixes. ChatGPT was used for this manuscript to review references, identify linguistic and grammatical errors, and verify compliance with the Journal of Open Source Software requirements. All AI-generated outputs were reviewed by the authors, who take full responsibility for the accuracy and originality of the works.
