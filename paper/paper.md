@@ -39,7 +39,7 @@ docker run --rm \
 
 
 # Summary
-`pedon` is a Python package designed to describe and analyze unsaturated soil hydraulic properties. The package offers an object-oriented modeling framework, complemented by tools for parameter retrieval from soil databases, implementation of pedotransfer functions, and optimization routines for parameter fitting. It leverages Python’s object-oriented strengths and its well-maintained scientific ecosystem, including NumPy [@numpy_article_2020], SciPy [@scipy_paper_2020], Matplotlib [@matplotlib_paper_2007], and Pandas [@pandas_software_2020; @pandas_paper_2010].
+`pedon` is a Python package for describing and analyzing unsaturated soil hydraulic properties. It provides a framework for soil hydraulic models, along with tools for retrieving parameters from soil databases, applying pedotransfer functions, and fitting model parameters to measurements.
 
 # Statement of need
 Researchers and engineers working with unsaturated soils often need estimates of soil parameters for their variably saturated groundwater flow models. `pedon` addresses this need by providing a modern Python toolkit that brings together commonly used soil hydraulic models, parameter databases, pedotransfer functions, and fitting routines. This makes soil analysis faster, more reproducible, and easier to integrate into existing groundwater modeling workflows.
@@ -56,6 +56,7 @@ Different soil hydraulic models (hereafter referred to as soil models) are avail
 - Gardner-Rucker [@rucker_gardner_2005]: `pedon.Rucker`
 - Combination of the van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_model_1958]: `pedon.GenuchtenGardner`
 
+# Software design
 The soil models are implemented as Python classes, providing a clear and consistent structure in which model-specific methods, such as those for evaluating the SWRC and HCF, are defined. For example, the Mualem–van Genuchten model can be instantiated and used as follows:
 
 ```python
@@ -75,7 +76,7 @@ theta = mg.theta(h)  # water content (-) at pressure head values
 k = mg.k(h)  # hydraulic conductivity (cm/d) at pressure head values
 ```
 
-Thanks to its object-oriented design, `pedon` allows users to define their own soil model classes, in which they can implement custom or literature-based soil water retention curves and hydraulic conductivity functions.
+Thanks to its object-oriented design and duck typing, `pedon` allows users to define their own soil model classes, in which they can implement custom or literature-based SWRC and HCF. `pedon` depends on Python's well-maintained scientific ecosystem, including NumPy [@numpy_article_2020], SciPy [@scipy_paper_2020], Matplotlib [@matplotlib_paper_2007], and Pandas [@pandas_software_2020; @pandas_paper_2010].
 
 # Soil hydraulic parameters
 Soil hydraulic parameters define the behavior of a soil model by determining the shape of its soil water retention curve and hydraulic conductivity function. These parameters are therefore essential inputs for variably saturated groundwater flow models. In practice, the parameters are rarely measured directly and are often derived from reference datasets, empirical relationships or laboratory measurements. `pedon` provides a framework for working with soil hydraulic parameters by linking them directly to soil models and offering tools to obtain and fit these parameters from existing datasets, easily measured soil properties, and direct measurements of soil water content and hydraulic conductivity.
