@@ -469,17 +469,17 @@ class SoilSample:
         )
 
     def gardner_parameter_approximation(
-        self, k_s: float, n: float, theta_s: float
+        self, k_s: float, a: float, n: float, theta_s: float
     ) -> Gardner:
         """
-        Estimation of the Gardner c using van Genuchten's n and the method by
+        Estimation of the Gardner c using van Genuchten's alpha and the method by
         Peche, A., Vonk, M.A., Houben, G. & Bakker, M. (in preparation). Approximation of the Gardner relative conductivity curve parameter from the van Genuchten shape parameter n
         """
-        if n < 2 or n > 8:
+        if n < 1.9:
             logging.error(
                 "n out of model limits for model after Peche et al. (in prep.)."
             )
-        c = 0.013 * exp(0.26 * n)
+        c = 1.94 * a
         return Gardner(k_s=k_s, theta_s=theta_s, m=c, c=c)
 
     def ghezzehei(self, k_s: float, alpha: float, n: float, theta_s: float) -> Gardner:
