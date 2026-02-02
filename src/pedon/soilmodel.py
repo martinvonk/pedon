@@ -171,7 +171,7 @@ class Brooks:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        if isinstance(theta, float):
+        if isinstance(theta, (float, int)):
             if theta >= self.theta_r:
                 return self.h_b * ((theta - self.theta_r) / (self.s(theta))) ** (
                     -1 / self.l
@@ -179,7 +179,7 @@ class Brooks:
             else:
                 return self.h_b
         else:
-            h = full(theta.shape, self.h_b)
+            h = full(theta.shape, self.h_b, dtype=float)
             mask = theta >= self.theta_r
             h[mask] = self.h_b * (
                 (theta[mask] - self.theta_r) / (self.s(theta[mask]))

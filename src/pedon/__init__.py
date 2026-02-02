@@ -1,5 +1,5 @@
-# type: ignore
-from . import _params, soil, soilmodel  # noqa: F401
+from . import soil as soil
+from . import soilmodel as soilmodel  # noqa: F401
 from ._params import get_params as get_params
 from ._version import __version__ as __version__
 from ._version import show_versions as show_versions
@@ -13,5 +13,6 @@ from .soilmodel import GenuchtenGardner as GenuchtenGardner
 from .soilmodel import Haverkamp as Haverkamp
 from .soilmodel import Panday as Panday
 from .soilmodel import Rucker as Rucker
+from .soilmodel import SoilModel as SoilModel
 from .soilmodel import plot_hcf as plot_hcf
 from .soilmodel import plot_swrc as plot_swrc
