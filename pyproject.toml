@@ -112,7 +112,7 @@ commands = [["mypy", "src"]]
 [tool.tox.env.typety]
 description = "run type checks with ty"
 extras = ["typing"]
-commands = [["ty", "src"]]
+commands = [["ty", "check", "src"]]
 
 [tool.tox.env.docu]
 description = "build documentation"
