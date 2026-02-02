@@ -29,7 +29,7 @@ bibliography: paper.bib
 ---
 
 # Summary
-`pedon` is a Python package for describing and analyzing unsaturated soil hydraulic properties. It provides a framework for soil hydraulic models, along with tools for retrieving parameters from soil databases, applying pedotransfer functions, and fitting soil hydraulic model parameters to measurements.
+`pedon` is a Python package for describing and analyzing unsaturated soil hydraulic properties. It provides an object-oriented framework for soil hydraulic models, along with tools for retrieving parameters from soil databases, applying pedotransfer functions, and fitting soil hydraulic model parameters to measurements.
 
 # Statement of need
 Researchers and engineers working with unsaturated soils need estimates of soil hydraulic model parameters for variably saturated groundwater flow models. `pedon` provides a Python toolkit that brings together soil hydraulic models, parameter databases, pedotransfer functions, and fitting routines, making soil analysis faster, more reproducible, and easier to integrate into existing groundwater modeling workflows.
@@ -113,7 +113,7 @@ The same fitting procedure can translate between soil models. The SWRC and HCF g
 bc = pe.SoilSample(h=h, theta=theta, k=k).fit(pe.Brooks)
 ```
 
-![Resulting Brooks-Corey SWRC after fitting on the Mualem-van Genuchten soil model \label{fig:swrc_fit}](figures/swrc_fit.png){height=7.5cm}
+![Resulting Brooks-Corey SWRC after fitting on the Mualem-van Genuchten soil model \label{fig:swrc_fit}](figures/swrc_fit.png){height=5.4cm}
 
 # State of the field
 `pedon` contributes to the field of groundwater modeling by providing a modular, object-oriented framework that integrates hydraulic soil models, established parameter databases, and pedotransfer functions into a single, reproducible workflow. Existing tools such as unsatfit [@seki_unsatfit_2023], PySWR [@memari_pyswr_2021], and RETC [@genuchten_retc_1991] are utilities primarily focused on least-squares fitting of predefined soil models. In contrast, `pedon` enables researchers to define custom soil model formulations and systematically evaluate them against different datasets and pedotransfer functions. This level of interoperability is unique and provides a broader framework for the analysis of unsaturated soil hydraulic properties. At the same time, pedon is developed with a collaborative mindset, exemplified by the integration and extension of the soil model parameter estimation algorithms from HYPAGS [@peche_hypags_2024].
