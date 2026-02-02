@@ -37,6 +37,11 @@ jobs:
             os: ubuntu-latest
             toxenv: ruff
             experimental: false
+          - name: Type checking with ty
+            python: "3.11"
+            os: ubuntu-latest
+            toxenv: typety
+            experimental: false
 
     name: ${{ matrix.name }}
     env:
