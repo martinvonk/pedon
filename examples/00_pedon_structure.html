@@ -5,21 +5,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Pedon Package Structure &#8212; pedon 0.0.11 documentation</title>
+    <title>Pedon Package Structure &#8212; pedon 0.0.12 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
-    <script src="../_static/documentation_options.js?v=0c446633"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/documentation_options.js?v=3bbcec59"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Soil Models" href="01_soil_models.html" />
-    <link rel="prev" title="Examples" href="index.html" />
+    <link rel="prev" title="Pedon" href="index.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -40,6 +40,16 @@
   <section id="Pedon-Package-Structure">
 <h1>Pedon Package Structure<a class="headerlink" href="#Pedon-Package-Structure" title="Link to this heading">¶</a></h1>
 <p><em>Martin Vonk (2025)</em></p>
+<section id="Overview">
+<h2>Overview<a class="headerlink" href="#Overview" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pedon</span></code> is a Python package for analyzing unsaturated soil hydraulic properties. It provides an integrated framework that combines:</p>
+<ol class="arabic simple">
+<li><p><strong>Soil Hydraulic Models</strong> - parametric descriptions of water retention and conductivity</p></li>
+<li><p><strong>Parameter Databases</strong> - pre-computed parameters from established sources (HYDRUS, VS2D, Staring)</p></li>
+<li><p><strong>Pedotransfer Functions</strong> - empirical relationships to estimate parameters from easily measured soil properties</p></li>
+<li><p><strong>Fitting Routines</strong> - direct parameter estimation from laboratory measurements</p></li>
+</ol>
+<p>This notebook introduces the three core classes that form the foundation of <code class="docutils literal notranslate"><span class="pre">pedon</span></code>: <code class="docutils literal notranslate"><span class="pre">Soil</span></code>, <code class="docutils literal notranslate"><span class="pre">SoilModel</span></code>, and <code class="docutils literal notranslate"><span class="pre">SoilSample</span></code>.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -51,13 +61,18 @@
 </pre></div>
 </div>
 </div>
-<p>Pedon knows three classes;</p>
-<ul class="simple">
-<li><p>Soil</p></li>
-<li><p>SoilModel</p></li>
-<li><p>SoilSample</p></li>
-</ul>
-<p>The Soil class encapsulates the SoilModel and SoilSample class. The soil class has the following attributes:</p>
+</section>
+<section id="The-Three-Core-Classes">
+<h2>The Three Core Classes<a class="headerlink" href="#The-Three-Core-Classes" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pedon</span></code> is built around three main classes:</p>
+<ol class="arabic simple">
+<li><p><strong>``SoilModel``</strong> - represents a soil hydraulic model (e.g., van Genuchten, Brooks-Corey)</p></li>
+<li><p><strong>``SoilSample``</strong> - holds measured or estimated soil properties (e.g., grain size, water content, conductivity)</p></li>
+<li><p><strong>``Soil``</strong> - combines a <code class="docutils literal notranslate"><span class="pre">SoilModel</span></code> with metadata (name, source, description)</p></li>
+</ol>
+<section id="Exploring-the-Soil-Class">
+<h3>Exploring the Soil Class<a class="headerlink" href="#Exploring-the-Soil-Class" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Soil</span></code> class is the primary container for soil hydraulic information. Its attributes are:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -81,7 +96,10 @@
  &#39;description&#39;: str | None}
 </pre></div></div>
 </div>
-<p>The name of the soil, the soil type (e.g. sand or clay) are strings. The source is the origin of the soil, and description contains extra information. The SoilModel is the relation between the pressure head, hydraulic conducitivity and water content. Possible SoilModels are:</p>
+</section>
+<section id="Available-Soil-Models">
+<h3>Available Soil Models<a class="headerlink" href="#Available-Soil-Models" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">pedon</span></code> provides multiple soil model formulations from the literature. Each model represents the relationship between pressure head (h), water content (θ), and hydraulic conductivity (K):</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -114,37 +132,69 @@
  &#39;SoilModel&#39;]
 </pre></div></div>
 </div>
-<p>The SoilSample atttribute can contain measurements of the sand percentage <code class="docutils literal notranslate"><span class="pre">sand_p</span></code>, silt percentage <code class="docutils literal notranslate"><span class="pre">silt_p</span></code>, bulkd density <code class="docutils literal notranslate"><span class="pre">rho</span></code> or measurements of the pressure head <code class="docutils literal notranslate"><span class="pre">h</span></code> and the resulting hydraulic conductivity <code class="docutils literal notranslate"><span class="pre">k</span></code> or water content <code class="docutils literal notranslate"><span class="pre">theta</span></code>.</p>
+</section>
+<section id="The-SoilSample-Class">
+<h3>The SoilSample Class<a class="headerlink" href="#The-SoilSample-Class" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">SoilSample</span></code> class stores measured or observable soil properties. It can contain:</p>
+<p><strong>From soil composition:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sand_p</span></code>, <code class="docutils literal notranslate"><span class="pre">silt_p</span></code>, <code class="docutils literal notranslate"><span class="pre">clay_p</span></code> - grain size distribution (%)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rho</span></code> - bulk density (g/cm³)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">om_p</span></code> - organic matter content (%)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">m50</span></code> - median sand grain diameter (μm)</p></li>
+</ul>
+<p><strong>From direct measurements (laboratory or field):</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">h</span></code> - pressure head values (cm)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">theta</span></code> - corresponding water content measurements (-)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">k</span></code> - corresponding hydraulic conductivity measurements (cm/d or m/s)</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">SoilSample</span></code> can be used with various functions to estimate soil hydraulic parameters through pedotransfer functions or curve fitting.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># class for sample measurements</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">SoilSample</span><span class="o">.</span><span class="vm">__annotations__</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Show all attributes of SoilSample class</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SoilSample attributes:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">pe</span><span class="o">.</span><span class="n">SoilSample</span><span class="o">.</span><span class="vm">__annotations__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;sand_p&#39;: float | None,
- &#39;silt_p&#39;: float | None,
- &#39;clay_p&#39;: float | None,
- &#39;rho&#39;: float | None,
- &#39;th33&#39;: float | None,
- &#39;th1500&#39;: float | None,
- &#39;om_p&#39;: float | None,
- &#39;m50&#39;: float | None,
- &#39;d10&#39;: float | None,
- &#39;d20&#39;: float | None,
- &#39;h&#39;: numpy.ndarray[tuple[typing.Any, ...], numpy.dtype[numpy.float64]] | None,
- &#39;k&#39;: numpy.ndarray[tuple[typing.Any, ...], numpy.dtype[numpy.float64]] | None,
- &#39;theta&#39;: numpy.ndarray[tuple[typing.Any, ...], numpy.dtype[numpy.float64]] | None}
+SoilSample attributes:
+  sand_p: float | None
+  silt_p: float | None
+  clay_p: float | None
+  rho: float | None
+  th33: float | None
+  th1500: float | None
+  om_p: float | None
+  m50: float | None
+  d10: float | None
+  d20: float | None
+  h: numpy.ndarray[tuple[typing.Any, ...], numpy.dtype[numpy.float64]] | None
+  k: numpy.ndarray[tuple[typing.Any, ...], numpy.dtype[numpy.float64]] | None
+  theta: numpy.ndarray[tuple[typing.Any, ...], numpy.dtype[numpy.float64]] | None
 </pre></div></div>
 </div>
+</section>
+</section>
+<section id="Workflow-Overview">
+<h2>Workflow Overview<a class="headerlink" href="#Workflow-Overview" title="Link to this heading">¶</a></h2>
+<p>The typical workflow in <code class="docutils literal notranslate"><span class="pre">pedon</span></code> could follow this pattern:</p>
+<ol class="arabic simple">
+<li><p><strong>Create a ``SoilSample``</strong> - from measured properties or existing data</p></li>
+<li><p><strong>Estimate parameters</strong> - using pedotransfer functions, HYPAGS, or other methods</p></li>
+<li><p><strong>Get a ``SoilModel``</strong> - with parameters that describe water retention and conductivity</p></li>
+<li><p><strong>Use the model</strong> - evaluate properties at any pressure head, or export to external tools</p></li>
+</ol>
+<p>In the following notebooks, you’ll learn how to work with each of these components and integrate them into your soil analysis workflows.</p>
+</section>
 </section>
 
 
@@ -174,14 +224,15 @@
 </search>
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Pedon</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html#examples">Examples</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Pedon Package Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="01_soil_models.html">Soil Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="02_datasets.html">Soil Parameter Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="03_pedotransfer_functions.html">Pedotransfer Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="04_hypags.html">From k-value to van Genuchten via HYPAGS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04_hypags.html">Parameter Estimation via HYPAGS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="05_curve_fitting.html">Curve Fitting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="06_hypags_curvefitting.html">From k value to Gardner via HYPAGS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06_hypags_curvefitting.html">From k value to Gardner via HYPAGS + Curve Fitting Routine</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../_api/modules.html">pedon</a></li>
@@ -191,8 +242,8 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="index.html">Examples</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Examples</a></li>
+  <li><a href="index.html">Pedon</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Pedon</a></li>
       <li>Next: <a href="01_soil_models.html" title="next chapter">Soil Models</a></li>
   </ul></li>
   </ul></li>
@@ -214,7 +265,7 @@
       &#169;2025, Martin Vonk.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

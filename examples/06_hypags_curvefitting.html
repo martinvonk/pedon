@@ -5,17 +5,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>From k value to Gardner via HYPAGS &#8212; pedon 0.0.11 documentation</title>
+    <title>From k value to Gardner via HYPAGS + Curve Fitting Routine &#8212; pedon 0.0.12 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
-    <script src="../_static/documentation_options.js?v=0c446633"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/documentation_options.js?v=3bbcec59"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pedon" href="../_api/modules.html" />
@@ -37,14 +37,42 @@
 
           <div class="body" role="main">
             
-  <section id="From-k-value-to-Gardner-via-HYPAGS">
-<h1>From k value to Gardner via HYPAGS<a class="headerlink" href="#From-k-value-to-Gardner-via-HYPAGS" title="Link to this heading">¶</a></h1>
-<p><em>Martin Vonk - 2025</em></p>
+  <section id="From-k-value-to-Gardner-via-HYPAGS-+-Curve-Fitting-Routine">
+<h1>From k value to Gardner via HYPAGS + Curve Fitting Routine<a class="headerlink" href="#From-k-value-to-Gardner-via-HYPAGS-+-Curve-Fitting-Routine" title="Link to this heading">¶</a></h1>
+<p><em>Martin Vonk (2025)</em></p>
+<section id="Overview">
+<h2>Overview<a class="headerlink" href="#Overview" title="Link to this heading">¶</a></h2>
+<p>This notebook demonstrates an integrated workflow that combines parameter estimation techniques:</p>
+<ol class="arabic simple">
+<li><p><strong>HYPAGS estimation</strong> - Get initial van Genuchten parameters from a single saturated conductivity measurement</p></li>
+<li><p><strong>Data generation</strong> - Create water retention and conductivity data from the estimated model</p></li>
+<li><p><strong>Curve fitting</strong> - Fit a different soil model (Gardner) to this data using least-squares optimization</p></li>
+</ol>
+<p>This workflow is useful for:</p>
+<ul class="simple">
+<li><p><strong>Model conversion</strong> - Converting between different soil model formulations (van Genuchten → Gardner, etc.)</p></li>
+<li><p><strong>Hypothesis testing</strong> - Comparing how well different models fit the same data</p></li>
+<li><p><strong>Parameter refinement</strong> - Using HYPAGS as an initial guess, then refining with additional data</p></li>
+<li><p><strong>Workflow demonstration</strong> - Showing how <code class="docutils literal notranslate"><span class="pre">pedon</span></code> components integrate together</p></li>
+</ul>
+</section>
+<section id="Workflow-Steps">
+<h2>Workflow Steps<a class="headerlink" href="#Workflow-Steps" title="Link to this heading">¶</a></h2>
+<p>This notebook follows these steps:</p>
+<ol class="arabic simple">
+<li><p>Import libraries and define helper plotting functions</p></li>
+<li><p>Estimate van Genuchten parameters using HYPAGS from a k value</p></li>
+<li><p>Generate synthetic water retention and conductivity data from the van Genuchten model</p></li>
+<li><p>Set up and visualize initial Gardner model parameters</p></li>
+<li><p>Fit the Gardner model to the synthetic data</p></li>
+<li><p>Compare the fitted Gardner model with the original van Genuchten curve</p></li>
+</ol>
+</section>
 <section id="Setup">
 <h2>Setup<a class="headerlink" href="#Setup" title="Link to this heading">¶</a></h2>
 <section id="Imports">
 <h3>Imports<a class="headerlink" href="#Imports" title="Link to this heading">¶</a></h3>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -53,22 +81,9 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pedon</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pe</span>
 
-<span class="n">pe</span><span class="o">.</span><span class="n">show_versions</span><span class="p">()</span>
+<span class="c1"># pe.show_versions()</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-python     : 3.11.14
-pedon      : 0.0.11
-numpy      : 2.4.1
-matplotlib : 3.10.8
-pandas     : 2.3.3
-scipy      : 1.17.0
-</pre></div></div>
 </div>
 </section>
 <section id="Helper-plot">
@@ -78,7 +93,7 @@ scipy      : 1.17.0
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_compare</span><span class="p">(</span>
-    <span class="n">soilsample</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">SoilSample</span><span class="p">,</span> <span class="n">soilmodel</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">soilmodel</span><span class="o">.</span><span class="n">SoilModel</span>
+    <span class="n">soilsample</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">SoilSample</span><span class="p">,</span> <span class="n">soilmodel</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">SoilModel</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">typing</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
     <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">))</span>
     <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">soilsample</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">soilsample</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Soil Sample&quot;</span><span class="p">)</span>
@@ -119,8 +134,10 @@ scipy      : 1.17.0
 </div>
 </section>
 </section>
-<section id="Estimate-Genuchten-parameters-via-HYPAGS">
-<h2>Estimate Genuchten parameters via HYPAGS<a class="headerlink" href="#Estimate-Genuchten-parameters-via-HYPAGS" title="Link to this heading">¶</a></h2>
+<section id="Step-1:-Estimate-van-Genuchten-Parameters-via-HYPAGS">
+<h2>Step 1: Estimate van Genuchten Parameters via HYPAGS<a class="headerlink" href="#Step-1:-Estimate-van-Genuchten-Parameters-via-HYPAGS" title="Link to this heading">¶</a></h2>
+<p>We start with a single measurement: saturated hydraulic conductivity of 100 cm/d (typical for sandy soil). HYPAGS will estimate the complete van Genuchten parameter set from this single value.</p>
+<p>Note: HYPAGS expects k in m/s, so we convert from cm/d.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -143,8 +160,22 @@ Genuchten(k_s=100.0, theta_r=0.108, theta_s=np.float64(0.260064701261806), alpha
 </pre></div></div>
 </div>
 </section>
-<section id="Estimate-Gardner-model-from-Genuchten-curve">
-<h2>Estimate Gardner model from Genuchten curve<a class="headerlink" href="#Estimate-Gardner-model-from-Genuchten-curve" title="Link to this heading">¶</a></h2>
+<section id="Step-2:-Convert-to-Gardner-Model-via-Curve-Fitting">
+<h2>Step 2: Convert to Gardner Model via Curve Fitting<a class="headerlink" href="#Step-2:-Convert-to-Gardner-Model-via-Curve-Fitting" title="Link to this heading">¶</a></h2>
+<p>Now we’ll fit a Gardner model to the van Genuchten data. This demonstrates model conversion: taking one model’s predictions and fitting a different model to match them.</p>
+<section id="Why-This-Workflow?">
+<h3>Why This Workflow?<a class="headerlink" href="#Why-This-Workflow?" title="Link to this heading">¶</a></h3>
+<p>Sometimes you need to convert between models because:</p>
+<ul class="simple">
+<li><p>Your simulation software only accepts a specific model</p></li>
+<li><p>You want to compare model performance on the same data</p></li>
+<li><p>You’re testing whether a simpler model (like Gardner) works as well as a more complex one (like van Genuchten)</p></li>
+</ul>
+</section>
+<section id="Sample-Pressure-Heads">
+<h3>Sample Pressure Heads<a class="headerlink" href="#Sample-Pressure-Heads" title="Link to this heading">¶</a></h3>
+<p>We create synthetic data by evaluating the van Genuchten model at various pressure head values. Note the careful range selection to avoid numerical issues where conductivity becomes extremely small.</p>
+</section>
 <section id="Sample-Genuchten-curve-for-data-points">
 <h3>Sample Genuchten curve for data points<a class="headerlink" href="#Sample-Genuchten-curve-for-data-points" title="Link to this heading">¶</a></h3>
 <div class="nbinput nblast docutils container">
@@ -161,8 +192,15 @@ Genuchten(k_s=100.0, theta_r=0.108, theta_s=np.float64(0.260064701261806), alpha
 </div>
 </div>
 </section>
-<section id="Set-initial-parameters-and-bounds">
-<h3>Set initial parameters and bounds<a class="headerlink" href="#Set-initial-parameters-and-bounds" title="Link to this heading">¶</a></h3>
+<section id="Setting-Parameter-Bounds">
+<h3>Setting Parameter Bounds<a class="headerlink" href="#Setting-Parameter-Bounds" title="Link to this heading">¶</a></h3>
+<p>Before fitting, we define reasonable bounds for each Gardner parameter. The bounds have three values:</p>
+<ul class="simple">
+<li><p><strong>p_ini</strong>: Initial guess for the optimizer</p></li>
+<li><p><strong>p_min</strong>: Minimum allowed value</p></li>
+<li><p><strong>p_max</strong>: Maximum allowed value</p></li>
+</ul>
+<p>Good bounds are crucial for successful fitting - they guide the optimization and prevent unrealistic values.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -241,8 +279,9 @@ WARNING:root:No default parameter bounds for SoilModel type Gardner
 </table>
 </div></div>
 </div>
-<section id="Show-fit-for-initial-bounds">
-<h4>Show fit for initial bounds<a class="headerlink" href="#Show-fit-for-initial-bounds" title="Link to this heading">¶</a></h4>
+<section id="Visualize-Initial-Fit">
+<h4>Visualize Initial Fit<a class="headerlink" href="#Visualize-Initial-Fit" title="Link to this heading">¶</a></h4>
+<p>Let’s see how the initial Gardner model parameters compare with the van Genuchten data. These plots show the data points (black dots) and the initial Gardner model curve. The fit will likely be poor at this stage.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -272,8 +311,9 @@ WARNING:root:No default parameter bounds for SoilModel type Gardner
 </div>
 </section>
 </section>
-<section id="Fit">
-<h3>Fit<a class="headerlink" href="#Fit" title="Link to this heading">¶</a></h3>
+<section id="Perform-the-Curve-Fitting">
+<h3>Perform the Curve Fitting<a class="headerlink" href="#Perform-the-Curve-Fitting" title="Link to this heading">¶</a></h3>
+<p>Now we use the least-squares algorithm to optimize Gardner parameters. The <code class="docutils literal notranslate"><span class="pre">W1</span></code> parameter controls how we weight the hydraulic conductivity data relative to water content data. A value of 0.1 means we weight conductivity less heavily than water content, which is common practice because conductivity data tends to be noisier and covers a wider range.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -297,6 +337,11 @@ WARNING:root:No default parameter bounds for SoilModel type Gardner
 Gardner(k_s=np.float64(1.7140071030290098), theta_s=np.float64(0.22527115097409922), m=np.float64(0.025716662197584478), c=np.float64(0.30552460435612094))
 </pre></div></div>
 </div>
+</section>
+</section>
+<section id="Results-and-Interpretation">
+<h2>Results and Interpretation<a class="headerlink" href="#Results-and-Interpretation" title="Link to this heading">¶</a></h2>
+<p>The plots above show the fitted Gardner model (curves) and the original van Genuchten data (points).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
@@ -320,10 +365,9 @@ Gardner(k_s=np.float64(1.7140071030290098), theta_s=np.float64(0.225271150974099
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_06_hypags_curvefitting_17_1.png" src="../_images/examples_06_hypags_curvefitting_17_1.png" />
+<img alt="../_images/examples_06_hypags_curvefitting_18_1.png" src="../_images/examples_06_hypags_curvefitting_18_1.png" />
 </div>
 </div>
-</section>
 </section>
 </section>
 
@@ -354,14 +398,15 @@ Gardner(k_s=np.float64(1.7140071030290098), theta_s=np.float64(0.225271150974099
 </search>
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Pedon</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html#examples">Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="00_pedon_structure.html">Pedon Package Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="01_soil_models.html">Soil Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="02_datasets.html">Soil Parameter Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="03_pedotransfer_functions.html">Pedotransfer Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="04_hypags.html">From k-value to van Genuchten via HYPAGS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04_hypags.html">Parameter Estimation via HYPAGS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="05_curve_fitting.html">Curve Fitting</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">From k value to Gardner via HYPAGS</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">From k value to Gardner via HYPAGS + Curve Fitting Routine</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../_api/modules.html">pedon</a></li>
@@ -371,7 +416,7 @@ Gardner(k_s=np.float64(1.7140071030290098), theta_s=np.float64(0.225271150974099
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="index.html">Examples</a><ul>
+  <li><a href="index.html">Pedon</a><ul>
       <li>Previous: <a href="05_curve_fitting.html" title="previous chapter">Curve Fitting</a></li>
       <li>Next: <a href="../_api/modules.html" title="next chapter">pedon</a></li>
   </ul></li>
@@ -394,7 +439,7 @@ Gardner(k_s=np.float64(1.7140071030290098), theta_s=np.float64(0.225271150974099
       &#169;2025, Martin Vonk.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |

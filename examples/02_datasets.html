@@ -5,17 +5,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Soil Parameter Datasets &#8212; pedon 0.0.11 documentation</title>
+    <title>Soil Parameter Datasets &#8212; pedon 0.0.12 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
-    <script src="../_static/documentation_options.js?v=0c446633"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/documentation_options.js?v=3bbcec59"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Pedotransfer Functions" href="03_pedotransfer_functions.html" />
@@ -40,9 +40,18 @@
   <section id="Soil-Parameter-Datasets">
 <h1>Soil Parameter Datasets<a class="headerlink" href="#Soil-Parameter-Datasets" title="Link to this heading">¶</a></h1>
 <p><em>Martin Vonk (2025)</em></p>
-<p>Generally either the Brooks-Corey or Mualem-van Genuchten soil models are used. Pedon has some built-in datasets with parameter sets that can be used for both soil models.</p>
+<section id="Overview">
+<h2>Overview<a class="headerlink" href="#Overview" title="Link to this heading">¶</a></h2>
+<p>When measured data is unavailable, soil hydraulic parameters can be obtained from established parameter databases. These databases contain pre-determined parameter sets for common soils based on hundreds of laboratory measurements and professional judgment.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pedon</span></code> integrates soil parameter data from three major sources:</p>
+<ol class="arabic simple">
+<li><p><strong>HYDRUS database</strong> - Parameter sets from Carsel &amp; Parrish (1988), widely used in HYDRUS and other simulators</p></li>
+<li><p><strong>VS2D database</strong> - Additional parameter sets in both Brooks-Corey and van Genuchten formats</p></li>
+<li><p><strong>Staring series</strong> - Dutch soil parameters based on BOFEK classification with many measured samples</p></li>
+</ol>
+<p>This notebook shows how to access these databases and understand their characteristics.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pedon</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pe</span>
@@ -50,7 +59,7 @@
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># list all soil types for van genuchten</span>
@@ -59,7 +68,7 @@
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -125,8 +134,12 @@
  &#39;Yolo Light Clay&#39;]
 </pre></div></div>
 </div>
+</section>
+<section id="Exploring-Available-Datasets">
+<h2>Exploring Available Datasets<a class="headerlink" href="#Exploring-Available-Datasets" title="Link to this heading">¶</a></h2>
+<p>First, let’s see what soil types are available. We can list soil names for specific soil models.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get the HYDRUS sand</span>
@@ -138,7 +151,7 @@
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -146,9 +159,16 @@
 Soil(name=&#39;Sand&#39;, model=Genuchten(k_s=712.8, theta_r=0.045, theta_s=0.43, alpha=0.145, n=2.68, l=0.5), sample=None, source=&#39;HYDRUS&#39;, description=&#39;Sand&#39;)
 </pre></div></div>
 </div>
-<p>Note that we now have a different class; the soil class. This class has some other attributes such as the name. If the name is in the dataset (<code class="docutils literal notranslate"><span class="pre">pe.Soil.list_names(pe.Genuchten)</span></code>), the <code class="docutils literal notranslate"><span class="pre">from_name()</span></code> can retrieve the soil model. Note that we have to parse the soil model <code class="docutils literal notranslate"><span class="pre">sm</span></code> as an attribute since some soil models are available both as a Genuchten and Brooks dataset.</p>
+<section id="Getting-Parameters-from-the-HYDRUS-Database">
+<h3>Getting Parameters from the HYDRUS Database<a class="headerlink" href="#Getting-Parameters-from-the-HYDRUS-Database" title="Link to this heading">¶</a></h3>
+<p>The HYDRUS database contains parameter sets for standard soil textural classes. Once you select a soil name and model type, you can retrieve the full <code class="docutils literal notranslate"><span class="pre">Soil</span></code> object with its hydraulic model.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Soil</span></code> class encapsulates a soil model along with metadata. Note that we need to specify both the soil model (<code class="docutils literal notranslate"><span class="pre">sm</span></code>) and optionally the source dataset. Some soil names may be available in multiple datasets.</p>
+</section>
+<section id="Getting-Parameters-from-the-Dutch-Staring-Series">
+<h3>Getting Parameters from the Dutch Staring Series<a class="headerlink" href="#Getting-Parameters-from-the-Dutch-Staring-Series" title="Link to this heading">¶</a></h3>
+<p>The Staring series provides soil hydraulic parameters for Dutch soils. These are based on extensive laboratory measurements.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get from the Staring series</span>
@@ -157,7 +177,7 @@ Soil(name=&#39;Sand&#39;, model=Genuchten(k_s=712.8, theta_r=0.045, theta_s=0.43
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -165,23 +185,28 @@ Soil(name=&#39;Sand&#39;, model=Genuchten(k_s=712.8, theta_r=0.045, theta_s=0.43
 Soil(name=&#39;O18&#39;, model=Genuchten(k_s=35.95, theta_r=0.01, theta_s=0.58, alpha=0.0127, n=1.32, l=-0.786), sample=SoilSample(sand_p=None, silt_p=np.float64(0.0), clay_p=np.float64(0.0), rho=np.float64(1.1), th33=None, th1500=None, om_p=np.float64(22.5), m50=np.float64(nan), d10=None, d20=None), source=&#39;Staring_2001&#39;, description=&#39;moerige tussenlaag&#39;)
 </pre></div></div>
 </div>
+</section>
+<section id="Getting-Parameters-from-the-VS2D-database">
+<h3>Getting Parameters from the VS2D database<a class="headerlink" href="#Getting-Parameters-from-the-VS2D-database" title="Link to this heading">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get for both genuchten and brooks</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get for both genuchten and brooks from VS2D dataset</span>
 <span class="n">ls_gen</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="p">(</span><span class="s2">&quot;Limon Silt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">sm</span><span class="o">=</span><span class="n">pe</span><span class="o">.</span><span class="n">Genuchten</span><span class="p">)</span>
 <span class="n">ls_bro</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="p">(</span><span class="s2">&quot;Limon Silt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">sm</span><span class="o">=</span><span class="n">pe</span><span class="o">.</span><span class="n">Brooks</span><span class="p">)</span>
 
 <span class="n">ax</span> <span class="o">=</span> <span class="n">ls_gen</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 <span class="n">ls_bro</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ls_gen</span><span class="p">,</span> <span class="n">ls_bro</span><span class="p">]]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">ls_gen</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -193,9 +218,15 @@ Text(0.5, 1.0, &#39;Limon Silt&#39;)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_02_datasets_6_1.png" src="../_images/examples_02_datasets_6_1.png" />
+<img alt="../_images/examples_02_datasets_10_1.png" src="../_images/examples_02_datasets_10_1.png" />
 </div>
 </div>
+</section>
+<section id="Comparing-Parameters-Across-Datasets">
+<h3>Comparing Parameters Across Datasets<a class="headerlink" href="#Comparing-Parameters-Across-Datasets" title="Link to this heading">¶</a></h3>
+<p>When the same soil type is available in multiple databases, it’s useful to compare their parameters. Different sources may give different values due to different measurement methodologies or soil samples used.</p>
+</section>
+</section>
 </section>
 
 
@@ -225,14 +256,15 @@ Text(0.5, 1.0, &#39;Limon Silt&#39;)
 </search>
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Pedon</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html#examples">Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="00_pedon_structure.html">Pedon Package Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="01_soil_models.html">Soil Models</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Soil Parameter Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="03_pedotransfer_functions.html">Pedotransfer Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="04_hypags.html">From k-value to van Genuchten via HYPAGS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04_hypags.html">Parameter Estimation via HYPAGS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="05_curve_fitting.html">Curve Fitting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="06_hypags_curvefitting.html">From k value to Gardner via HYPAGS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06_hypags_curvefitting.html">From k value to Gardner via HYPAGS + Curve Fitting Routine</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../_api/modules.html">pedon</a></li>
@@ -242,7 +274,7 @@ Text(0.5, 1.0, &#39;Limon Silt&#39;)
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="index.html">Examples</a><ul>
+  <li><a href="index.html">Pedon</a><ul>
       <li>Previous: <a href="01_soil_models.html" title="previous chapter">Soil Models</a></li>
       <li>Next: <a href="03_pedotransfer_functions.html" title="next chapter">Pedotransfer Functions</a></li>
   </ul></li>
@@ -265,7 +297,7 @@ Text(0.5, 1.0, &#39;Limon Silt&#39;)
       &#169;2025, Martin Vonk.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
       &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
       
       |
