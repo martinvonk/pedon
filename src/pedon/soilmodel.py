@@ -21,6 +21,7 @@ class SoilModel(Protocol):
         ... class CustomModel:
         ...     k_s: float
         ...     theta_s: float
+        ...     theta_r: float
         ...
         ...     def theta(self, h: FloatArray) -> FloatArray:
         ...         # Calculate soil moisture content from pressure head
@@ -28,7 +29,7 @@ class SoilModel(Protocol):
         ...
         ...     def s(self, h: FloatArray) -> FloatArray:
         ...         # Calculate effective saturation from pressure head
-        ...         return (self.theta(h) - theta_r) / (theta_s - theta_r)
+        ...         return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
         ...
         ...     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         ...         # Calculate relative permeability from pressure head or saturation
@@ -173,8 +174,10 @@ class Brooks:
     def h(self, theta: FloatArray) -> FloatArray:
         if isinstance(theta, (float, int)):
             if theta >= self.theta_r:
-                return self.h_b * ((theta - self.theta_r) / (self.s(theta))) ** (
-                    -1 / self.l
+                return (
+                    self.h_b
+                    * (theta - self.theta_r)
+                    / (self.theta_s - self.theta_r) ** (-1 / self.l)
                 )
             else:
                 return self.h_b
