@@ -29,16 +29,13 @@ bibliography: paper.bib
 ---
 
 # Summary
-`pedon` is a Python package for describing and analyzing unsaturated soil hydraulic properties. It provides a framework for soil hydraulic models, along with tools for retrieving parameters from soil databases, applying pedotransfer functions, and fitting soil hydraulic parameters to measurements.
+`pedon` is a Python package for describing and analyzing unsaturated soil hydraulic properties. It provides a framework for soil hydraulic models, along with tools for retrieving parameters from soil databases, applying pedotransfer functions, and fitting soil hydraulic model parameters to measurements.
 
 # Statement of need
-Researchers and engineers working with unsaturated soils need estimates of soil hydraulic parameters for variably saturated groundwater flow models. `pedon` provides a Python toolkit that brings together soil hydraulic models, parameter databases, pedotransfer functions, and fitting routines, making soil analysis faster, more reproducible, and easier to integrate into existing groundwater modeling workflows.
-
-## State of the field
-`pedon` contributes to the field of groundwater modeling by providing a modular, object-oriented framework that integrates soil hydraulic models, established parameter databases, and pedotransfer functions into a single, reproducible workflow. Existing tools such as unsatfit [@seki_unsatfit_2023], PySWR [@memari_pyswr_2021], and RETC [@genuchten_retc_1991] are utilities primarily focused on least-squares fitting of predefined soil hydraulic models. In contrast, `pedon` enables researchers to define custom soil hydraulic model formulations and systematically evaluate them against different datasets and pedotransfer functions. This level of interoperability is unique and provides a broader framework for the analysis of unsaturated soil hydraulic properties. At the same time, pedon is developed with a collaborative mindset, exemplified by the integration and extension of the soil hydraulic model parameter estimation algorithms from HYPAGS [@peche_hypags_2024].
+Researchers and engineers working with unsaturated soils need estimates of soil hydraulic model parameters for variably saturated groundwater flow models. `pedon` provides a Python toolkit that brings together soil hydraulic models, parameter databases, pedotransfer functions, and fitting routines, making soil analysis faster, more reproducible, and easier to integrate into existing groundwater modeling workflows.
 
 # Soil hydraulic models
-A soil hydraulic model is a parametric description of soil hydraulic functions: the soil water retention curve (SWRC) and the unsaturated hydraulic conductivity function (HCF). These relate soil water content and flow to pressure head and vice versa for use in variably saturated groundwater flow models. At this time, `pedon` provides the following soil models:
+A soil hydraulic model (soil model in short) is a parametric description of soil hydraulic functions: the soil water retention curve (SWRC) and the unsaturated hydraulic conductivity function (HCF). These relate soil water content and flow to pressure head and vice versa for use in variably saturated groundwater flow models. At this time, `pedon` provides the following soil models:
 
 - `pedon.Genuchten`: Mualem-van Genuchten [@genuchten_mualem_1980]
 - `pedon.Brooks`: Brooks-Corey [@brooks_corey_1964]
@@ -89,10 +86,10 @@ staring = pe.Soil("B01").from_name(pe.Genuchten, source="Staring_2018")
 ```
 
 ## Parameter estimation
-`pedon` provides two approaches for obtaining soil hydraulic model parameters from soil data. The first uses pedotransfer functions based on easily measured soil properties. The second relies on direct measurements of soil water content and hydraulic conductivity.
+`pedon` provides two approaches for obtaining soil model parameters from soil data. The first uses pedotransfer functions based on easily measured soil properties. The second relies on direct measurements of soil water content and hydraulic conductivity.
 
 ### Pedotransfer functions
-Pedotransfer functions relate easily measured soil properties (e.g. sand, silt, clay or organic matter content and bulk density) to soil hydraulic model parameters [@bouma_pedotransfer_1989]. `pedon` implements functions from the literature, including those of @wosten_pedotransfer_1999, @wosten_staringreeks_2001, @cosby_pedotransfer_1984, and @cooper_pedotransfer_2021. It also provides access to parameter databases such as Rosetta [@schaap_rosetta_2001] and HYPAGS [@peche_hypags_2024], the latter enabling estimation from a single value of saturated hydraulic conductivity or representative grain diameters.
+Pedotransfer functions relate easily measured soil properties (e.g. sand, silt, clay or organic matter content and bulk density) to soil model parameters [@bouma_pedotransfer_1989]. `pedon` implements functions from the literature, including those of @wosten_pedotransfer_1999, @wosten_staringreeks_2001, @cosby_pedotransfer_1984, and @cooper_pedotransfer_2021. It also provides access to parameter databases such as Rosetta [@schaap_rosetta_2001] and HYPAGS [@peche_hypags_2024], the latter enabling estimation from a single value of saturated hydraulic conductivity or representative grain diameters.
 
 ```python
 # Estimate parameters using Cosby's pedotransfer function
@@ -106,7 +103,7 @@ hypags: pe.Genuchten = pe.SoilSample(k=ks).hypags()
 ```
 
 ### Soil hydraulic measurements
-`pedon` can estimate soil hydraulic model parameters directly when measurements of soil water retention and/or unsaturated hydraulic conductivity are available. A soil model, together with its SWRC and HCF, is fitted to the data by minimizing the difference between measured and simulated values. This uses nonlinear least-squares algorithm from SciPy [@scipy_paper_2020] and follows the well-established methodology of the `RETC` software [@genuchten_retc_1991].
+`pedon` can estimate soil model parameters directly when measurements of soil water retention and/or unsaturated hydraulic conductivity are available. A soil model, together with its SWRC and HCF, is fitted to the data by minimizing the difference between measured and simulated values. This uses nonlinear least-squares algorithm from SciPy [@scipy_paper_2020] and follows the well-established methodology of the `RETC` software [@genuchten_retc_1991].
 
 ### Soil model conversion
 The same fitting procedure can translate between soil models. The SWRC and HCF generated by one model are sampled over a range of pressure heads and refitted using another formulation. This enables direct model comparison (Figure \ref{fig:swrc_fit}) and facilitates integration with external tools when a different model is required.
@@ -118,8 +115,11 @@ bc = pe.SoilSample(h=h, theta=theta, k=k).fit(pe.Brooks)
 
 ![Resulting Brooks-Corey SWRC after fitting on the Mualem-van Genuchten soil model \label{fig:swrc_fit}](figures/swrc_fit.png){height=7.5cm}
 
+# State of the field
+`pedon` contributes to the field of groundwater modeling by providing a modular, object-oriented framework that integrates hydraulic soil models, established parameter databases, and pedotransfer functions into a single, reproducible workflow. Existing tools such as unsatfit [@seki_unsatfit_2023], PySWR [@memari_pyswr_2021], and RETC [@genuchten_retc_1991] are utilities primarily focused on least-squares fitting of predefined soil models. In contrast, `pedon` enables researchers to define custom soil model formulations and systematically evaluate them against different datasets and pedotransfer functions. This level of interoperability is unique and provides a broader framework for the analysis of unsaturated soil hydraulic properties. At the same time, pedon is developed with a collaborative mindset, exemplified by the integration and extension of the soil model parameter estimation algorithms from HYPAGS [@peche_hypags_2024].
+
 # Research impact statement
-Soil hydraulic models and their parameters are essential for simulating variably saturated groundwater flow. Determining these parameters experimentally is difficult, time-consuming, and uncertain [@genuchten_retc_1991; @brandhorst_uncertainty_2017]. Therefore, soil hydralulic model parameters are often approximated or estimated from reference databases. `pedon` bundles soil hydraulic models and parameter sources in a single framework, enabling efficient parameter derivation without extensive literature searches or ad hoc reimplementation. `pedon` is already used in scientific workflows for variably saturated groundwater flow modeling, including published studies by @vonk_nonlinear_2024 and @collenteur_signatures_2025. It is also a dependency of the Python package [`dutchsoils`](https://github.com/markvdbrink/dutchsoils), which is used in a academic context to process Dutch soil datasets [@heinen_bofek_2022].
+Soil hydraulic models and their parameters are essential for simulating variably saturated groundwater flow. Determining these parameters experimentally is difficult, time-consuming, and uncertain [@genuchten_retc_1991; @brandhorst_uncertainty_2017]. Therefore, soil hydralulic model parameters are often approximated or estimated from reference databases. `pedon` bundles soil models and parameter sources in a single framework, enabling efficient parameter derivation without extensive literature searches or ad hoc reimplementation. `pedon` is already used in scientific workflows for variably saturated groundwater flow modeling, including published studies by @vonk_nonlinear_2024 and @collenteur_signatures_2025. It is also a dependency of the Python package [`dutchsoils`](https://github.com/markvdbrink/dutchsoils), which is used in a academic context to process Dutch soil datasets [@heinen_bofek_2022].
 
 # AI usage disclosure
 GitHub Copilot was used during development for reviewing pull requests, writing unit tests and documentation, providing code completion, and sanity-checking proposed bug fixes. ChatGPT was used for this manuscript to review references, identify linguistic and grammatical errors, and verify compliance with the Journal of Open Source Software requirements. All AI-generated outputs were reviewed by the authors, who take full responsibility for the accuracy and originality of the works.
