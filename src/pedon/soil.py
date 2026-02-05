@@ -24,7 +24,7 @@ from scipy.optimize import fixed_point, least_squares
 
 from ._params import get_params
 from ._typing import FloatArray
-from .soilmodel import Brooks, Genuchten, SoilModel, get_soilmodel
+from .soilmodel import Brooks, Gardner, Genuchten, SoilModel, get_soilmodel
 
 
 @dataclass
@@ -467,6 +467,32 @@ class SoilSample:
             alpha=10 ** vgpar[2],
             n=10 ** vgpar[3],
         )
+
+    def gardner_parameter_approximation(
+        self, k_s: float, a: float, n: float, theta_s: float
+    ) -> Gardner:
+        """
+        Estimation of the Gardner c using van Genuchten's alpha and the method by
+        Peche, A., Vonk, M.A., Houben, G. & Bakker, M. (in preparation). Approximation of the Gardner relative conductivity curve parameter from the van Genuchten shape parameter n
+        """
+        if n < 1.9:
+            logging.error(
+                "n out of model limits for model after Peche et al. (in prep.)."
+            )
+        c = 1.94 * a
+        return Gardner(k_s=k_s, theta_s=theta_s, m=c, c=c)
+
+    def ghezzehei(self, k_s: float, alpha: float, n: float, theta_s: float) -> Gardner:
+        """
+        Estimation of the Gardner c using van Genuchten's n, alpha and the method by
+        Ghezzehei, T. A., Kneafsey, T. J., & Su, G. W. (2007). Correspondence of the Gardner and van Genuchten–Mualem relative permeability function parameters. Water resources research, 43(10).
+        """
+        if n < 2:
+            logging.error(
+                "n out of model limits for model after Ghezzehei et al. (2007)."
+            )
+        c = 1.3 * n * alpha
+        return Gardner(k_s=k_s, theta_s=theta_s, m=c, c=c)
 
     def hypags(self) -> Genuchten:
         """
