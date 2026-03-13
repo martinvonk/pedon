@@ -960,7 +960,7 @@ class SoilModelConverter:
 
         return all_methods
 
-    def ghezzehei(self) -> "Gardner":
+    def ghezzehei(self) -> Gardner:
         """
         Converts van Genuchten model to Gardner model using Ghezzehei et al. (2007).
 
@@ -1019,7 +1019,7 @@ class SoilModelConverter:
         # Create and return Gardner model
         return Gardner(k_s=k_s, theta_s=theta_s, m=c, c=c)
 
-    def peche(self) -> "Gardner":
+    def peche(self) -> Gardner:
         """
         Converts van Genuchten model to Gardner model using Peche et al. (in prep.).
 
