@@ -3,7 +3,7 @@ import logging
 from bisect import bisect_right
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Self, Type
+from typing import Literal, Type
 
 from numpy import abs as npabs
 from numpy import (
@@ -21,10 +21,11 @@ from numpy import (
 )
 from pandas import DataFrame, isna, read_csv
 from scipy.optimize import fixed_point, least_squares
+from typing_extensions import Self
 
 from ._params import get_params
 from ._typing import FloatArray
-from .soilmodel import Brooks, Genuchten, SoilModel, get_soilmodel
+from .soilmodel import Brooks, Gardner, Genuchten, SoilModel, get_soilmodel
 
 
 @dataclass
@@ -906,3 +907,173 @@ class Soil:
         ss = SoilSample().from_staring(name=self.name, year=year)
         self.__setattr__("sample", ss)
         return self
+
+
+@dataclass
+class SoilModelConverter:
+    """
+    Container class for soil hydraulic model conversion methods.
+
+    Converts between different soil hydraulic models (e.g., van Genuchten to Gardner).
+
+    Attributes
+    ----------
+    sm : SoilModel
+        The soil model instance to convert from.
+
+    Example
+    --------
+    >>> vg = Genuchten(k_s=1e-5, alpha=2.0, n=2.5, theta_s=0.45, theta_r=0.05)
+    >>> converter = SoilModelConverter(sm=vg)
+    >>> gardner = converter.peche()
+    >>> print(gardner.c)
+    4.4
+
+    """
+
+    sm: SoilModel
+
+    def list_methods(self) -> list[str]:
+        """
+        Get all available conversion methods for the current SoilModel type.
+
+        Returns
+        -------
+        list[str]
+            List of method names that are applicable for the current SoilModel.
+
+        Example
+        --------
+        >>> vg = Genuchten(k_s=1e-5, alpha=2.0, n=2.5, theta_s=0.45, theta_r=0.05)
+        >>> converter = SoilModelConverter(sm=vg)
+        >>> converter.list_methods()
+        ['ghezzehei', 'peche']
+        """
+        all_methods = []
+
+        # Get all methods of this class
+        for attr_name in dir(self):
+            attr = getattr(self, attr_name)
+            # Skip private methods and list_methods itself
+            if not attr_name.startswith("_") and attr_name != "list_methods":
+                if callable(attr):
+                    all_methods.append(attr_name)
+
+        return all_methods
+
+    def ghezzehei(self) -> "Gardner":
+        """
+        Converts van Genuchten model to Gardner model using Ghezzehei et al. (2007).
+
+        Estimates the Gardner c parameter from van Genuchten's n and alpha parameters
+        using the empirical relationship c = 1.3 * n * alpha.
+
+        Returns
+        -------
+        Gardner
+            Gardner model instance with converted parameters.
+
+        Raises
+        ------
+        TypeError
+            If sm is not a Genuchten model instance.
+        ValueError
+            If n < 2 (outside model validity range).
+
+        References
+        ----------
+        Ghezzehei, T. A., Kneafsey, T. J., & Su, G. W. (2007). Correspondence of
+        the Gardner and van Genuchten–Mualem relative permeability function
+        parameters. Water Resources Research, 43(10). https://doi.org/10.1029/2006WR005339
+
+        Examples
+        --------
+        >>> vg = Genuchten(k_s=1e-5, alpha=2.0, n=2.5, theta_s=0.45, theta_r=0.05)
+        >>> converter = SoilModelConverter(sm=vg)
+        >>> gardner = converter.ghezzehei()
+        >>> print(gardner.c)
+        6.5
+        """
+        # Check if input model is Genuchten
+        if not isinstance(self.sm, Genuchten):
+            raise TypeError(
+                f"ghezzehei() method requires Genuchten model, "
+                f"got {type(self.sm).__name__}"
+            )
+
+        # Extract parameters from Genuchten model
+        k_s = self.sm.k_s
+        alpha = self.sm.alpha
+        n = self.sm.n
+        theta_s = self.sm.theta_s
+
+        # Validate n parameter
+        if n < 2:
+            raise ValueError(
+                f"n = {n} is outside model validity range for Ghezzehei et al. (2007). "
+                f"Method requires n >= 2."
+            )
+
+        # Calculate Gardner c parameter using Ghezzehei relationship
+        c = 1.3 * n * alpha
+
+        # Create and return Gardner model
+        return Gardner(k_s=k_s, theta_s=theta_s, m=c, c=c)
+
+    def peche(self) -> "Gardner":
+        """
+        Converts van Genuchten model to Gardner model using Peche et al. (in prep.).
+
+        Estimates the Gardner c parameter from van Genuchten's alpha parameter
+        using the empirical relationship c = 2.2 * alpha.
+
+        Returns
+        -------
+        Gardner
+            Gardner model instance with converted parameters.
+
+        Raises
+        ------
+        TypeError
+            If sm is not a Genuchten model instance.
+        ValueError
+            If n < 1.8 (outside model validity range).
+
+        References
+        ----------
+        Peche, A., Vonk, M.A., Altfelder, S., Houben, G. & Bakker, M. (in preparation).
+        A new model for the approximation of the Gardner relative1
+        conductivity curve parameter based on van Genuchten’s α
+
+        Examples
+        --------
+        >>> vg = Genuchten(k_s=1e-5, alpha=2.0, n=2.5, theta_s=0.45, theta_r=0.05)
+        >>> converter = SoilModelConverter(sm=vg)
+        >>> gardner = converter.peche()
+        >>> print(gardner.c)
+        4.4
+        """
+        # Check if input model is Genuchten
+        if not isinstance(self.sm, Genuchten):
+            raise TypeError(
+                f"peche() method requires Genuchten model, got {type(self.sm).__name__}"
+            )
+
+        # Extract parameters from Genuchten model
+        k_s = self.sm.k_s
+        alpha = self.sm.alpha
+        n = self.sm.n
+        theta_s = self.sm.theta_s
+
+        # Validate n parameter
+        if n < 1.8:
+            raise ValueError(
+                f"n = {n} is outside model validity range for Peche et al. (in prep.). "
+                f"Method requires n >= 1.8."
+            )
+
+        # Calculate Gardner c parameter using Peche relationship
+        c = 2.2 * alpha
+
+        # Create and return Gardner model
+        return Gardner(k_s=k_s, theta_s=theta_s, m=c, c=c)
