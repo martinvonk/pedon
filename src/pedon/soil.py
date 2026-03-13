@@ -3,7 +3,7 @@ import logging
 from bisect import bisect_right
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Type
+from typing import Literal, Self, Type
 
 from numpy import abs as npabs
 from numpy import (
@@ -21,7 +21,6 @@ from numpy import (
 )
 from pandas import DataFrame, isna, read_csv
 from scipy.optimize import fixed_point, least_squares
-from typing_extensions import Self
 
 from ._params import get_params
 from ._typing import FloatArray
