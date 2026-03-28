@@ -39,7 +39,7 @@ A soil hydraulic model (soil model in short) is a parametric description of soil
 
 - `pedon.Genuchten`: Mualem-van Genuchten [@genuchten_mualem_1980]
 - `pedon.Brooks`: Brooks-Corey [@brooks_corey_1964]
-- `pedon.Panday`: Mualem-van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2025]
+- `pedon.Panday`: Mualem-van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2026]
 - `pedon.Fredlund`: Fredlund-Xing [@fredlund_xing_1994]
 - `pedon.Haverkamp`: Haverkamp [@haverkamp_model_1977]
 - `pedon.Gardner`: Gardner(-Kozeny) [@gardner_model_1958; @brutsaert_kozeny_1967; @bakker_gardner_2009; @mathias_gardner_2006]
