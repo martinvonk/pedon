@@ -30,7 +30,7 @@ repository = "https://github.com/martinvonk/pedon"
 
 [project.optional-dependencies]
 ruffing = ["ruff"]
-typing = ["mypy", "pandas-stubs"]
+typing = ["mypy", "pandas-stubs", "ty"]
 rosetta = ["httpx"]
 pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar", "pedon[rosetta]"]
 coveraging = ["coverage"]
@@ -41,7 +41,7 @@ documentation = [
         "ipykernel",
         "pandoc",
 ]
-dev = ["pedon[ruffing,typing,pytesting]", "tox"]
+dev = ["pedon[ruffing,typing,pytesting]", "tox-uv"]
 
 
 [tool.setuptools]
@@ -58,7 +58,6 @@ where = ["src"]
 
 [tool.mypy]
 mypy_path = "src"
-plugins = "numpy.typing.mypy_plugin"
 
 [[tool.mypy.overrides]]
 module = ["matplotlib.*", "scipy.stats.*"]
@@ -78,8 +77,8 @@ show-fixes = true
 fix = true
 
 [tool.tox]
-requires = ["tox>=4"]
-env_list = ["py311", "py312", "py313", "py314", "type", "ruff"]
+requires = ["tox-uv>=1.0"]
+env_list = ["py311", "py312", "py313", "py314", "type", "ruff", "typety"]
 
 [tool.tox.env_run_base]
 description = "run unit tests"
@@ -95,7 +94,6 @@ commands = [
                 "check",
                 "--extend-select",
                 "I",
-                "--preview",
         ],
         [
                 "ruff",
@@ -106,9 +104,14 @@ commands = [
 
 
 [tool.tox.env.type]
-description = "run type checks"
+description = "run type checks with mypy"
 extras = ["typing"]
 commands = [["mypy", "src"]]
+
+[tool.tox.env.typety]
+description = "run type checks with ty"
+extras = ["typing"]
+commands = [["ty", "check", "src"]]
 
 [tool.tox.env.docu]
 description = "build documentation"

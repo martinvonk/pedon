@@ -10,28 +10,70 @@ from ._typing import FloatArray, SoilModelNames
 
 @runtime_checkable
 class SoilModel(Protocol):
+    """Protocol for soil models
+
+    This protocol defines the interface for custom soil models. To create a custom
+    soil model, implement all methods defined below. Your class will automatically
+    conform to this protocol.
+
+    Example:
+        >>> @dataclass
+        ... class CustomModel:
+        ...     k_s: float
+        ...     theta_s: float
+        ...     theta_r: float
+        ...
+        ...     def theta(self, h: FloatArray) -> FloatArray:
+        ...         # Calculate soil moisture content from pressure head
+        ...         return ...
+        ...
+        ...     def s(self, h: FloatArray) -> FloatArray:
+        ...         # Calculate effective saturation from pressure head
+        ...         return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+        ...
+        ...     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        ...         # Calculate relative permeability from pressure head or saturation
+        ...         return ...
+        ...
+        ...     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        ...         # Calculate hydraulic conductivity from pressure head or saturation
+        ...         return self.k_s * self.k_r(h=h, s=s)
+        ...
+        ...     def h(self, theta: FloatArray) -> FloatArray:
+        ...         # Inverse of theta method
+        ...         return ...
+        ...
+        ...     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        ...         # Plot the soil water retention curve by calling `plot_swrc`
+        ...         return plot_swrc(self, ax=ax)
+    """
+
     def theta(self, h: FloatArray) -> FloatArray:
-        """Method to calculate the soil moisture content from the pressure head h"""
+        """Calculate soil moisture content (water content) from
+        pressure head h."""
         ...
 
     def s(self, h: FloatArray) -> FloatArray:
-        """Method to calculate the effective saturation from the pressure head h"""
+        """Calculate effective saturation from pressure head h.
+        Effective saturation is normalized between 0 (dry) and 1 (saturated)."""
         ...
 
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
-        """Method to calcualte the relative permeability from the pressure head h"""
+        """Calculate relative permeability (or relative hydraulic conductivity).
+        Relative permeability is normalized between 0 (dry) and 1 (saturated).
+        Can be calculated from either pressure head h or saturation s."""
         ...
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
-        """Method to calcualte the permeability from the pressure head h"""
+        """Calculate hydraulic conductivity from pressure head h or saturation s."""
         ...
 
     def h(self, theta: FloatArray) -> FloatArray:
-        """Method to calcualte the pressure head h from the water content"""
+        """Calculate pressure head h from soil moisture content (inverse of theta)."""
         ...
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
-        """Method to plot the soil water retention curve"""
+        """Plot the soil water retention curve by calling `plot_swrc`."""
         ...
 
 
@@ -130,15 +172,17 @@ class Brooks:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        if isinstance(theta, float):
+        if isinstance(theta, (float, int)):
             if theta >= self.theta_r:
-                return self.h_b * ((theta - self.theta_r) / (self.s(theta))) ** (
-                    -1 / self.l
+                return (
+                    self.h_b
+                    * (theta - self.theta_r)
+                    / (self.theta_s - self.theta_r) ** (-1 / self.l)
                 )
             else:
                 return self.h_b
         else:
-            h = full(theta.shape, self.h_b)
+            h = full(theta.shape, self.h_b, dtype=float)
             mask = theta >= self.theta_r
             h[mask] = self.h_b * (
                 (theta[mask] - self.theta_r) / (self.s(theta[mask]))
