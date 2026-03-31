@@ -1058,7 +1058,6 @@ class SoilModelConverter:
                 alpha=alpha,
                 n=n,
             )
-
         else:
             raise TypeError(
                 f"Unsupported model type: {type(self.sm).__name__}. "
@@ -1069,20 +1068,27 @@ class SoilModelConverter:
         """
         Converts van Genuchten model to Gardner model using Ghezzehei et al. (2007).
 
-        Estimates the Gardner c parameter from van Genuchten's n and alpha parameters
-        using the empirical relationship c = 1.3 * n * alpha.
+        Estimates the Gardner sorptive number c (= alpha_G) from van Genuchten's n
+        and alpha parameters using eq. (17): c = 1.3 * n * alpha. The air entry
+        pressure h_b is computed from the point of maximum downward concavity of
+        the vGM retention curve using eq. (13).
 
         Returns
         -------
         Gardner
-            Gardner model instance with converted parameters.
+            Gardner model instance with converted parameters, including h_b.
 
         Raises
         ------
         TypeError
             If sm is not a Genuchten model instance.
         ValueError
-            If n < 2 (outside model validity range).
+            If n < 2 (outside model validity range; eq. 13 requires m > 0.5).
+
+        Notes
+        -----
+        Units: unit-agnostic. alpha and h_b share the same length unit;
+        c has units of 1/[length]. k_s retains its original units.
 
         References
         ----------
@@ -1095,8 +1101,8 @@ class SoilModelConverter:
         >>> vg = Genuchten(k_s=1e-5, alpha=2.0, n=2.5, theta_s=0.45, theta_r=0.05)
         >>> converter = SoilModelConverter(sm=vg)
         >>> gardner = converter.ghezzehei()
-        >>> print(gardner.c)
-        6.5
+        >>> print(gardner.c) # Output: 6.5
+        >>> print(round(gardner.h_b, 3)) # Output: 0.668
         """
         # Check if input model is Genuchten
         if not isinstance(self.sm, Genuchten):
@@ -1111,18 +1117,26 @@ class SoilModelConverter:
         n = self.sm.n
         theta_s = self.sm.theta_s
 
-        # Validate n parameter
+        # Validate n parameter — eq. (13) requires m > 0.5, i.e. n > 2
         if n < 2:
             raise ValueError(
                 f"n = {n} is outside model validity range for Ghezzehei et al. (2007). "
                 f"Method requires n >= 2."
             )
 
-        # Calculate Gardner c parameter using Ghezzehei relationship
+        m = self.sm.m  # m = 1 - 1/n
+
+        # Calculate Gardner sorptive number c = alpha_G using eq. (17)
         c = 1.3 * n * alpha
 
-        # Create and return Gardner model
-        return Gardner(k_s=k_s, theta_s=theta_s, m=c, c=c)
+        # Calculate air entry pressure h_b using eq. (13)
+        # Derived from d^3 Theta / d psi^3 = 0 on the vGM retention curve
+        inner = (5 * m - m**2 + (8 * m + 5 * m**2 - 2 * m**3 + m**4) ** 0.5) / (
+            4 * m**2 - 2 * m
+        )
+        h_b = (1 / alpha) * inner ** (m - 1)
+
+        return Gardner(k_s=k_s, theta_s=theta_s, m=c, c=c, h_b=h_b)
 
     def peche(self) -> Gardner:
         """
