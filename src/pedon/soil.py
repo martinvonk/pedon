@@ -925,8 +925,7 @@ class SoilModelConverter:
     >>> vg = Genuchten(k_s=1e-5, alpha=2.0, n=2.5, theta_s=0.45, theta_r=0.05)
     >>> converter = SoilModelConverter(sm=vg)
     >>> gardner = converter.peche()
-    >>> print(gardner.c)
-    4.4
+    >>> print(gardner.c)  # Output: 4.4
 
     """
 
@@ -960,6 +959,108 @@ class SoilModelConverter:
 
         return all_methods
 
+    def morel(self) -> Brooks | Genuchten:
+        """
+        Convert between van Genuchten and Brooks-Corey models using the Morel-Seytoux
+        equivalence method, which preserves the effective capillary drive.
+
+        This method implements the parameter equivalence from Morel-Seytoux et al. (1996),
+        providing conversion between Brooks-Corey (BC) and van Genuchten (vG) parameters
+        while preserving the maximum value of the effective capillary drive Hc.M,
+        defined as the integral of relative permeability over capillary pressure.
+
+        The conversion is based on two criteria:
+        1. Preserve the effective capillary drive (primary criterion)
+        2. Preserve asymptotic behavior at low water contents (secondary criterion)
+
+        Returns
+        -------
+        Brooks or Genuchten
+            Converted soil model instance:
+            - If input is Genuchten, returns Brooks model
+            - If input is Brooks, returns Genuchten model
+
+        References
+        ----------
+        Morel-Seytoux, H. J., Meyer, P. D., Nachabe, M., Touma, J., van Genuchten, M. T.,
+        & Lenhard, R. J. (1996). Parameter equivalence for the Brooks-Corey and van
+        Genuchten soil characteristics: Preserving the effective capillary drive.
+        Water Resources Research, 32(5), 1251-1258.
+        https://doi.org/10.1029/96WR00069
+
+        """
+        if isinstance(self.sm, Genuchten):
+            """Convert van Genuchten to Brooks-Corey model."""
+            vg = self.sm
+
+            # Calculate p from m (relationship 16a in Morel-Seytoux et al. 1996)
+            # p = 1 + (2/m)
+            m = vg.m
+            p = 1 + (2 / m)
+
+            # Calculate h_ce (entry/bubble pressure) using formula (17)
+            # hce = (1/a) * 2p(p-1)/(p+3) * (147.8 + 8.1p + 0.092p^2) / (55.6 + 7.4p + p^2)
+            a_inv = (
+                (1 / vg.alpha)
+                * (2 * p * (p - 1))
+                / (p + 3)
+                * (147.8 + 8.1 * p + 0.092 * p**2)
+                / (55.6 + 7.4 * p + p**2)
+            )
+
+            # Calculate lambda (l) from p using Corey relationship (8b)
+            # M = (p - 3) / 2, where M is lambda
+            lamb = (p - 3) / 2
+
+            return Brooks(
+                k_s=vg.k_s,
+                theta_r=vg.theta_r,
+                theta_s=vg.theta_s,
+                h_b=a_inv,  # h_ce maps to h_b
+                l=lamb,  # lambda maps to l
+            )
+        elif isinstance(self.sm, Brooks):
+            """Convert Brooks-Corey to van Genuchten model."""
+            bc = self.sm
+
+            # Calculate p from l using Corey relationship (8a)
+            # p = 3 + 2*M, where M is lambda (l)
+            p = 3 + 2 * bc.l
+
+            # Calculate m from p using relationship (16a)
+            # m = 2 / (p - 1)
+            m = 2 / (p - 1)
+
+            # Calculate n from m using relationship (10b)
+            # n = 1 / (1 - m)
+            n = 1 / (1 - m)
+
+            # Calculate alpha (1/a) from h_b using formula (18), rearranged
+            # 1/a = hce * [2p(p-1)/(p+3)] * [(55.6 + 7.4p + p^2) / (147.8 + 8.1p + 0.092p^2)]
+            # Therefore: a = hce / {[2p(p-1)/(p+3)] * [(55.6 + 7.4p + p^2) / (147.8 + 8.1p + 0.092p^2)]}
+            # Or: alpha = 1/a = 1 / {hce * [2p(p-1)/(p+3)] * [(55.6 + 7.4p + p^2) / (147.8 + 8.1p + 0.092p^2)]}
+            alpha = 1 / (
+                bc.h_b
+                * (2 * p * (p - 1))
+                / (p + 3)
+                * (55.6 + 7.4 * p + p**2)
+                / (147.8 + 8.1 * p + 0.092 * p**2)
+            )
+
+            return Genuchten(
+                k_s=bc.k_s,
+                theta_r=bc.theta_r,
+                theta_s=bc.theta_s,
+                alpha=alpha,
+                n=n,
+            )
+
+        else:
+            raise TypeError(
+                f"Unsupported model type: {type(self.sm).__name__}. "
+                "Only Genuchten and Brooks models are supported by `morel` method."
+            )
+
     def ghezzehei(self) -> Gardner:
         """
         Converts van Genuchten model to Gardner model using Ghezzehei et al. (2007).
@@ -982,7 +1083,7 @@ class SoilModelConverter:
         References
         ----------
         Ghezzehei, T. A., Kneafsey, T. J., & Su, G. W. (2007). Correspondence of
-        the Gardner and van Genuchten–Mualem relative permeability function
+        the Gardner and van Genuchten-Mualem relative permeability function
         parameters. Water Resources Research, 43(10). https://doi.org/10.1029/2006WR005339
 
         Examples
@@ -1041,8 +1142,8 @@ class SoilModelConverter:
         References
         ----------
         Peche, A., Vonk, M.A., Altfelder, S., Houben, G. & Bakker, M. (in preparation).
-        A new model for the approximation of the Gardner relative1
-        conductivity curve parameter based on van Genuchten’s α
+        A new model for the approximation of the Gardner relative
+        conductivity curve parameter based on van Genuchten's alpha.
 
         Examples
         --------
