@@ -949,17 +949,13 @@ class SoilModelConverter:
         """
         all_methods = []
 
+        # Get all methods of this class
         for attr_name in dir(self):
-            if attr_name.startswith("_") or attr_name == "list_methods":
-                continue
             attr = getattr(self, attr_name)
-            if not callable(attr):
-                continue
-            try:
-                attr()
-                all_methods.append(attr_name)
-            except TypeError:
-                pass  # method does not support the current model type
+            # Skip private methods and list_methods itself
+            if not attr_name.startswith("_") and attr_name != "list_methods":
+                if callable(attr):
+                    all_methods.append(attr_name)
 
         return all_methods
 
@@ -994,7 +990,7 @@ class SoilModelConverter:
 
         """
         if isinstance(self.sm, Genuchten):
-            # Convert van Genuchten to Brooks-Corey
+            """Convert van Genuchten to Brooks-Corey model."""
             vg = self.sm
 
             # Calculate p from m (relationship 16a in Morel-Seytoux et al. 1996)
@@ -1024,7 +1020,7 @@ class SoilModelConverter:
                 l=lamb,  # lambda maps to l
             )
         elif isinstance(self.sm, Brooks):
-            # Convert Brooks-Corey to van Genuchten
+            """Convert Brooks-Corey to van Genuchten model."""
             bc = self.sm
 
             # Calculate p from l using Corey relationship (8a)
@@ -1062,7 +1058,7 @@ class SoilModelConverter:
         else:
             raise TypeError(
                 f"Unsupported model type: {type(self.sm).__name__}. "
-                "Only Genuchten and Brooks soil models are supported by `morel` method."
+                "Only Genuchten and Brooks models are supported by `morel` method."
             )
 
     def ghezzehei(self) -> Gardner:
@@ -1101,8 +1097,8 @@ class SoilModelConverter:
         # Check if input model is Genuchten
         if not isinstance(self.sm, Genuchten):
             raise TypeError(
-                f"Unsupported model type: {type(self.sm).__name__}. "
-                "Only Genuchten soil models are supported by `ghezzehei` method."
+                f"ghezzehei() method requires Genuchten model, "
+                f"got {type(self.sm).__name__}"
             )
 
         # Extract parameters from Genuchten model
@@ -1160,8 +1156,7 @@ class SoilModelConverter:
         # Check if input model is Genuchten
         if not isinstance(self.sm, Genuchten):
             raise TypeError(
-                f"Unsupported model type: {type(self.sm).__name__}. "
-                "Only Genuchten soil models are supported by `peche` method."
+                f"peche() method requires Genuchten model, got {type(self.sm).__name__}"
             )
 
         # Extract parameters from Genuchten model
