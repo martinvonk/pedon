@@ -3,7 +3,7 @@ from typing import Protocol, Type, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
-from numpy import exp, full, linspace, log, log10, logspace
+from numpy import exp, full, linspace, log, log10, logspace, maximum
 
 from ._typing import FloatArray, SoilModelNames
 
@@ -237,7 +237,7 @@ class Haverkamp:
 
 @dataclass
 class Gardner:
-    """Gardner(-Kozeny) Soil Model
+    """Gardner(-Kozeny) Soil Model with optional air entry pressure.
 
     Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
     moisture flow equation with application to evaporation from soils
@@ -249,9 +249,11 @@ class Gardner:
     theta_s: float
     m: float
     c: float
+    h_b: float = 0.0
 
     def theta(self, h: FloatArray) -> FloatArray:
-        return self.theta_s * exp(-self.m * npabs(h))
+        h_abs = maximum(npabs(h) - self.h_b, 0.0)
+        return self.theta_s * exp(-self.m * h_abs)
 
     def s(self, h: FloatArray) -> FloatArray:
         return self.theta(h) / self.theta_s
@@ -260,13 +262,14 @@ class Gardner:
         if s is not None:
             theta = s * self.theta_s
             h = self.h(theta)
-        return exp(-self.c * npabs(h))
+        h_abs = maximum(npabs(h) - self.h_b, 0.0)
+        return exp(-self.c * h_abs)
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        return -(1.0 / self.m) * log(theta / self.theta_s)
+        return self.h_b - (1.0 / self.m) * log(theta / self.theta_s)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
