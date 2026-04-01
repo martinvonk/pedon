@@ -1,3 +1,4 @@
+from . import _typing as typing  # noqa: F401
 from . import soil as soil
 from . import soilmodel as soilmodel  # noqa: F401
 from ._params import get_params as get_params

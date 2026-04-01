@@ -2,11 +2,10 @@ from dataclasses import dataclass, field
 from typing import Protocol, Type, runtime_checkable
 
 import matplotlib.pyplot as plt
-from matplotlib.axes import Axes
 from numpy import abs as npabs
 from numpy import exp, full, linspace, log, log10, logspace, maximum
 
-from ._typing import FloatArray, SoilModelNames
+from ._typing import FloatArray, MatplotlibAxes, SoilModelNames
 
 
 @runtime_checkable
@@ -44,7 +43,7 @@ class SoilModel(Protocol):
         ...         # Inverse of theta method
         ...         return ...
         ...
-        ...     def plot(self, ax: Axes | None = None) -> Axes:
+        ...     def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         ...         # Plot the soil water retention curve by calling `plot_swrc`
         ...         return plot_swrc(sm=self, ax=ax)
     """
@@ -73,7 +72,7 @@ class SoilModel(Protocol):
         """Calculate pressure head h from soil moisture content (inverse of theta)."""
         ...
 
-    def plot(self, ax: Axes | None = None) -> Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         """Plot the soil water retention curve by calling `plot_swrc`."""
         ...
 
@@ -135,7 +134,7 @@ class Genuchten:
         h = 1 / self.alpha * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
         return h
 
-    def plot(self, ax: Axes | None = None) -> Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(sm=self, ax=ax)
 
     def convert(self, method: str | None = None) -> list[str] | SoilModel:
@@ -216,7 +215,7 @@ class Brooks:
             ) ** (-1 / self.l)
             return h
 
-    def plot(self, ax: Axes | None = None) -> Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(sm=self, ax=ax)
 
     def convert(self, method: str | None = None) -> list[str] | SoilModel:
@@ -270,7 +269,7 @@ class Haverkamp:
         s = (theta - self.theta_r) / (self.theta_s - self.theta_r)
         return (self.alpha * ((1.0 / s) - 1.0)) ** (1.0 / self.beta)
 
-    def plot(self, ax: Axes | None = None) -> Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(sm=self, ax=ax)
 
     def convert(self, method: str | None = None) -> list[str] | SoilModel:
@@ -322,7 +321,7 @@ class Gardner:
     def h(self, theta: FloatArray) -> FloatArray:
         return self.h_b - (1.0 / self.m) * log(theta / self.theta_s)
 
-    def plot(self, ax: Axes | None = None) -> Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(sm=self, ax=ax)
 
     def convert(self, method: str | None = None) -> list[str] | SoilModel:
@@ -378,7 +377,7 @@ class Rucker:
             (theta - self.theta_r) / (self.theta_s - self.theta_r)
         )
 
-    def plot(self, ax: Axes | None = None) -> Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(sm=self, ax=ax)
 
     def convert(self, method: str | None = None) -> list[str] | SoilModel:
@@ -441,7 +440,7 @@ class Panday:
         h = 1 / self.alpha * ((1 / se) ** (1 / self.gamma) - 1) ** (1 / self.beta)
         return h
 
-    def plot(self, ax: Axes | None = None) -> Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(sm=self, ax=ax)
 
     def convert(self, method: str | None = None) -> list[str] | SoilModel:
@@ -524,7 +523,7 @@ class Fredlund:
             1 / self.n
         )
 
-    def plot(self, ax: Axes | None = None) -> Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(sm=self, ax=ax)
 
     def convert(self, method: str | None = None) -> list[str] | SoilModel:
@@ -587,7 +586,7 @@ class GenuchtenGardner:
         h = 1 / self.alpha * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
         return h
 
-    def plot(self, ax: Axes | None = None) -> Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(sm=self, ax=ax)
 
     def convert(self, method: str | None = None) -> list[str] | SoilModel:
@@ -620,8 +619,8 @@ def get_soilmodel(
 
 
 def plot_swrc(
-    sm: SoilModel, saturation: bool = False, ax: Axes | None = None, **kwargs
-) -> Axes:
+    sm: SoilModel, saturation: bool = False, ax: MatplotlibAxes | None = None, **kwargs
+) -> MatplotlibAxes:
     """Plot soil water retention curve"""
 
     if ax is None:
@@ -649,9 +648,9 @@ def plot_swrc(
 
 def plot_hcf(
     sm: SoilModel,
-    ax: Axes | None = None,
+    ax: MatplotlibAxes | None = None,
     **kwargs,
-) -> Axes:
+) -> MatplotlibAxes:
     """Plot the hydraulic conductivity function"""
 
     if ax is None:
