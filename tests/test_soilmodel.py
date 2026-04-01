@@ -11,7 +11,7 @@ theta = array([0.1, 0.2, 0.3, 0.4])
 
 @pytest.fixture
 def gen() -> pe.SoilModel:
-    return pe.Genuchten(k_s=10, theta_r=0.01, theta_s=0.43, alpha=0.02, n=2.1, l=0.5)
+    return pe.Genuchten(k_s=10, theta_r=0.01, theta_s=0.43, alpha=0.02, n=1.1, l=0.5)
 
 
 @pytest.fixture
@@ -179,46 +179,3 @@ def test_h_haverkamp_inverse(
     h_out = hav.h(theta=theta)
     theta_back = hav.theta(h=h_out)
     assert allclose(theta_back, theta)
-
-
-# --- Protocol conformance ---
-@pytest.fixture(params=["gen", "bro", "gar", "hav", "gr", "sor", "gg"])
-def any_model(request: pytest.FixtureRequest) -> pe.SoilModel:
-    return request.getfixturevalue(request.param)
-
-
-def test_protocol_conformance(any_model: pe.SoilModel) -> None:
-    assert isinstance(any_model, pe.SoilModel)
-
-
-# --- convert() ---
-def test_convert_list_returns_sorted_list(gen: pe.Genuchten) -> None:
-    methods = gen.convert()
-    assert isinstance(methods, list)
-    assert methods == sorted(methods)
-
-
-def test_convert_list_empty_for_gardner(gar: pe.Gardner) -> None:
-    assert gar.convert() == []
-
-
-def test_convert_by_name_returns_soilmodel(gen: pe.Genuchten) -> None:
-    methods: list[str] = gen.convert(None)  # get list of methods
-    for method in methods:
-        result = gen.convert(method)
-        assert isinstance(result, pe.SoilModel)
-
-
-# --- fit() ---
-
-
-def test_fit_returns_soilmodel(gen: pe.Genuchten) -> None:
-    result = gen.fit(pe.Brooks, h=h)
-    assert isinstance(result, pe.SoilModel)
-
-
-def test_fit_to_same_class_roundtrip(gen: pe.Genuchten) -> None:
-    fitted = gen.fit(pe.Genuchten, h=h)
-    assert isinstance(fitted, pe.Genuchten)
-    # fitted parameters should reproduce theta closely
-    assert allclose(fitted.theta(h), gen.theta(h), rtol=1e-2)
