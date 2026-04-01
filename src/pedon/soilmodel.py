@@ -46,6 +46,18 @@ class SoilModel(Protocol):
         ...     def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         ...         # Plot the soil water retention curve by calling `plot_swrc`
         ...         return plot_swrc(sm=self, ax=ax)
+        ...
+        ...     def convert(self, method: str | None = None) -> list[str] | SoilModel:
+        ...         # Convert this soil model to another model type
+        ...         if method is None:
+        ...             return SoilModelConverter.list_methods(sm=self)
+        ...         return getattr(SoilModelConverter, method)(self)
+        ...
+        ...     def fit(self, sm: Type[SoilModel], h: FloatArray, **kwargs) -> SoilModel:
+        ...         # Fit this soil model to another soil model type using the provided pressure head data
+        ...         from .soil import SoilSample
+        ...         ss = SoilSample(h=h, theta=self.theta(h), k=self.k(h))
+        ...         return ss.fit(sm=sm, **kwargs)
     """
 
     def theta(self, h: FloatArray) -> FloatArray:
