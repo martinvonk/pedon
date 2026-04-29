@@ -89,7 +89,7 @@ staring = pe.Soil("B01").from_name(pe.Genuchten, source="Staring_2018")
 `pedon` provides two approaches for obtaining soil model parameters from soil data. The first uses pedotransfer functions based on easily measured soil properties. The second relies on direct measurements of soil water content and hydraulic conductivity.
 
 ### Pedotransfer functions
-Pedotransfer functions relate easily measured soil properties (e.g. sand, silt, clay or organic matter content and bulk density) to soil model parameters [@bouma_pedotransfer_1989]. `pedon` implements functions from the literature, including those of @wosten_pedotransfer_1999, @wosten_staringreeks_2001, @cosby_pedotransfer_1984, and @cooper_pedotransfer_2021. It also provides access to parameter databases such as Rosetta [@schaap_rosetta_2001] and HYPAGS [@peche_hypags_2024], the latter enabling estimation from a single value of saturated hydraulic conductivity or representative grain diameters.
+Pedotransfer functions relate easily measured soil properties (e.g. sand, silt, clay or organic matter content and bulk density) to soil model parameters [@bouma_pedotransfer_1989]. `pedon` implements functions from the literature, including those of @wosten_pedotransfer_1999, @wosten_staringreeks_2001, @cosby_pedotransfer_1984, and @cooper_pedotransfer_2021. It also provides access to parameter databases such as Rosetta [@schaap_rosetta_2001] (optional dependency) and HYPAGS [@peche_hypags_2024], the latter enabling estimation from a single value of saturated hydraulic conductivity or representative grain diameters.
 
 ```python
 # Estimate parameters using Cosby's pedotransfer function
