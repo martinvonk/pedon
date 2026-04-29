@@ -122,6 +122,7 @@ class SoilSample:
         W2: float | None = None,
         k_s: float | None = None,
         silent: bool = True,
+        kwargs: dict | None = None,
     ) -> SoilModel:
         """
         Fit the provided SoilModel (e.g., van Genuchten, Brooks-Corey class) to the
@@ -130,6 +131,30 @@ class SoilSample:
         requested model name. The objective combines water retention and log10(k)
         errors; weighting terms W1 and W2 control the relative contribution of k.
         Returns a model instance with optimized parameters.
+
+        Parameters
+        ----------
+        sm : Type[SoilModel]
+            The soil model class to fit (e.g., Genuchten, Brooks).
+        pbounds : DataFrame | None, optional
+            DataFrame with parameter bounds and initial values. If None, defaults are
+            used based on the model name. Expected columns: 'p_ini', 'p_min', 'p_max'.
+        weights : FloatArray | float, optional
+            Weights for the objective function. Can be a single float (applied to all)
+            or an array of length N+M (N for theta, M-N for k). Default is 1.0.
+        W1 : float, optional
+            Scaling factor for the k error in the objective function. Default is 0.1.
+        W2 : float | None, optional
+            Additional scaling factor for the k error. If None, it is computed to balance
+            the contributions of theta and k errors based on their magnitudes and weights.
+        k_s : float | None, optional
+            If provided, this value of saturated hydraulic conductivity will be fixed during
+            optimization. This means that the relative hydraulic conductivity curve will be
+            estimated.
+        silent : bool, optional
+            If False, prints the optimization result. Default is True.
+        kwargs : dict, optional
+            Additional keyword arguments to pass to the scipy.optimize.least_squares function.
 
         Notes
         -----
@@ -161,8 +186,12 @@ class SoilSample:
                 * sum(weights[0:N] * theta)
                 / (N * sum(weights[N:M] * npabs(log10(k))))
             )
+            logging.debug(f"Using W2: {W2}")
 
         def get_diff(p: FloatArray) -> FloatArray:
+            """Objective function for least squares optimization. Computes the difference
+            between measured and model-predicted theta and log10(k) values, applying
+            the specified weights and scaling factors."""
             est_pars = dict(zip(pbounds.index, p))
             if k_s is not None:
                 est_pars["k_s"] = k_s
@@ -172,6 +201,7 @@ class SoilSample:
             diff = append(weights[0:N] * theta_diff, weights[N:M] * W1 * W2 * k_diff)
             return diff
 
+        kwargs = {"method": "trf", "jac": "3-point", "x_scale": "jac"} | (kwargs or {})
         res = least_squares(
             get_diff,
             x0=pbounds.loc[:, "p_ini"],
@@ -179,6 +209,7 @@ class SoilSample:
                 pbounds.loc[:, "p_min"],
                 pbounds.loc[:, "p_max"],
             ),
+            **kwargs,
         )
         opt_pars = dict(zip(pbounds.index, res.x))
         if k_s is not None:
