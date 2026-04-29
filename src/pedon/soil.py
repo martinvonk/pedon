@@ -188,7 +188,7 @@ class SoilSample:
                 * sum(weights[0:N] * theta)
                 / (N * sum(weights[N:M] * npabs(log10(k))))
             )
-            logging.debug(f"Using W2: {W2}")
+            logger.debug(f"Computed W2: {W2}")
 
         def get_diff(p: FloatArray) -> FloatArray:
             """Objective function for least squares optimization. Computes the difference
