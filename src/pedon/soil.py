@@ -1,7 +1,7 @@
 # type: ignore
-import logging
 from bisect import bisect_right
 from dataclasses import dataclass, field
+from logging import getLogger
 from pathlib import Path
 from typing import Literal, Self, Type
 
@@ -25,6 +25,8 @@ from scipy.optimize import fixed_point, least_squares
 from ._params import get_params
 from ._typing import FloatArray
 from .soilmodel import Brooks, Genuchten, SoilModel, get_soilmodel
+
+logger = getLogger(__name__)
 
 
 @dataclass
@@ -734,7 +736,7 @@ class SoilSample:
                 k = self.k
             elif isinstance(self.k, ndarray):
                 if len(self.k) > 1:
-                    logging.warning(
+                    logger.warning(
                         "HYPAGS routine only accepts single k value, choosing the first k value in the array."
                     )
                 k = float(self.k[0])
@@ -744,27 +746,27 @@ class SoilSample:
             # case 0: mathematical model where k is given
             # check for non-valid input
             if k > 2.6e-2 or k < 2.87e-7:
-                logging.error("k out of hypags model limits.")
-            logging.debug("Using case 0 of hypags model (k given).")
+                logger.error("k out of hypags model limits.")
+            logger.debug("Using case 0 of hypags model (k given).")
             self.d10 = (k / Pi * c) ** (0.5)  # calculation of d10
             self.d20 = c1 * self.d10  # calculation of d20
         elif self.d10 is not None:
             # case 1: mathematical model where d10 is given
             if not 5.35e-5 <= self.d10 <= 8.3e-4:
-                logging.error(
+                logger.error(
                     f"d10 ({self.d10:.3e}) out of hypags model limits: 5.35e-5 to 8.3e-4."
                 )
-            logging.debug("Using case 1 of hypags model (d10 given).")
+            logger.debug("Using case 1 of hypags model (d10 given).")
             self.d20 = c1 * self.d10  # calculation of d20
             k = (Pi * rho_f * g * self.d10**2) / mu
             self.k = array([k], dtype=float)  # calculation of k
         elif self.d20 is not None:
             # case 2: mathematical model where d20 is given
             if not 6.25e-5 <= self.d20 <= 1.2e-3:
-                logging.error(
+                logger.error(
                     f"d20 ({self.d20:.3e}) out of hypags model limits: 6.25e-5 to 1.2e-3."
                 )
-            logging.debug("Using case 2 of hypags model (d20 given).")
+            logger.debug("Using case 2 of hypags model (d20 given).")
             self.d10 = self.d20 / c1  # calculation of d10
             k = (Pi * rho_f * g * self.d10**2) / mu
             self.k = array([k], dtype=float)  # calculation of k
@@ -877,7 +879,7 @@ class Soil:
         if "HYDRUS_" in self.name:
             self.name = self.name.replace("HYDRUS_", "")
             source = "HYDRUS"
-            logging.warning(
+            logger.warning(
                 "Removed 'HYDRUS_' from soil name. For future use"
                 "please provide source='HYDRUS' argument"
             )
