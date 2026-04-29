@@ -1,11 +1,9 @@
 # %%
-import logging
 
 import numpy as np
 
 import pedon as pe
 
-logging.basicConfig(level="DEBUG")
 # %%
 # Dummy model for Silt in order to create SWRC and HCF
 p_true = {
@@ -297,8 +295,13 @@ pbounds.loc[["k_s", "theta_r", "theta_s", "alpha", "n"], "p_ini"] = np.array(
 )
 
 # fit
+# import logging
+# logging.basicConfig(level="DEBUG") # to see W2 value
+
 genf = pe.SoilSample(h=h, theta=theta, k=k).fit(
-    pe.Genuchten, pbounds=pbounds, silent=False
+    pe.Genuchten,
+    pbounds=pbounds,
+    # silent=False,
 )
 
 # %%

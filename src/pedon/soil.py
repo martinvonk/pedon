@@ -124,7 +124,7 @@ class SoilSample:
         W2: float | None = None,
         k_s: float | None = None,
         silent: bool = True,
-        kwargs: dict | None = None,
+        **kwargs,
     ) -> SoilModel:
         """
         Fit the provided SoilModel (e.g., van Genuchten, Brooks-Corey class) to the
@@ -203,7 +203,7 @@ class SoilSample:
             diff = append(weights[0:N] * theta_diff, weights[N:M] * W1 * W2 * k_diff)
             return diff
 
-        kwargs = {"method": "trf", "jac": "3-point", "x_scale": "jac"} | (kwargs or {})
+        kwargs = {"jac": "3-point", "x_scale": "jac"} | (kwargs or {})
         res = least_squares(
             get_diff,
             x0=pbounds.loc[:, "p_ini"],
