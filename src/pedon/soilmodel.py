@@ -489,6 +489,57 @@ class GenuchtenGardner:
         return plot_swrc(self, ax=ax)
 
 
+@dataclass
+class GenuchtenKool:
+    """Combination soil model using the van Genuchten soil water retention
+    curve and the Gardner hydraulic conductivity function.
+
+    van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
+    Hydraulic Conductivity of Unsaturated Soil
+    Kool, J. B., & Parker, J. C. (1987). Development and evaluation of
+    closed-form expressions for hysteretic soil hydraulic properties.
+    """
+
+    k_s: float
+    theta_r: float
+    theta_s: float
+    alpha: float
+    n: float
+    xi: float = field(default=2.0, repr=True)
+    m: float = field(init=False, repr=False)
+
+    def __post_init__(self):
+        self.m = 1 - 1 / self.n
+        self.alpha_w = self.alpha * self.xi
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        theta = (
+            self.theta_r
+            + (self.theta_s - self.theta_r)
+            / (1 + npabs(self.alpha_w * h) ** self.n) ** self.m
+        )
+        return theta
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is None:
+            s = self.s(h)
+        return s**self.l * (1 - (1 - s ** (1 / self.m)) ** self.m) ** 2
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        h = 1 / self.alpha_w * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
+        return h
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
 def get_soilmodel(
     soilmodel_name: SoilModelNames,
 ) -> Type[SoilModel]:
@@ -501,6 +552,7 @@ def get_soilmodel(
         "Panday": Panday,
         "Fredlund": Fredlund,
         "GenuchtenGardner": GenuchtenGardner,
+        "GenuchtenKool": GenuchtenKool,
     }
     return sms[soilmodel_name]
 
