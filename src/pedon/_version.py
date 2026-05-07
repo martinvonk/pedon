@@ -25,7 +25,7 @@ def get_versions() -> dict[str, str]:
 def show_versions() -> None:
     """Print version information."""
     versions = get_versions()
-    max_name_len = max(len(name) for name in versions.keys())
+    max_name_len = max(len(key) for key in versions.keys())
     msg = ""
     for name, version in versions.items():
         msg += f"{name:<{max_name_len}} : {version}\n"
