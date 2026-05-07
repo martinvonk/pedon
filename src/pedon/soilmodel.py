@@ -505,12 +505,17 @@ class GenuchtenKool:
     theta_s: float
     alpha: float
     n: float
-    xi: float = field(default=2.0, repr=True)
+    l: float = 0.5  # noqa: E741
     m: float = field(init=False, repr=False)
+    xi: float = field(default=2.0, repr=True)
 
     def __post_init__(self):
         self.m = 1 - 1 / self.n
-        self.alpha_w = self.alpha * self.xi
+
+    @property
+    def alpha_w(self) -> float:
+        """Alpha parameter for the water retention curve, which is scaled by xi."""
+        return self.alpha * self.xi
 
     def theta(self, h: FloatArray) -> FloatArray:
         theta = (
