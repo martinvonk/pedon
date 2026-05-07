@@ -1,5 +1,5 @@
-import logging
 from dataclasses import MISSING, fields
+from logging import getLogger
 from typing import Type
 
 from numpy import inf, nan
@@ -7,6 +7,8 @@ from pandas import DataFrame
 
 from pedon._typing import SoilModelNames
 from pedon.soilmodel import SoilModel, get_soilmodel
+
+logger = getLogger(__name__)
 
 
 def _get_default_params(sm: Type[SoilModel]) -> DataFrame:
@@ -38,7 +40,7 @@ def get_params(
         smn = sm
         sm = get_soilmodel(smn)
     else:
-        raise ValueError(
+        raise TypeError(
             f"Argument must either be Type[SoilModel] | SoilModel | str, not {type(sm)}"
         )
 
@@ -74,6 +76,6 @@ def get_params(
         for param, bounds in param_bounds[smn].items():
             params.loc[param] = bounds
     else:
-        logging.warning(f"No default parameter bounds for SoilModel type {smn}")
+        logger.warning(f"No default parameter bounds for SoilModel type {smn}")
 
     return params

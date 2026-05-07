@@ -1,7 +1,7 @@
 # type: ignore
-import logging
 from bisect import bisect_right
 from dataclasses import dataclass, field
+from logging import getLogger
 from pathlib import Path
 from typing import Literal, Self, Type
 
@@ -25,6 +25,8 @@ from scipy.optimize import fixed_point, least_squares
 from ._params import get_params
 from ._typing import FloatArray
 from .soilmodel import Brooks, Genuchten, SoilModel, get_soilmodel
+
+logger = getLogger(__name__)
 
 
 @dataclass
@@ -122,6 +124,7 @@ class SoilSample:
         W2: float | None = None,
         k_s: float | None = None,
         silent: bool = True,
+        **kwargs,
     ) -> SoilModel:
         """
         Fit the provided SoilModel (e.g., van Genuchten, Brooks-Corey class) to the
@@ -130,6 +133,30 @@ class SoilSample:
         requested model name. The objective combines water retention and log10(k)
         errors; weighting terms W1 and W2 control the relative contribution of k.
         Returns a model instance with optimized parameters.
+
+        Parameters
+        ----------
+        sm : Type[SoilModel]
+            The soil model class to fit (e.g., Genuchten, Brooks).
+        pbounds : DataFrame | None, optional
+            DataFrame with parameter bounds and initial values. If None, defaults are
+            used based on the model name. Expected columns: 'p_ini', 'p_min', 'p_max'.
+        weights : FloatArray | float, optional
+            Weights for the objective function. Can be a single float (applied to all)
+            or an array of length N+M (N for theta, M-N for k). Default is 1.0.
+        W1 : float, optional
+            Scaling factor for the k error in the objective function. Default is 0.1.
+        W2 : float | None, optional
+            Additional scaling factor for the k error. If None, it is computed to balance
+            the contributions of theta and k errors based on their magnitudes and weights.
+        k_s : float | None, optional
+            If provided, this value of saturated hydraulic conductivity will be fixed during
+            optimization. This means that the relative hydraulic conductivity curve will be
+            estimated.
+        silent : bool, optional
+            If False, prints the optimization result. Default is True.
+        kwargs : dict, optional
+            Additional keyword arguments to pass to the scipy.optimize.least_squares function.
 
         Notes
         -----
@@ -161,8 +188,12 @@ class SoilSample:
                 * sum(weights[0:N] * theta)
                 / (N * sum(weights[N:M] * npabs(log10(k))))
             )
+            logger.debug(f"Computed W2: {W2}")
 
         def get_diff(p: FloatArray) -> FloatArray:
+            """Objective function for least squares optimization. Computes the difference
+            between measured and model-predicted theta and log10(k) values, applying
+            the specified weights and scaling factors."""
             est_pars = dict(zip(pbounds.index, p))
             if k_s is not None:
                 est_pars["k_s"] = k_s
@@ -172,6 +203,7 @@ class SoilSample:
             diff = append(weights[0:N] * theta_diff, weights[N:M] * W1 * W2 * k_diff)
             return diff
 
+        kwargs = {"jac": "3-point", "x_scale": "jac"} | (kwargs or {})
         res = least_squares(
             get_diff,
             x0=pbounds.loc[:, "p_ini"],
@@ -179,6 +211,7 @@ class SoilSample:
                 pbounds.loc[:, "p_min"],
                 pbounds.loc[:, "p_max"],
             ),
+            **kwargs,
         )
         opt_pars = dict(zip(pbounds.index, res.x))
         if k_s is not None:
@@ -703,7 +736,7 @@ class SoilSample:
                 k = self.k
             elif isinstance(self.k, ndarray):
                 if len(self.k) > 1:
-                    logging.warning(
+                    logger.warning(
                         "HYPAGS routine only accepts single k value, choosing the first k value in the array."
                     )
                 k = float(self.k[0])
@@ -713,27 +746,27 @@ class SoilSample:
             # case 0: mathematical model where k is given
             # check for non-valid input
             if k > 2.6e-2 or k < 2.87e-7:
-                logging.error("k out of hypags model limits.")
-            logging.debug("Using case 0 of hypags model (k given).")
+                logger.error("k out of hypags model limits.")
+            logger.debug("Using case 0 of hypags model (k given).")
             self.d10 = (k / Pi * c) ** (0.5)  # calculation of d10
             self.d20 = c1 * self.d10  # calculation of d20
         elif self.d10 is not None:
             # case 1: mathematical model where d10 is given
             if not 5.35e-5 <= self.d10 <= 8.3e-4:
-                logging.error(
+                logger.error(
                     f"d10 ({self.d10:.3e}) out of hypags model limits: 5.35e-5 to 8.3e-4."
                 )
-            logging.debug("Using case 1 of hypags model (d10 given).")
+            logger.debug("Using case 1 of hypags model (d10 given).")
             self.d20 = c1 * self.d10  # calculation of d20
             k = (Pi * rho_f * g * self.d10**2) / mu
             self.k = array([k], dtype=float)  # calculation of k
         elif self.d20 is not None:
             # case 2: mathematical model where d20 is given
             if not 6.25e-5 <= self.d20 <= 1.2e-3:
-                logging.error(
+                logger.error(
                     f"d20 ({self.d20:.3e}) out of hypags model limits: 6.25e-5 to 1.2e-3."
                 )
-            logging.debug("Using case 2 of hypags model (d20 given).")
+            logger.debug("Using case 2 of hypags model (d20 given).")
             self.d10 = self.d20 / c1  # calculation of d10
             k = (Pi * rho_f * g * self.d10**2) / mu
             self.k = array([k], dtype=float)  # calculation of k
@@ -836,7 +869,7 @@ class Soil:
             smn = sm
             sm = get_soilmodel(smn)
         else:
-            raise ValueError(
+            raise TypeError(
                 f"Argument must either be Type[SoilModel] | SoilModel | str,"
                 f"not {type(sm)}"
             )
@@ -846,7 +879,7 @@ class Soil:
         if "HYDRUS_" in self.name:
             self.name = self.name.replace("HYDRUS_", "")
             source = "HYDRUS"
-            logging.warning(
+            logger.warning(
                 "Removed 'HYDRUS_' from soil name. For future use"
                 "please provide source='HYDRUS' argument"
             )
@@ -887,7 +920,7 @@ class Soil:
             sm = get_soilmodel(smn)
 
         else:
-            raise ValueError(
+            raise TypeError(
                 f"Argument must either be Type[SoilModel] | SoilModel | str,"
                 f"not {type(sm)}"
             )
