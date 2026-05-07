@@ -492,7 +492,8 @@ class GenuchtenGardner:
 @dataclass
 class GenuchtenKool:
     """Combination soil model using the van Genuchten soil water retention
-    curve and the Gardner hydraulic conductivity function.
+    curve and hydraulic conductivity function. Adjusted with a scaling factor
+    xi to get the hysteresis behavior as described in Kool and Parker (1987).
 
     van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
     Hydraulic Conductivity of Unsaturated Soil
