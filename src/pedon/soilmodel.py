@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Protocol, Type, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
@@ -10,7 +10,7 @@ from ._typing import FloatArray, SoilModelNames
 
 @runtime_checkable
 class SoilModel(Protocol):
-    """Protocol for soil models
+    """Protocol for soil models.
 
     This protocol defines the interface for custom soil models. To create a custom
     soil model, implement all methods defined below. Your class will automatically
@@ -46,22 +46,26 @@ class SoilModel(Protocol):
         ...     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         ...         # Plot the soil water retention curve by calling `plot_swrc`
         ...         return plot_swrc(self, ax=ax)
+
     """
 
     def theta(self, h: FloatArray) -> FloatArray:
-        """Calculate soil moisture content (water content) from
-        pressure head h."""
+        """Calculate soil moisture content (water content) from pressure head h."""
         ...
 
     def s(self, h: FloatArray) -> FloatArray:
         """Calculate effective saturation from pressure head h.
-        Effective saturation is normalized between 0 (dry) and 1 (saturated)."""
+
+        Effective saturation is normalized between 0 (dry) and 1 (saturated).
+        """
         ...
 
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         """Calculate relative permeability (or relative hydraulic conductivity).
+
         Relative permeability is normalized between 0 (dry) and 1 (saturated).
-        Can be calculated from either pressure head h or saturation s."""
+        Can be calculated from either pressure head h or saturation s.
+        """
         ...
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
@@ -79,10 +83,10 @@ class SoilModel(Protocol):
 
 @dataclass
 class Genuchten:
-    """Mualem-van Genuchten Soil Model
+    """Mualem-van Genuchten Soil Model.
 
     van Genuchten, M. Th. (1980) - A Closed-form Equation for Predicting the
-    Hydraulic Conductivity of Unsaturated Soil
+    Hydraulic Conductivity of Unsaturated Soil.
     """
 
     k_s: float
@@ -126,9 +130,9 @@ class Genuchten:
 
 @dataclass
 class Brooks:
-    """Brooks and Corey Soil Model
+    """Brooks and Corey Soil Model.
 
-    Brooks, R.H. and Corey, A.T. (1964) - Hydraulic Properties of Porous Media
+    Brooks, R.H. and Corey, A.T. (1964) - Hydraulic Properties of Porous Media.
     """
 
     k_s: float
@@ -195,7 +199,7 @@ class Brooks:
 
 @dataclass
 class Haverkamp:
-    """Haverkamp Soil Model
+    """Haverkamp Soil Model.
 
     Haverkamp, R., Vauclin, M., Touma, J., Wierenga, P. J., & Vachaud, G. (1977).
     A comparison of numerical simulation models for one-dimensional infiltration.
@@ -237,12 +241,12 @@ class Haverkamp:
 
 @dataclass
 class Gardner:
-    """Gardner(-Kozeny) Soil Model
+    """Gardner(-Kozeny) Soil Model.
 
     Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
-    moisture flow equation with application to evaporation from soils
+    moisture flow equation with application to evaporation from soils.
     Bakker and Nieber (2009) - Damping of Sinusoidal Surface Flux Fluctuations
-    with Soil Depth
+    with Soil Depth.
     """
 
     k_s: float
@@ -274,7 +278,7 @@ class Gardner:
 
 @dataclass
 class Rucker:
-    """Gardner(-Rucker) Soil Model
+    """Gardner(-Rucker) Soil Model.
 
     Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
     moisture flow equation with application to evaporation from soils
@@ -318,9 +322,9 @@ class Rucker:
 
 @dataclass
 class Panday:
-    """Panday Soil Model (MODFLOW-USG)
+    """Panday Soil Model as used in MODFLOW-USG Tranport and MODFLOW's UZF package.
 
-    Panday, S. - USG-Transport: Transport and other Enhancements to MODFLOW-USG
+    Panday, S. - USG-Transport: Transport and other Enhancements to MODFLOW-USG.
     """
 
     k_s: float
@@ -369,10 +373,10 @@ class Panday:
 
 @dataclass
 class Fredlund:
-    """Fredlund and Xing Soil Model
+    """Fredlund and Xing Soil Model.
 
     Fredlund, D.G. and Xing, A. (1994) - Equations for the soil-water
-    characteristic curve
+    characteristic curve.
     """
 
     k_s: float
@@ -397,7 +401,7 @@ class Fredlund:
         def theta_d(
             h: FloatArray, a: float, n: float, m: float, theta_s: float
         ) -> FloatArray:
-            """Derivative of theta (according to WolframAlpha)"""
+            """Compute the derivative of theta."""
             return -(
                 theta_s
                 * m
@@ -440,8 +444,10 @@ class Fredlund:
 
 @dataclass
 class GenuchtenGardner:
-    """Combination soil model using the van Genuchten soil water retention
-    curve and the Gardner hydraulic conductivity function.
+    """Combination soil model.
+
+    Uses the van Genuchten soil water retention curve and the Gardner
+    hydraulic conductivity function.
 
     Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
     moisture flow equation with application to evaporation from soils
@@ -489,9 +495,68 @@ class GenuchtenGardner:
         return plot_swrc(self, ax=ax)
 
 
+@dataclass
+class GenuchtenKool:
+    """Soil model with scaling factor for hysteresis.
+
+    Uses the van Genuchten soil water retention curve and
+    hydraulic conductivity function with a scaling factor xi to get the
+    hysteresis behavior as described in Kool and Parker (1987).
+
+    van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
+    Hydraulic Conductivity of Unsaturated Soil.
+    Kool, J. B., & Parker, J. C. (1987). Development and evaluation of
+    closed-form expressions for hysteretic soil hydraulic properties.
+    """
+
+    k_s: float
+    theta_r: float
+    theta_s: float
+    alpha: float
+    n: float
+    l: float = 0.5  # noqa: E741
+    m: float = field(init=False, repr=False)
+    xi: float = field(default=2.0, repr=True)
+
+    def __post_init__(self):
+        self.m = 1 - 1 / self.n
+
+    @property
+    def alpha_w(self) -> float:
+        """Alpha parameter for the water retention curve, which is scaled by xi."""
+        return self.alpha * self.xi
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        theta = (
+            self.theta_r
+            + (self.theta_s - self.theta_r)
+            / (1 + npabs(self.alpha_w * h) ** self.n) ** self.m
+        )
+        return theta
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is None:
+            s = self.s(h)
+        return s**self.l * (1 - (1 - s ** (1 / self.m)) ** self.m) ** 2
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        h = 1 / self.alpha_w * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
+        return h
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
 def get_soilmodel(
     soilmodel_name: SoilModelNames,
-) -> Type[SoilModel]:
+) -> type[SoilModel]:
     sms = {
         "Genuchten": Genuchten,
         "Brooks": Brooks,
@@ -501,6 +566,7 @@ def get_soilmodel(
         "Panday": Panday,
         "Fredlund": Fredlund,
         "GenuchtenGardner": GenuchtenGardner,
+        "GenuchtenKool": GenuchtenKool,
     }
     return sms[soilmodel_name]
 
@@ -508,8 +574,7 @@ def get_soilmodel(
 def plot_swrc(
     sm: SoilModel, saturation: bool = False, ax: plt.Axes | None = None, **kwargs
 ) -> plt.Axes:
-    """Plot soil water retention curve"""
-
+    """Plot soil water retention curve."""
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=(3, 6))
         ax.set_yscale("log")
@@ -525,7 +590,7 @@ def plot_swrc(
     if "label" in kwargs:
         label = kwargs.pop("label")
     else:
-        label = getattr(getattr(sm, "__class__"), "__name__")
+        label = sm.__class__.__name__
 
     ax.plot(sw, -h, label=label, **kwargs)
     ax.set_ylim(1e-3, 1e6)
@@ -538,8 +603,7 @@ def plot_hcf(
     ax: plt.Axes | None = None,
     **kwargs,
 ) -> plt.Axes:
-    """Plot the hydraulic conductivity function"""
-
+    """Plot the hydraulic conductivity function."""
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=(3, 6))
         ax.set_yscale("log")
@@ -551,7 +615,7 @@ def plot_hcf(
     if "label" in kwargs:
         label = kwargs.pop("label")
     else:
-        label = getattr(getattr(sm, "__class__"), "__name__")
+        label = sm.__class__.__name__
 
     ax.plot(k, h, label=label, **kwargs)
     ax.set_ylim(1e-3, 1e6)
