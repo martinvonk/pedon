@@ -40,8 +40,9 @@ documentation = [
         "nbsphinx",
         "ipykernel",
         "pandoc",
+        "flopy",
 ]
-dev = ["pedon[ruffing,typing,pytesting]", "tox-uv"]
+dev = ["pedon[ruffing,typing,pytesting,documentation]", "tox-uv"]
 
 
 [tool.setuptools]
