@@ -1,41 +1,120 @@
+"""Tests for pedotransfer functions."""
+
 import pytest
 
 import pedon as pe
 
+REL = 1e-3
+
 
 @pytest.fixture
 def ss() -> pe.soil.SoilSample:
+    """Fixture for a soil sample with specific properties for testing pedotransfer functions."""
     return pe.soil.SoilSample(
-        sand_p=50, silt_p=10, clay_p=40, rho=1.5, om_p=20, m50=150
+        sand_p=50.0, silt_p=10.0, clay_p=40.0, rho=1.5, om_p=20.0, m50=150.0
     )
 
 
 def test_wosten(ss: pe.soil.SoilSample) -> None:
+    """Test Wösten pedotransfer function with texture-dependent parameters."""
     sm = ss.wosten(ts=True)
     assert isinstance(sm, pe.Genuchten)
+    assert sm.k_s == pytest.approx(0.6547824638330241, rel=REL)
+    assert sm.theta_r == pytest.approx(0.01, rel=REL)
+    assert sm.theta_s == pytest.approx(0.3506329025688723, rel=REL)
+    assert sm.alpha == pytest.approx(0.0014029528494249415, rel=REL)
+    assert sm.n == pytest.approx(1.1209348010913704, rel=REL)
+    assert sm.l == pytest.approx(-3.6143956260446446, rel=REL)
+    assert sm.m == pytest.approx(0.10788745337697181, rel=REL)
 
 
 def test_wosten_sand(ss: pe.soil.SoilSample) -> None:
+    """Test Wösten sand-specific pedotransfer function."""
     sm = ss.wosten_sand(ts=True)
     assert isinstance(sm, pe.Genuchten)
+    assert sm.k_s == pytest.approx(20.793, rel=REL)
+    assert sm.theta_r == pytest.approx(0.01, rel=REL)
+    assert sm.theta_s == pytest.approx(0.4959, rel=REL)
+    assert sm.alpha == pytest.approx(0.0204414, rel=REL)
+    assert sm.n == pytest.approx(2.2182, rel=REL)
+    assert sm.l == pytest.approx(2.0, rel=REL)
+    assert sm.m == pytest.approx(0.5491840230817779, rel=REL)
 
 
 def test_wosten_clay(ss: pe.soil.SoilSample) -> None:
+    """Test Wösten clay-specific pedotransfer function."""
     sm = ss.wosten_clay()
     assert isinstance(sm, pe.Genuchten)
+    assert sm.k_s == pytest.approx(0.0, rel=REL)
+    assert sm.theta_r == pytest.approx(0.01, rel=REL)
+    assert sm.theta_s == pytest.approx(0.4258, rel=REL)
+    assert sm.alpha == pytest.approx(0.0, rel=REL)
+    assert sm.n == pytest.approx(1.2582, rel=REL)
+    assert sm.l == pytest.approx(-6.6123, rel=REL)
+    assert sm.m == pytest.approx(0.20521379748847557, rel=REL)
 
 
 def test_cosby(ss: pe.soil.SoilSample) -> None:
+    """Test Cosby pedotransfer function."""
     sm = ss.cosby()
     assert isinstance(sm, pe.Brooks)
+    assert sm.k_s == pytest.approx(35.9428, rel=REL)
+    assert sm.theta_r == pytest.approx(0.0, rel=REL)
+    assert sm.theta_s == pytest.approx(0.4192, rel=REL)
+    assert sm.h_b == pytest.approx(13.42765, rel=REL)
+    assert sm.l == pytest.approx(0.10834, rel=REL)
 
 
 def test_rosetta(ss: pe.soil.SoilSample) -> None:
-    sm = ss.rosetta()
-    assert isinstance(sm, pe.Genuchten)
+    """Test ROSETTA pedotransfer function with mocked HTTP response."""
+    from unittest.mock import Mock, patch
+
+    # Mock response data matching the structure returned by the ROSETTA API
+    mock_response = Mock()
+    mock_response.is_error = False
+    # van_genuchten_params: [theta_r, theta_s, log10(alpha), log10(n), log10(k_s)]
+    mock_response.json.return_value = {
+        "van_genuchten_params": [
+            [
+                0.1142278836409842,  # theta_r
+                0.42963731868993743,  # theta_s
+                -1.8689880666646325,  # log10(alpha)
+                0.10546903898903125,  # log10(n)
+                1.1367547932846525,  # log10(k_s)
+            ]
+        ]
+    }
+
+    with patch("httpx.post", return_value=mock_response) as mock_post:
+        sm = ss.rosetta()
+
+        # Verify the API was called with correct parameters
+        assert mock_post.called
+        call_args = mock_post.call_args
+        assert "rosetta/3" in call_args[0][0]  # Default version is 3
+
+        # Verify response is parsed and mapped correctly
+        assert isinstance(sm, pe.Genuchten)
+        assert sm.k_s == pytest.approx(13.7019747459841, rel=REL)
+        assert sm.theta_r == pytest.approx(0.1142278836409842, rel=REL)
+        assert sm.theta_s == pytest.approx(0.42963731868993743, rel=REL)
+        assert sm.alpha == pytest.approx(0.013518839874177326, rel=REL)
+        assert sm.n == pytest.approx(1.274931762885784, rel=REL)
+        assert sm.l == pytest.approx(0.5, rel=REL)
+        assert sm.m == pytest.approx(0.2156442963374613, rel=REL)
 
 
 def test_rosetta_invalidpercentage(ss: pe.soil.SoilSample) -> None:
-    ss.sand_p = 10
-    with pytest.raises(ValueError):
-        _ = ss.rosetta()
+    """Test that ROSETTA raises ValueError when API returns None values."""
+    from unittest.mock import Mock, patch
+
+    mock_response = Mock()
+    mock_response.is_error = False
+    # Response with None values in van_genuchten_params
+    mock_response.json.return_value = {
+        "van_genuchten_params": [[None, None, None, None, None]]
+    }
+
+    with patch("httpx.post", return_value=mock_response):
+        with pytest.raises(ValueError, match="Rosetta API returned None values"):
+            _ = ss.rosetta()

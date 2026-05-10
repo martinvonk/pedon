@@ -1,3 +1,5 @@
+"""Soil sample class and pedotransfer functions."""
+
 # type: ignore
 from bisect import bisect_right
 from dataclasses import dataclass, field

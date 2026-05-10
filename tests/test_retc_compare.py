@@ -1,3 +1,4 @@
+"""Tests for RETC comparison."""
 # %%
 
 import numpy as np
@@ -312,6 +313,7 @@ genf = pe.SoilSample(h=h, theta=theta, k=k).fit(
 
 
 def test_retc_compare():
+    """Test RETC outcomes to pedon."""
     atol = 1e-2  # 2 decimal accuracy
     # check if retc is close to true values
     assert np.isclose(p_true["theta_r"], p_retc["theta_r"], atol=atol)
