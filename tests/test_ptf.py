@@ -1,3 +1,5 @@
+"""Tests for pedotransfer functions."""
+
 import pytest
 
 import pedon as pe
@@ -7,12 +9,14 @@ REL = 1e-5
 
 @pytest.fixture
 def ss() -> pe.soil.SoilSample:
+    """Fixutre for a soil sample with specific properties for testing pedotransfer functions."""
     return pe.soil.SoilSample(
         sand_p=50.0, silt_p=10.0, clay_p=40.0, rho=1.5, om_p=20.0, m50=150.0
     )
 
 
 def test_wosten(ss: pe.soil.SoilSample) -> None:
+    """Test Wösten pedotransfer function with texture-dependent parameters."""
     sm = ss.wosten(ts=True)
     assert isinstance(sm, pe.Genuchten)
     assert sm.k_s == pytest.approx(0.6547824638330241, rel=REL)
@@ -25,6 +29,7 @@ def test_wosten(ss: pe.soil.SoilSample) -> None:
 
 
 def test_wosten_sand(ss: pe.soil.SoilSample) -> None:
+    """Test Wösten sand-specific pedotransfer function."""
     sm = ss.wosten_sand(ts=True)
     assert isinstance(sm, pe.Genuchten)
     assert sm.k_s == pytest.approx(20.793, rel=REL)
@@ -37,6 +42,7 @@ def test_wosten_sand(ss: pe.soil.SoilSample) -> None:
 
 
 def test_wosten_clay(ss: pe.soil.SoilSample) -> None:
+    """Test Wösten clay-specific pedotransfer function."""
     sm = ss.wosten_clay()
     assert isinstance(sm, pe.Genuchten)
     assert sm.k_s == pytest.approx(0.0, rel=REL)
@@ -49,6 +55,7 @@ def test_wosten_clay(ss: pe.soil.SoilSample) -> None:
 
 
 def test_cosby(ss: pe.soil.SoilSample) -> None:
+    """Test Cosby pedotransfer function."""
     sm = ss.cosby()
     assert isinstance(sm, pe.Brooks)
     assert sm.k_s == pytest.approx(35.9428, rel=REL)
@@ -59,6 +66,7 @@ def test_cosby(ss: pe.soil.SoilSample) -> None:
 
 
 def test_rosetta(ss: pe.soil.SoilSample) -> None:
+    """Test ROSETTA pedotransfer function."""
     sm = ss.rosetta()
     assert isinstance(sm, pe.Genuchten)
     assert sm.k_s == pytest.approx(13.7019747459841, rel=REL)
@@ -71,6 +79,7 @@ def test_rosetta(ss: pe.soil.SoilSample) -> None:
 
 
 def test_rosetta_invalidpercentage(ss: pe.soil.SoilSample) -> None:
+    """Test that ROSETTA raises ValueError for invalid soil percentages."""
     ss.sand_p = 10
     with pytest.raises(ValueError):
         _ = ss.rosetta()

@@ -1,3 +1,5 @@
+"""Test soilmodels."""
+
 import pytest
 from numpy import allclose, array, logspace
 
@@ -10,36 +12,43 @@ theta = array([0.1, 0.2, 0.3, 0.4])
 
 
 def assert_close(actual: FloatArray, expected: FloatArray) -> None:
+    """Assert if two arrays are close within a reasonable tolerance."""
     assert allclose(actual, expected, rtol=1e-12, atol=1e-12)
 
 
 @pytest.fixture
 def gen() -> pe.SoilModel:
+    """Fixture for a van Genuchten soil model with specific parameters for testing."""
     return pe.Genuchten(k_s=10, theta_r=0.01, theta_s=0.43, alpha=0.02, n=1.1, l=0.5)
 
 
 @pytest.fixture
 def bro() -> pe.SoilModel:
+    """Fixture for a Brooks-Corey soil model with specific parameters for testing."""
     return pe.Brooks(k_s=10, theta_r=0.01, theta_s=0.43, h_b=10, l=2)
 
 
 @pytest.fixture
 def sor() -> pe.SoilModel:
+    """Fixture for a Panday soil model with specific parameters for testing."""
     return pe.Panday(k_s=10, theta_r=0.01, theta_s=0.43, alpha=0.02, beta=1.1, brook=3)
 
 
 @pytest.fixture
 def gar() -> pe.SoilModel:
+    """Fixture for a Gardner soil model with specific parameters for testing."""
     return pe.Gardner(k_s=10, theta_s=0.43, c=0.02, m=1.1)
 
 
 @pytest.fixture
 def gr() -> pe.SoilModel:
+    """Fixture for a Rucker soil model with specific parameters for testing."""
     return pe.Rucker(k_s=10, theta_r=0.01, theta_s=0.43, c=0.02, m=1.1)
 
 
 @pytest.fixture
 def gg() -> pe.SoilModel:
+    """Fixture for a Genuchten-Gardner soil model with specific parameters for testing."""
     return pe.GenuchtenGardner(
         k_s=10, theta_s=0.43, theta_r=0.01, c=0.02, alpha=0.04, n=1.4
     )
@@ -47,6 +56,7 @@ def gg() -> pe.SoilModel:
 
 @pytest.fixture
 def hav() -> pe.soilmodel.Haverkamp:
+    """Fixture for a Haverkamp soil model with specific parameters for testing."""
     # Example parameters similar in style to other model tests
     return pe.Haverkamp(
         k_s=10.0,
@@ -59,6 +69,7 @@ def hav() -> pe.soilmodel.Haverkamp:
 
 
 def test_theta_genuchten(gen: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test water content calculation for the van Genuchten model."""
     expected = array(
         [
             0.42999674186266773,
@@ -76,6 +87,7 @@ def test_theta_genuchten(gen: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_s_genuchten(gen: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test degree of saturation calculation for the van Genuchten model."""
     expected = array(
         [
             0.9999922425301613,
@@ -93,6 +105,7 @@ def test_s_genuchten(gen: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_k_genuchten(gen: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test hydraulic conductivity calculation for the van Genuchten model."""
     expected = array(
         [
             3.2869753941674986,
@@ -110,6 +123,7 @@ def test_k_genuchten(gen: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_h_genuchten(gen: pe.SoilModel, theta: FloatArray = theta) -> None:
+    """Test pressure head calculation for the van Genuchten model."""
     expected = array(
         [244927639.31052694, 139271.6694845786, 1998.5290326524432, 61.672352811394724]
     )
@@ -117,6 +131,7 @@ def test_h_genuchten(gen: pe.SoilModel, theta: FloatArray = theta) -> None:
 
 
 def test_theta_brooks(bro: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test water content calculation for the Brooks-Corey model."""
     expected = array(
         [
             0.43,
@@ -134,11 +149,13 @@ def test_theta_brooks(bro: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_s_brooks(bro: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test degree of saturation calculation for the Brooks-Corey model."""
     expected = array([1.0, 1.0, 1.0, 1.0, 0.01, 0.0001, 1e-06, 1e-08, 1e-10])
     assert_close(bro.s(h=h), expected)
 
 
 def test_k_brooks(bro: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test hydraulic conductivity calculation for the Brooks-Corey model."""
     expected = array(
         [
             10.0,
@@ -156,6 +173,7 @@ def test_k_brooks(bro: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_h_brooks(bro: pe.SoilModel, theta: FloatArray = theta) -> None:
+    """Test pressure head calculation for the Brooks-Corey model."""
     expected = array(
         [33.33333333333333, 22.941573387056174, 18.569533817705185, 16.012815380508712]
     )
@@ -163,6 +181,7 @@ def test_h_brooks(bro: pe.SoilModel, theta: FloatArray = theta) -> None:
 
 
 def test_theta_panday(sor: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test water content calculation for the Panday model."""
     expected = array(
         [
             0.4299967418626678,
@@ -180,6 +199,7 @@ def test_theta_panday(sor: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_s_panday(sor: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test degree of saturation calculation for the Panday model."""
     expected = array(
         [
             0.9999922425301614,
@@ -197,6 +217,7 @@ def test_s_panday(sor: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_k_panday(sor: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test hydraulic conductivity calculation for the Panday model."""
     expected = array(
         [
             9.999767277710188,
@@ -214,6 +235,7 @@ def test_k_panday(sor: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_h_panday(sor: pe.SoilModel, theta: FloatArray = theta) -> None:
+    """Test pressure head calculation for the Panday model."""
     expected = array(
         [244927639.31052694, 139271.6694845786, 1998.5290326524432, 61.672352811394724]
     )
@@ -221,6 +243,7 @@ def test_h_panday(sor: pe.SoilModel, theta: FloatArray = theta) -> None:
 
 
 def test_theta_gardner(gar: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test water content calculation for the Gardner model."""
     expected = array(
         [
             0.42529591987340853,
@@ -238,6 +261,7 @@ def test_theta_gardner(gar: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_s_gardner(gar: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test degree of saturation calculation for the Gardner model."""
     expected = array(
         [
             0.9890602787753687,
@@ -255,6 +279,7 @@ def test_s_gardner(gar: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_k_gardner(gar: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test hydraulic conductivity calculation for the Gardner model."""
     expected = array(
         [
             9.998000199986667,
@@ -272,6 +297,7 @@ def test_k_gardner(gar: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_h_gardner(gar: pe.SoilModel, theta: FloatArray = theta) -> None:
+    """Test pressure head calculation for the Gardner model."""
     expected = array(
         [
             1.3260136569995606,
@@ -284,6 +310,7 @@ def test_h_gardner(gar: pe.SoilModel, theta: FloatArray = theta) -> None:
 
 
 def test_theta_gardner_rucker(gr: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test water content calculation for the Gardner-Rucker model."""
     expected = array(
         [
             0.42999999864525157,
@@ -301,6 +328,7 @@ def test_theta_gardner_rucker(gr: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_s_gardner_rucker(gr: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test degree of saturation calculation for the Gardner-Rucker model."""
     expected = array(
         [
             0.9999999967744085,
@@ -318,6 +346,7 @@ def test_s_gardner_rucker(gr: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_k_gardner_rucker(gr: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test hydraulic conductivity calculation for the Gardner-Rucker model."""
     expected = array(
         [
             9.998000199986667,
@@ -335,6 +364,7 @@ def test_k_gardner_rucker(gr: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_h_gardner_rucker(gr: pe.SoilModel, theta: FloatArray = theta) -> None:
+    """Test pressure head calculation for the Gardner-Rucker model."""
     expected = array(
         [1.400404582679226, 0.7211187628335707, 0.3367034439062675, 0.06737088377611077]
     )
@@ -342,6 +372,7 @@ def test_h_gardner_rucker(gr: pe.SoilModel, theta: FloatArray = theta) -> None:
 
 
 def test_theta_genuchten_gardner(gg: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test water content calculation for the GenuchtenGardner model."""
     expected = array(
         [
             0.4299979007684259,
@@ -359,6 +390,7 @@ def test_theta_genuchten_gardner(gg: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_s_genuchten_gardner(gg: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test degree of saturation calculation for the GenuchtenGardner model."""
     expected = array(
         [
             0.9999950018295856,
@@ -376,6 +408,7 @@ def test_s_genuchten_gardner(gg: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_k_genuchten_gardner(gg: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test hydraulic conductivity calculation for the GenuchtenGardner model."""
     expected = array(
         [
             9.998000199986667,
@@ -393,6 +426,7 @@ def test_k_genuchten_gardner(gg: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_h_genuchten_gardner(gg: pe.SoilModel, theta: FloatArray = theta) -> None:
+    """Test pressure head calculation for the GenuchtenGardner model."""
     expected = array(
         [1172.3053976502565, 173.47442816736208, 50.22660724364475, 10.481432805126213]
     )
@@ -400,6 +434,7 @@ def test_h_genuchten_gardner(gg: pe.SoilModel, theta: FloatArray = theta) -> Non
 
 
 def test_theta_haverkamp(hav: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test water content calculation for the Haverkamp model."""
     expected = array(
         [
             0.3602762555045123,
@@ -417,6 +452,7 @@ def test_theta_haverkamp(hav: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_s_haverkamp(hav: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test degree of saturation calculation for the Haverkamp model."""
     expected = array(
         [
             0.8339910845345532,
@@ -434,6 +470,7 @@ def test_s_haverkamp(hav: pe.SoilModel, h: FloatArray = h) -> None:
 
 
 def test_k_haverkamp(hav: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test hydraulic conductivity calculation for the Haverkamp model."""
     expected = array(
         [
             9.92100751538024,
@@ -453,6 +490,7 @@ def test_k_haverkamp(hav: pe.SoilModel, h: FloatArray = h) -> None:
 def test_k_r_haverkamp_accepts_s_kwarg(
     hav: pe.soilmodel.Haverkamp,
 ) -> None:
+    """Test that Haverkamp k_r method accepts a pre-computed saturation argument."""
     kr_out = hav.k_r(h=array([1.0, 2.0, 3.0]), s=array([0.1, 0.2, 0.3]))
     expected = array([0.7352941176470588, 0.8620689655172414, 0.9146341463414634])
     assert_close(kr_out, expected)
@@ -461,6 +499,7 @@ def test_k_r_haverkamp_accepts_s_kwarg(
 def test_h_haverkamp_inverse(
     hav: pe.soilmodel.Haverkamp, theta: FloatArray = theta
 ) -> None:
+    """Test that Haverkamp h is the inverse of theta."""
     expected = array(
         [
             0.11334904230389142,

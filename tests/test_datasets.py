@@ -1,9 +1,12 @@
+"""Tests for pedon datasets."""
+
 import pedon as pe
 
 pe.soil.Soil("Del Monte Sand").from_name(pe.Brooks)
 
 
 def test_sample_staring_2018() -> None:
+    """Test loading soil sample from Staring 2018 dataset."""
     ss = pe.soil.SoilSample().from_staring("B01", year="2018")
     assert ss.silt_p == 5.0
     assert ss.clay_p == 0.0
@@ -12,6 +15,7 @@ def test_sample_staring_2018() -> None:
 
 
 def test_sample_staring_2001() -> None:
+    """Test loading soil sample from Staring 2001 dataset."""
     ss = pe.soil.SoilSample().from_staring("B01", year="2001")
     assert ss.silt_p == 7.0
     assert ss.clay_p == 0.0
@@ -21,6 +25,7 @@ def test_sample_staring_2001() -> None:
 
 
 def test_soil_from_name() -> None:
+    """Test loading soil from name."""
     s = pe.soil.Soil("Del Monte Sand").from_name(pe.Brooks)
     assert s.source == "VS2D"
     assert s.description == "20 mesh"
@@ -33,6 +38,7 @@ def test_soil_from_name() -> None:
 
 
 def test_soil_from_staring() -> None:
+    """Test loading soil from Staring dataset."""
     s = pe.soil.Soil("O01").from_staring()
     assert s.source == "Staring_2018"
     assert s.description == "leemarm zeer fijn tot matig fijn zand"
@@ -46,6 +52,7 @@ def test_soil_from_staring() -> None:
 
 
 def test_soil_list_genuchten() -> None:
+    """Test listing soil names for Genuchten model."""
     gen_soils = pe.soil.Soil.list_names(pe.Genuchten)
     gen_soils_current = [
         "Sand",

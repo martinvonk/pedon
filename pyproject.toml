@@ -75,6 +75,7 @@ extend-include = ["*.ipynb"]
 lint.extend-select = ["I", "D"]
 show-fixes = true
 fix = true
+lint.ignore = ["D102", "D203", "D213"]
 
 [tool.tox]
 requires = ["tox-uv>=1.0"]

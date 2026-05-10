@@ -1,3 +1,5 @@
+"""Unit tests for the version information functions in pedon._version."""
+
 import re
 
 from pedon._version import __version__, get_versions, show_versions
