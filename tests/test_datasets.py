@@ -2,8 +2,6 @@
 
 import pedon as pe
 
-pe.soil.Soil("Del Monte Sand").from_name(pe.Brooks)
-
 
 def test_sample_staring_2018() -> None:
     """Test loading soil sample from Staring 2018 dataset."""

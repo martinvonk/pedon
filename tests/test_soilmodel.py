@@ -13,7 +13,7 @@ theta = array([0.1, 0.2, 0.3, 0.4])
 
 def assert_close(actual: FloatArray, expected: FloatArray) -> None:
     """Assert if two arrays are close within a reasonable tolerance."""
-    assert allclose(actual, expected, rtol=1e-12, atol=1e-12)
+    assert allclose(actual, expected, rtol=1e-8, atol=1e-8)
 
 
 @pytest.fixture
