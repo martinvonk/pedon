@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Protocol, Type, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
@@ -46,22 +46,26 @@ class SoilModel(Protocol):
         ...     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         ...         # Plot the soil water retention curve by calling `plot_swrc`
         ...         return plot_swrc(self, ax=ax)
+
     """
 
     def theta(self, h: FloatArray) -> FloatArray:
         """Calculate soil moisture content (water content) from
-        pressure head h."""
+        pressure head h.
+        """
         ...
 
     def s(self, h: FloatArray) -> FloatArray:
         """Calculate effective saturation from pressure head h.
-        Effective saturation is normalized between 0 (dry) and 1 (saturated)."""
+        Effective saturation is normalized between 0 (dry) and 1 (saturated).
+        """
         ...
 
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         """Calculate relative permeability (or relative hydraulic conductivity).
         Relative permeability is normalized between 0 (dry) and 1 (saturated).
-        Can be calculated from either pressure head h or saturation s."""
+        Can be calculated from either pressure head h or saturation s.
+        """
         ...
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
@@ -548,7 +552,7 @@ class GenuchtenKool:
 
 def get_soilmodel(
     soilmodel_name: SoilModelNames,
-) -> Type[SoilModel]:
+) -> type[SoilModel]:
     sms = {
         "Genuchten": Genuchten,
         "Brooks": Brooks,
@@ -567,7 +571,6 @@ def plot_swrc(
     sm: SoilModel, saturation: bool = False, ax: plt.Axes | None = None, **kwargs
 ) -> plt.Axes:
     """Plot soil water retention curve"""
-
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=(3, 6))
         ax.set_yscale("log")
@@ -583,7 +586,7 @@ def plot_swrc(
     if "label" in kwargs:
         label = kwargs.pop("label")
     else:
-        label = getattr(getattr(sm, "__class__"), "__name__")
+        label = sm.__class__.__name__
 
     ax.plot(sw, -h, label=label, **kwargs)
     ax.set_ylim(1e-3, 1e6)
@@ -597,7 +600,6 @@ def plot_hcf(
     **kwargs,
 ) -> plt.Axes:
     """Plot the hydraulic conductivity function"""
-
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=(3, 6))
         ax.set_yscale("log")
@@ -609,7 +611,7 @@ def plot_hcf(
     if "label" in kwargs:
         label = kwargs.pop("label")
     else:
-        label = getattr(getattr(sm, "__class__"), "__name__")
+        label = sm.__class__.__name__
 
     ax.plot(k, h, label=label, **kwargs)
     ax.set_ylim(1e-3, 1e6)

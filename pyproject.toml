@@ -72,7 +72,7 @@ pythonpath = ["src"]
 
 [tool.ruff]
 extend-include = ["*.ipynb"]
-lint.extend-select = ["I"]
+lint.extend-select = ["I", "D"]
 show-fixes = true
 fix = true
 
