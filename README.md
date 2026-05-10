@@ -1,6 +1,6 @@
 # pedon
 
-[![PyPI](https://img.shields.io/pypi/v/pedon?style=flat-square&color=007ec6)](https://pypi.org/projectpedonspei/)
+[![PyPI](https://img.shields.io/pypi/v/pedon?style=flat-square&color=007ec6)](https://pypi.org/project/pedon/)
 [![PyPi Supported Python Versions](https://img.shields.io/pypi/pyversions/pedon?style=flat-square&color=007ec6)](https://pypi.org/project/pedon/)
 [![Code Size](https://img.shields.io/github/languages/code-size/martinvonk/pedon?style=flat-square&color=007ec6)](https://pypi.org/project/pedon/)
 [![PyPi Downloads](https://img.shields.io/pypi/dm/pedon?style=flat-square&color=0a3d62)](https://pypi.org/project/pedon/)
