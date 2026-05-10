@@ -1,3 +1,5 @@
+"""Pedon is A Python package for analyzing unsaturated soil hydraulic properties."""
+
 from . import soil as soil
 from . import soilmodel as soilmodel
 from ._params import get_params as get_params

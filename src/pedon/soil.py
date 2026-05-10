@@ -31,9 +31,10 @@ logger = getLogger(__name__)
 
 @dataclass
 class SoilSample:
-    """A container for measured soil properties and in-situ soil hydraulic data, with
-    convenience routines to predict hydraulic parameters using a range of pedo-
-    transfer functions and empirical models.
+    """A container for measured soil properties and in-situ soil hydraulic data.
+
+    Class provides convenience routines to predict hydraulic parameters using
+    a range of pedotransfer functions and empirical models.
 
     Attributes
     ----------
@@ -95,7 +96,7 @@ class SoilSample:
     )  # moisture content measurement
 
     def from_staring(self, name: str, year: str = "2018") -> "SoilSample":
-        """Get properties and measurements from Staring series"""
+        """Get properties and measurements from Staring series."""
         if year not in ("2001", "2018"):
             raise ValueError(
                 f"No Staring series available for year '{year}'"
@@ -126,7 +127,9 @@ class SoilSample:
         silent: bool = True,
         **kwargs,
     ) -> SoilModel:
-        """Fit the provided SoilModel (e.g., van Genuchten, Brooks-Corey class) to the
+        """Fit the provided SoilModel to the measurements.
+
+        Fit the provided SoilModel (e.g., van Genuchten, Brooks-Corey class) to the
         stored measurements (theta, k, h) using nonlinear least squares. If
         pbounds is not provided, default parameter bounds are retrieved for the
         requested model name. The objective combines water retention and log10(k)
@@ -191,9 +194,11 @@ class SoilSample:
             logger.debug(f"Computed W2: {W2}")
 
         def get_diff(p: FloatArray) -> FloatArray:
-            """Objective function for least squares optimization. Computes the difference
-            between measured and model-predicted theta and log10(k) values, applying
-            the specified weights and scaling factors.
+            """Objective function for least squares optimization.
+
+            Computes the difference between measured and model-predicted
+            theta and log10(k) values, applying the specified weights and
+            scaling factors.
             """
             est_pars = dict(zip(pbounds.index, p))
             if k_s is not None:
@@ -224,9 +229,7 @@ class SoilSample:
         return sm(**opt_pars)
 
     def wosten(self, ts: bool = False) -> Genuchten:
-        """Wosten et al (1999) - Development and use of a database of hydraulic
-        properties of European soils
-        """
+        """Wosten et al (1999) - Development and use of a database of hydraulic properties of European soils."""
         topsoil = 1.0 * ts
 
         theta_s = (
@@ -314,8 +317,10 @@ class SoilSample:
         )
 
     def wosten_sand(self, ts: bool = False) -> Genuchten:
-        """Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
-        van boven- en ondergronden in Nederland: de Staringreeks
+        """Pedotransfer function for sandy soils.
+
+        Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
+        van boven- en ondergronden in Nederland: de Staringreeks.
         """
         topsoil = 1.0 * ts
         theta_s = (
@@ -377,7 +382,7 @@ class SoilSample:
             + 2.364 * self.silt_p**-1
             + 1.014 * log(self.silt_p)
         )
-        l = min(max(2 * (exp(l_) - 1) / (exp(l_) + 1), -2.0), 2.0)
+        l = min(max(2 * (exp(l_) - 1) / (exp(l_) + 1), -2.0), 2.0)  # noqa: E741
 
         return Genuchten(
             k_s=round(k_s, 4),
@@ -389,8 +394,10 @@ class SoilSample:
         )
 
     def wosten_clay(self) -> Brooks:
-        """Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
-        van boven- en ondergronden in Nederland: de Staringreeks
+        """Pedotransfer function for clay soils.
+
+        Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
+        van boven- en ondergronden in Nederland: de Staringreeks.
         """
         theta_s = (
             0.6311
@@ -432,7 +439,7 @@ class SoilSample:
         )
 
         l_ = 0.102 + 0.0222 * self.clay_p - 0.043 * self.rho * self.clay_p
-        l = min(max(10.0 * (exp(l_) - 1) / (exp(l_) + 1), -10.0), 10.0)
+        l = min(max(10.0 * (exp(l_) - 1) / (exp(l_) + 1), -10.0), 10.0)  # noqa: E741
         return Genuchten(
             k_s=round(k_s, 4),
             theta_r=0.01,
@@ -443,8 +450,10 @@ class SoilSample:
         )
 
     def cosby(self) -> Brooks:
-        """Cooper (2021) - Using data assimilation to optimize pedotransfer
-        functions using field-scale in situ soil moisture observations
+        """Pedotransfer function returning Brooks-Corey parameters.
+
+        Cooper (2021) - Using data assimilation to optimize pedotransfer
+        functions using field-scale in situ soil moisture observations.
         """
         c = self.clay_p / 100
         s = self.sand_p / 100
@@ -464,7 +473,7 @@ class SoilSample:
         )
 
     def rosetta(self, version: Literal[1, 2, 3] = 3) -> Genuchten:
-        """Rosetta (Schaap et al., 2001) - Predicting soil water retention from soil"""
+        """Rosetta (Schaap et al., 2001) - Predicting soil water retention from soil."""
         try:
             from httpx import post as httpx_post
         except ImportError:
@@ -557,8 +566,10 @@ class SoilSample:
         def solve_kozeny_carman(
             k: float, ne_i: float, d50_i: float, const: float
         ) -> tuple[float, float]:
-            """Solve for d50 and effective porosity based on Kozeny-Carman equation
-            using scipy's fixed_point for robust successive substitution iteration.
+            """Solve for d50 and effective porosity.
+
+            Based on Kozeny-Carman equation using scipy's fixed_point
+            for robust successive substitution iteration.
 
             Parameters (Parametrization-dependent)
             ----------
@@ -577,6 +588,7 @@ class SoilSample:
 
             def update_func(vars):
                 """Fixed-point iteration function.
+
                 Computes the next iteration values for [n, d] given current values.
                 """
                 n, d = vars
@@ -652,7 +664,7 @@ class SoilSample:
             Parameters
             ----------
             alpha : float
-            Alpha parameter.
+                Van Genuchten alpha parameter.
 
             Returns
             -------
