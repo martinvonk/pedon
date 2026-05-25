@@ -1,11 +1,11 @@
 """Plotting modules for pedon."""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from numpy import logspace, nan
-from typing import cast
+
 if TYPE_CHECKING:
     from .soilmodel import SoilModel
 
