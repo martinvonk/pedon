@@ -939,9 +939,9 @@ class Soil:
         elif (source is not None) and len(sersm) > 1:
             sersm = sersm.query("source == @source")
 
-        sers: Series = Series(sersm.squeeze("columns"))
+        sers: Any = sersm.squeeze("index").copy()
         if isna(sers.at["description"]):
-            sers.at["description"] = sers["soil type"]
+            sers.loc["description"] = sers.at["soil type"]
         setattr(self, "source", sers.pop("source"))
         setattr(self, "description", sers.pop("description"))
         sm: Any = sm
