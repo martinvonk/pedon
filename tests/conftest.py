@@ -55,3 +55,16 @@ def haverkamp() -> pe.soilmodel.Haverkamp:
         beta=1.2,
         a=0.5,
     )
+
+@fixture
+def genuchtenkool() -> pe.SoilModel:
+    """Fixture for a Genuchten-Kool soil model with specific parameters for testing."""
+    return pe.GenuchtenKool(
+        k_s=10.0,
+        theta_r=0.01,
+        theta_s=0.43,
+        alpha=0.02,
+        n=1.1,
+        l=0.5,
+        xi=2.5,
+    )

@@ -383,6 +383,73 @@ def test_h_genuchtengardner(
     assert_close(genuchtengardner.h(theta=theta), expected)
 
 
+def test_alpha_w_genuchtenkool(genuchtenkool: pe.SoilModel) -> None:
+    """Test scaled alpha parameter for the GenuchtenKool model."""
+    assert genuchtenkool.alpha_w == 0.05
+
+
+def test_theta_genuchtenkool(genuchtenkool: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test water content calculation for the GenuchtenKool model."""
+    expected = array(
+        [
+            0.4299910737668094,
+            0.42988779112842795,
+            0.4286129877445311,
+            0.41563208021830816,
+            0.3624881596094997,
+            0.2936755393053078,
+            0.23558483318061144,
+            0.18920450408643255,
+            0.1523482139298137,
+        ]
+    )
+    assert_close(genuchtenkool.theta(h=h), expected)
+
+
+def test_s_genuchtenkool(genuchtenkool: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test degree of saturation calculation for the GenuchtenKool model."""
+    expected = array(
+        [
+            0.9999787470638319,
+            0.9997328360200666,
+            0.9966975898679312,
+            0.965790667186448,
+            0.8392575228797612,
+            0.6754179507269233,
+            0.5371067456681224,
+            0.42667739068198224,
+            0.33892431888050883,
+        ]
+    )
+    assert_close(genuchtenkool.s(h=h), expected)
+
+
+def test_k_genuchtenkool(genuchtenkool: pe.SoilModel, h: FloatArray = h) -> None:
+    """Test hydraulic conductivity calculation for the GenuchtenKool model."""
+    expected = array(
+        [
+            2.8343153705439206,
+            1.6927117058050811,
+            0.6817168120309531,
+            0.09609620636559924,
+            0.0018452194138960125,
+            1.2243219408738212e-05,
+            6.982358918415397e-08,
+            3.9308819964993456e-10,
+            2.2106947229727662e-12,
+        ]
+    )
+    assert_close(genuchtenkool.k(h=h), expected)
+
+
+def test_h_genuchtenkool(genuchtenkool: pe.SoilModel, theta: FloatArray = theta) -> None:
+    """Test pressure head calculation for the GenuchtenKool model."""
+    expected = array(
+        [97971055.72421077, 55708.66779383144, 799.4116130609773, 24.66894112455789]
+    )
+    assert_close(genuchtenkool.h(theta=theta), expected)
+
+
 def test_theta_haverkamp(haverkamp: pe.SoilModel, h: FloatArray = h) -> None:
     """Test water content calculation for the Haverkamp model."""
     expected = array(
@@ -472,6 +539,7 @@ def test_h_haverkamp_inverse(
         "gardner",
         "rucker",
         "genuchtengardner",
+        "genuchtenkool",
         "haverkamp",
     ],
 )
