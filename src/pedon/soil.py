@@ -20,7 +20,7 @@ from numpy import (
     multiply,
     ndarray,
 )
-from pandas import DataFrame, Series, isna, read_csv
+from pandas import DataFrame, isna, read_csv
 from scipy.optimize import fixed_point, least_squares
 
 from ._params import get_params
