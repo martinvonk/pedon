@@ -475,11 +475,7 @@ def test_h_haverkamp_inverse(
         "haverkamp",
     ],
 )
-def test_h_theta_roundtrip_for_invertible_models(
-    fixture_name: str,
-    request: pytest.FixtureRequest,
-    theta: FloatArray = theta,
-) -> None:
+def test_h_theta_roundtrip(fixture_name: str, request: pytest.FixtureRequest) -> None:
     """Test that h and theta are inverse pairs for models with closed-form inverses."""
     model = request.getfixturevalue(fixture_name)
     h_out = model.h(theta=theta)
