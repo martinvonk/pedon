@@ -39,15 +39,16 @@ pytesting = [
         "pytest-mpl",
         "pedon[rosetta]",
 ]
-coveraging = ["coverage"]
 documentation = [
         "sphinx>=8.2",
         "myst-parser",
         "nbsphinx",
         "ipykernel",
         "pandoc",
+        "flopy",
+        "pedon[rosetta]",
 ]
-dev = ["pedon[ruffing,typing,pytesting]", "tox-uv"]
+dev = ["pedon[documentation,rosetta,ruffing,typing,pytesting]", "tox-uv"]
 
 
 [tool.setuptools]
