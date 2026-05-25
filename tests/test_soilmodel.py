@@ -1,10 +1,12 @@
 """Test soilmodels."""
 
+from typing import get_args
+
 import pytest
 from numpy import allclose, array, logspace
 
 import pedon as pe
-from pedon._typing import FloatArray
+from pedon._typing import FloatArray, SoilModelNames
 
 h = -logspace(-2, 6, num=9, dtype=float)
 
@@ -14,6 +16,15 @@ theta = array([0.1, 0.2, 0.3, 0.4])
 def assert_close(actual: FloatArray, expected: FloatArray) -> None:
     """Assert if two arrays are close within a reasonable tolerance."""
     assert allclose(actual, expected, rtol=1e-8, atol=1e-8)
+
+
+@pytest.mark.parametrize("soilmodel_name", get_args(SoilModelNames))
+def test_get_soilmodel(
+    soilmodel_name: SoilModelNames,
+) -> None:
+    """Test that get_soilmodel maps each supported name to the right class."""
+    smt = pe.soilmodel.get_soilmodel(soilmodel_name)
+    assert smt.__name__ == soilmodel_name
 
 
 def test_theta_genuchten(genuchten: pe.SoilModel) -> None:
@@ -317,9 +328,7 @@ def test_h_rucker(rucker: pe.SoilModel, theta: FloatArray = theta) -> None:
     assert_close(rucker.h(theta=theta), expected)
 
 
-def test_theta_genuchtengardner(
-    genuchtengardner: pe.SoilModel
-) -> None:
+def test_theta_genuchtengardner(genuchtengardner: pe.SoilModel) -> None:
     """Test water content calculation for the GenuchtenGardner model."""
     expected = array(
         [
