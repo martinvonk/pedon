@@ -110,12 +110,12 @@ class SoilSample:
             "name"
         )
 
-        self.silt_p = float(staring_properties.at[name, "silt_p"])
-        self.clay_p = float(staring_properties.at[name, "clay_p"])
-        self.om_p = float(staring_properties.at[name, "om_p"])
-        self.m50 = float(staring_properties.at[name, "m50"])
+        self.silt_p = cast(float, staring_properties.at[name, "silt_p"])
+        self.clay_p = cast(float, staring_properties.at[name, "clay_p"])
+        self.om_p = cast(float, staring_properties.at[name, "om_p"])
+        self.m50 = cast(float, staring_properties.at[name, "m50"])
         if year == "2001":
-            self.rho = float(staring_properties.at[name, "rho"])
+            self.rho = cast(float, staring_properties.at[name, "rho"])
         return self
 
     def fit(
