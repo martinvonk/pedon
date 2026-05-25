@@ -1,11 +1,10 @@
 """Soil sample class and pedotransfer functions."""
 
-# type: ignore
 from bisect import bisect_right
 from dataclasses import dataclass, field
 from logging import getLogger
 from pathlib import Path
-from typing import Literal, Self
+from typing import Literal, Self, cast
 
 from numpy import abs as npabs
 from numpy import (
@@ -20,12 +19,13 @@ from numpy import (
     log10,
     multiply,
     ndarray,
+    asarray,
 )
-from pandas import DataFrame, isna, read_csv
+from pandas import Series, DataFrame, isna, read_csv
 from scipy.optimize import fixed_point, least_squares
 
 from ._params import get_params
-from ._typing import FloatArray
+from ._typing import FloatArray, SoilModelNames
 from .soilmodel import Brooks, Genuchten, SoilModel, get_soilmodel
 
 logger = getLogger(__name__)
@@ -106,16 +106,16 @@ class SoilSample:
             )
         path = Path(__file__).parent / "datasets/soilsamples.csv"
         properties = read_csv(path, delimiter=";")
-        staring_properties = properties[
-            properties["source"] == f"Staring_{year}"
-        ].set_index("name")
+        staring_properties = properties.query(f"source == 'Staring_{year}'").set_index(
+            "name"
+        )
 
-        self.silt_p = staring_properties.loc[name, "silt_p"]
-        self.clay_p = staring_properties.loc[name, "clay_p"]
-        self.om_p = staring_properties.loc[name, "om_p"]
-        self.m50 = staring_properties.loc[name, "m50"]
+        self.silt_p = float(staring_properties.at[name, "silt_p"])
+        self.clay_p = float(staring_properties.at[name, "clay_p"])
+        self.om_p = float(staring_properties.at[name, "om_p"])
+        self.m50 = float(staring_properties.at[name, "m50"])
         if year == "2001":
-            self.rho = staring_properties.loc[name, "rho"]
+            self.rho = float(staring_properties.at[name, "rho"])
         return self
 
     def fit(
@@ -169,13 +169,13 @@ class SoilSample:
             - Input/outputs and bounds are expected in the units used by the soil model.
 
         """
-        theta = self.theta
+        theta = asarray(self.theta, dtype=float)
         N = len(theta)
-        k = self.k
+        k = asarray(self.k, dtype=float)
         M = N + len(k)
 
         if pbounds is None:
-            pbounds = get_params(sm.__name__)
+            pbounds = get_params(sm)
             if k_s is not None:
                 pbounds = pbounds.drop("k_s")
             else:
@@ -184,8 +184,11 @@ class SoilSample:
             pbounds.loc["theta_s", "p_ini"] = max(theta)
             pbounds.loc["theta_s", "p_max"] = max(theta) + 0.02
 
-        if isinstance(weights, float):
-            weights = full(M, weights)
+        weights = (
+            full(M, weights)
+            if isinstance(weights, float)
+            else asarray(weights, dtype=float)
+        )
 
         if W2 is None:
             W2 = (
@@ -202,6 +205,7 @@ class SoilSample:
             theta and log10(k) values, applying the specified weights and
             scaling factors.
             """
+            p = asarray(p, dtype=float)
             est_pars = dict(zip(pbounds.index, p))
             if k_s is not None:
                 est_pars["k_s"] = k_s
@@ -211,7 +215,7 @@ class SoilSample:
             diff = append(weights[0:N] * theta_diff, weights[N:M] * W1 * W2 * k_diff)
             return diff
 
-        kwargs = {"jac": "3-point", "x_scale": "jac"} | (kwargs or {})
+        kwargs_merged: dict = {"jac": "3-point", "x_scale": "jac"} | (kwargs or {})
         res = least_squares(
             get_diff,
             x0=pbounds.loc[:, "p_ini"],
@@ -219,7 +223,7 @@ class SoilSample:
                 pbounds.loc[:, "p_min"],
                 pbounds.loc[:, "p_max"],
             ),
-            **kwargs,
+            **kwargs_merged,
         )
         opt_pars = dict(zip(pbounds.index, res.x))
         if k_s is not None:
@@ -232,6 +236,12 @@ class SoilSample:
 
     def wosten(self, ts: bool = False) -> Genuchten:
         """Wosten et al (1999) - Development and use of a database of hydraulic properties of European soils."""
+        assert (
+            self.clay_p is not None
+            and self.rho is not None
+            and self.silt_p is not None
+            and self.om_p is not None
+        )
         topsoil = 1.0 * ts
 
         theta_s = (
@@ -324,6 +334,12 @@ class SoilSample:
         Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
         van boven- en ondergronden in Nederland: de Staringreeks.
         """
+        msg = "Wosten sand pedotransfer function requires 'rho', 'm50', 'silt_p' and 'om_p' to be set."
+        assert self.rho is not None, msg
+        assert self.m50 is not None, msg
+        assert self.silt_p is not None, msg
+        assert self.om_p is not None, msg
+
         topsoil = 1.0 * ts
         theta_s = (
             -35.7
@@ -395,12 +411,16 @@ class SoilSample:
             l=round(l, 4),
         )
 
-    def wosten_clay(self) -> Brooks:
+    def wosten_clay(self) -> Genuchten:
         """Pedotransfer function for clay soils.
 
         Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
         van boven- en ondergronden in Nederland: de Staringreeks.
         """
+        msg = "Wosten clay pedotransfer function requires 'clay_p', 'rho', and 'om_p' to be set."
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
         theta_s = (
             0.6311
             + 0.003383 * self.clay_p
@@ -457,6 +477,9 @@ class SoilSample:
         Cooper (2021) - Using data assimilation to optimize pedotransfer
         functions using field-scale in situ soil moisture observations.
         """
+        msg = "Cosby pedotransfer function requires 'clay_p' and 'sand_p' to be set."
+        assert self.clay_p is not None, msg
+        assert self.sand_p is not None, msg
         c = self.clay_p / 100
         s = self.sand_p / 100
         b = 3.100 + 15.70 * c - 0.300 * s
@@ -638,24 +661,26 @@ class SoilSample:
                 0.0005,
             ]
             errors = [
-                [3.002, 1.144],
-                [5.364, 1.258],
-                [7.031, 1.366],
-                [6.728, 1.519],
-                [6.758, 2.072],
-                [6.607, 2.393],
-                [5.91, 2.985],
-                [5.643, 3.229],
-                [4.84, 4.0],
-                [4.082, 4.233],
-                [3.182, 4.486],
-                [3.051, 5.03],
-                [3.442, 5.483],
+                (3.002, 1.144),
+                (5.364, 1.258),
+                (7.031, 1.366),
+                (6.728, 1.519),
+                (6.758, 2.072),
+                (6.607, 2.393),
+                (5.91, 2.985),
+                (5.643, 3.229),
+                (4.84, 4.0),
+                (4.082, 4.233),
+                (3.182, 4.486),
+                (3.051, 5.03),
+                (3.442, 5.483),
             ]
             default_error = (1.811, 2.858)
 
             i = bisect_right(bounds, k)
-            return tuple(errors[i - 1]) if i <= len(errors) else default_error
+            errors = errors[i - 1] if i <= len(errors) else default_error
+
+            return errors
 
         def get_n_errors(alpha: float) -> tuple[float, float]:
             """Return bootstrap confidence interval errors for a given alpha value.
@@ -676,20 +701,21 @@ class SoilSample:
             """
             bounds = [1, 2, 3, 4, 5, 6, 7, 8, 9]
             errors = [
-                [2.836, 0.358],
-                [3.061, 0.826],
-                [3.481, 0.828],
-                [3.182, 0.605],
-                [1.905, 0.509],
-                [1.184, 0.297],
-                [4.032, 0.352],
-                [1.385, 0.241],
-                [1.017, 0.155],
+                (2.836, 0.358),
+                (3.061, 0.826),
+                (3.481, 0.828),
+                (3.182, 0.605),
+                (1.905, 0.509),
+                (1.184, 0.297),
+                (4.032, 0.352),
+                (1.385, 0.241),
+                (1.017, 0.155),
             ]
             default_error = (3.006, 0.377)
 
             i = bisect_right(bounds, alpha)
-            return tuple(errors[i - 1]) if i <= len(errors) else default_error
+            errors = errors[i - 1] if i <= len(errors) else default_error
+            return errors
 
         def get_res_water_content(k: float) -> tuple[float, float, float]:
             """Return residual water content (θr) with lower and upper bounds for a given k value.
@@ -724,24 +750,25 @@ class SoilSample:
                 0.0005,
             ]
             values = [
-                [0.089, 0.097, 0.198],
-                [0.097, 0.107, 0.207],
-                [0.09, 0.099, 0.227],
-                [0.095, 0.102, 0.221],
-                [0.091, 0.098, 0.216],
-                [0.087, 0.097, 0.227],
-                [0.104, 0.111, 0.212],
-                [0.099, 0.108, 0.219],
-                [0.079, 0.085, 0.233],
-                [0.082, 0.087, 0.226],
-                [0.067, 0.07, 0.223],
-                [0.105, 0.11, 0.23],
-                [0.096, 0.105, 0.23],
+                (0.089, 0.097, 0.198),
+                (0.097, 0.107, 0.207),
+                (0.09, 0.099, 0.227),
+                (0.095, 0.102, 0.221),
+                (0.091, 0.098, 0.216),
+                (0.087, 0.097, 0.227),
+                (0.104, 0.111, 0.212),
+                (0.099, 0.108, 0.219),
+                (0.079, 0.085, 0.233),
+                (0.082, 0.087, 0.226),
+                (0.067, 0.07, 0.223),
+                (0.105, 0.11, 0.23),
+                (0.096, 0.105, 0.23),
             ]
-            default_value = (0.068, 0.111, 0.096)
+            default_water_content = (0.068, 0.111, 0.096)
 
             i = bisect_right(bounds, k)
-            return tuple(values[i - 1]) if i <= len(values) else default_value
+            res = values[i - 1] if i <= len(values) else default_water_content
+            return res
 
         # mathematical model of hypags calculation of k, d10, d20:
         # CONDITION: in HYPAGS, either k, d10 or d20 have to be given
@@ -753,7 +780,7 @@ class SoilSample:
                     logger.warning(
                         "HYPAGS routine only accepts single k value, choosing the first k value in the array."
                     )
-                k = float(self.k[0])
+                k = float(self.k[0])  # type: ignore[index]
             else:
                 k = float(self.k)
 
@@ -762,8 +789,9 @@ class SoilSample:
             if k > 2.6e-2 or k < 2.87e-7:
                 logger.error("k out of hypags model limits.")
             logger.debug("Using case 0 of hypags model (k given).")
-            self.d10 = (k / Pi * c) ** (0.5)  # calculation of d10
-            self.d20 = c1 * self.d10  # calculation of d20
+            d10 = (k / Pi * c) ** (0.5)  # calculation of d10
+            self.d20 = c1 * d10  # calculation of d20
+            self.d10 = d10
         elif self.d10 is not None:
             # case 1: mathematical model where d10 is given
             if not 5.35e-5 <= self.d10 <= 8.3e-4:
@@ -790,6 +818,9 @@ class SoilSample:
             )
 
         # calculation of d50 and ne
+        assert self.d20 is not None, (
+            "d20 should have been calculated in the previous steps."
+        )
         d50_0 = a3 * self.d20  # starting value for iterative approximation of d50
         ne_0 = a1 * k**a2
         ne, d50 = solve_kozeny_carman(k=k, ne_i=ne_0, d50_i=d50_0, const=c)
@@ -870,12 +901,14 @@ class Soil:
     description: str | None = None
 
     def from_name(
-        self, sm: type[SoilModel] | SoilModel | str, source: str | None = None
+        self,
+        sm: type[SoilModel] | SoilModel | SoilModelNames,
+        source: str | None = None,
     ) -> Self:
         """Load soil parameters from a CSV database by soil name and model type."""
         if isinstance(sm, SoilModel):
             if hasattr(sm, "__name__"):
-                smn = sm.__name__
+                smn = cast(str, sm.__name__)
             else:
                 smn = sm.__class__.__name__
                 sm = type(sm)
@@ -897,27 +930,27 @@ class Soil:
                 "Removed 'HYDRUS_' from soil name. For future use"
                 "please provide source='HYDRUS' argument"
             )
-        sersm = ser[ser["soilmodel"] == smn].loc[[self.name], :]
+        sersm = ser.query("soilmodel == @smn").loc[[self.name], :]
         if source is None and len(sersm) > 1:
             raise ValueError(
                 f"Multiple sources for soil {self.name}: "
-                f"{array2string(sersm.loc[:, 'source'].values)}. "
+                f"{array2string(sersm.loc[:, 'source'].values)}. "  # type: ignore[arg-type]
                 f"Please provide the source using the source argument"
             )
         elif (source is not None) and len(sersm) > 1:
-            sersm = sersm[sersm["source"] == source]
+            sersm = sersm.query("source == @source")
 
-        serd = sersm.squeeze().to_dict()
-        if isna(serd["description"]):
-            serd["description"] = serd["soil type"]
-        self.__setattr__("source", serd.pop("source"))
-        self.__setattr__("description", serd.pop("description"))
+        sers: Series = Series(sersm.squeeze("columns"))
+        if isna(sers.at["description"]):
+            sers.at["description"] = sers["soil type"]
+        setattr(self, "source", sers.pop("source"))
+        setattr(self, "description", sers.pop("description"))
         smserd = {
-            x: serd[x]
+            x: sers.at[x]
             for x in sm.__dataclass_fields__
             if sm.__dataclass_fields__[x].init
         }
-        self.__setattr__("model", sm(**smserd))
+        setattr(self, "model", sm(**smserd))
         return self
 
     @staticmethod
@@ -925,14 +958,13 @@ class Soil:
         """Return a list of available soil names for a given soil model."""
         if isinstance(sm, SoilModel):
             if hasattr(sm, "__name__"):
-                smn = sm.__name__
+                smn = cast(str, sm.__name__)
             else:
                 smn = sm.__class__.__name__
                 sm = type(sm)
         elif isinstance(sm, str):
-            smn = sm
-            sm = get_soilmodel(smn)
-
+            smn = cast(str, sm)
+            sm = get_soilmodel(smn)  # type: ignore
         else:
             raise TypeError(
                 f"Argument must either be Type[SoilModel] | SoilModel | str,"
@@ -942,7 +974,7 @@ class Soil:
         path = Path(__file__).parent / "datasets/soilsamples.csv"
         names = read_csv(path, delimiter=";")
 
-        return names[names["soilmodel"] == smn].loc[:, "name"].unique().tolist()
+        return names.query("soilmodel==@smn").loc[:, "name"].unique().tolist()
 
     def from_staring(self, year: str = "2018") -> Self:
         """Load soil parameters from the Staring series database."""
@@ -951,5 +983,5 @@ class Soil:
 
         self.from_name(sm=Genuchten, source=f"Staring_{year}")
         ss = SoilSample().from_staring(name=self.name, year=year)
-        self.__setattr__("sample", ss)
+        setattr(self, "sample", ss)
         return self
