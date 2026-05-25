@@ -237,7 +237,7 @@ class Brooks:
             h = full(theta.shape, self.h_b, dtype=float)
             mask = theta >= self.theta_r
             h[mask] = self.h_b * (
-                (theta[mask] - self.theta_r) / (self.s(theta[mask]))
+                (theta[mask] - self.theta_r) / (self.theta_s - self.theta_r)
             ) ** (-1 / self.l)
             return h
 
@@ -505,7 +505,9 @@ class Panday:
 
     def h(self, theta: FloatArray) -> FloatArray:
         se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
-        h = 1 / self.alpha * ((1 / se) ** (1 / self.gamma) - 1) ** (1 / self.beta)
+        h = self.h_b + (1.0 / self.alpha) * (
+            (1.0 / se) ** (1.0 / self.gamma) - 1.0
+        ) ** (1.0 / self.beta)
         return h
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
@@ -591,8 +593,8 @@ class Fredlund:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        return self.a * (exp(self.theta_s / theta) ** (1 / self.m) - exp(1)) ** (
-            1 / self.n
+        return self.a * (exp((self.theta_s / theta) ** (1.0 / self.m)) - exp(1)) ** (
+            1.0 / self.n
         )
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:

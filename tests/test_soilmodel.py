@@ -168,9 +168,7 @@ def test_k_brooks(bro: pe.SoilModel, h: FloatArray = h) -> None:
 
 def test_h_brooks(bro: pe.SoilModel, theta: FloatArray = theta) -> None:
     """Test pressure head calculation for the Brooks-Corey model."""
-    expected = array(
-        [33.33333333333333, 22.941573387056174, 18.569533817705185, 16.012815380508712]
-    )
+    expected = array([21.60246899, 14.86783883, 12.03443336, 10.37749043])
     assert_close(bro.h(theta=theta), expected)
 
 
