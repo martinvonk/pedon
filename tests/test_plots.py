@@ -14,18 +14,6 @@ matplotlib.use("Agg")
 savefig_kwargs = {"dpi": 100, "bbox_inches": "tight"}
 
 
-def gen() -> pe.SoilModel:
-    """Fixture for a van Genuchten soil model with fixed plotting parameters."""
-    return pe.Genuchten(
-        k_s=10.0,
-        theta_r=0.01,
-        theta_s=0.43,
-        alpha=0.02,
-        n=1.1,
-        l=0.5,
-    )
-
-
 @pytest.mark.mpl_image_compare(
     baseline_dir="baseline_images/test_plots",
     filename="swrc_genuchten.png",
