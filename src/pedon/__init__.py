@@ -1,5 +1,6 @@
 """Pedon is A Python package for analyzing unsaturated soil hydraulic properties."""
 
+from . import plot as plot
 from . import soil as soil
 from . import soilmodel as soilmodel
 from ._params import get_params as get_params
@@ -17,5 +18,3 @@ from .soilmodel import Haverkamp as Haverkamp
 from .soilmodel import Panday as Panday
 from .soilmodel import Rucker as Rucker
 from .soilmodel import SoilModel as SoilModel
-from .soilmodel import plot_hcf as plot_hcf
-from .soilmodel import plot_swrc as plot_swrc

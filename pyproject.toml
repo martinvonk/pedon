@@ -32,7 +32,13 @@ repository = "https://github.com/martinvonk/pedon"
 ruffing = ["ruff"]
 typing = ["mypy", "pandas-stubs", "ty", "pedon[rosetta]"]
 rosetta = ["httpx"]
-pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar", "pedon[rosetta]"]
+pytesting = [
+        "pytest>=7",
+        "pytest-cov",
+        "pytest-sugar",
+        "pytest-mpl",
+        "pedon[rosetta]",
+]
 coveraging = ["coverage"]
 documentation = [
         "sphinx>=8.2",

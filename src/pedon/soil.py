@@ -20,7 +20,7 @@ from numpy import (
     multiply,
     ndarray,
 )
-from pandas import DataFrame, Series, isna, read_csv
+from pandas import DataFrame, isna, read_csv
 from scipy.optimize import fixed_point, least_squares
 
 from ._params import get_params
@@ -939,7 +939,7 @@ class Soil:
         elif (source is not None) and len(sersm) > 1:
             sersm = sersm.query("source == @source")
 
-        sers: Any = sersm.squeeze("index").copy()
+        sers: Any = sersm.iloc[0].copy()
         if isna(sers.at["description"]):
             sers.loc["description"] = sers.at["soil type"]
         setattr(self, "source", sers.pop("source"))
