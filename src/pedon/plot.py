@@ -1,6 +1,6 @@
 """Plotting modules for pedon."""
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -30,7 +30,6 @@ def swrc(
         right = getattr(sm, "theta_s", nan) + 0.01
         ax.set_xlim(left=0.0, right=right)
 
-    kwargs = {} or kwargs
     label = kwargs.pop("label", sm.__class__.__name__)
 
     ax.plot(sw, h, label=label, **kwargs)
@@ -56,7 +55,6 @@ def hcf(
     h = logspace(-6, 10, num=1000)
     k = sm.k(h=h)
 
-    kwargs = {} or kwargs
     label = kwargs.pop("label", sm.__class__.__name__)
 
     ax.plot(k, h, label=label, **kwargs)
@@ -76,11 +74,8 @@ def curves(sm: "SoilModel", axes: list[Axes] | None = None, **kwargs) -> list[Ax
     if axes is None:
         _, axs = plt.subplots(1, 2, figsize=(6.0, 6.0), sharey=True, layout="tight")
     else:
-        axs: list[Axes] = cast(list, axes)
+        axs: list[Axes] = axes
 
     axs[0] = swrc(sm, ax=axs[0], **kwargs)
     axs[1] = hcf(sm, ax=axs[1], **kwargs)
-    axs[0].set_yscale("log")
-    axs[1].set_yscale("log")
-    axs[1].set_xscale("log")
     return axs

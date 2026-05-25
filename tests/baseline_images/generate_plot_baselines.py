@@ -5,13 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 
 import matplotlib
-
-matplotlib.use("Agg")
-
 import matplotlib.pyplot as plt
 
 import pedon as pe
 from pedon.plot import curves, hcf, swrc
+
+matplotlib.use("Agg")
 
 BASELINE_DIR = Path(__file__).resolve().parent / "test_plots"
 

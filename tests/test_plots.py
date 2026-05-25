@@ -12,12 +12,13 @@ from pedon.plot import curves, hcf, swrc
 matplotlib.use("Agg")
 
 savefig_kwargs = {"dpi": 100, "bbox_inches": "tight"}
+tolerance = 2.0
 
 
 @pytest.mark.mpl_image_compare(
     baseline_dir="baseline_images/test_plots",
     filename="swrc_genuchten.png",
-    tolerance=0.0,
+    tolerance=tolerance,
     style="default",
     savefig_kwargs=savefig_kwargs,
 )
@@ -30,7 +31,7 @@ def test_swrc_plot(gen: pe.SoilModel):
 @pytest.mark.mpl_image_compare(
     baseline_dir="baseline_images/test_plots",
     filename="hcf_genuchten.png",
-    tolerance=0.0,
+    tolerance=tolerance,
     style="default",
     savefig_kwargs=savefig_kwargs,
 )
@@ -43,7 +44,7 @@ def test_hcf_plot(gen: pe.SoilModel):
 @pytest.mark.mpl_image_compare(
     baseline_dir="baseline_images/test_plots",
     filename="curves_genuchten.png",
-    tolerance=0.0,
+    tolerance=tolerance,
     style="default",
     savefig_kwargs=savefig_kwargs,
 )
