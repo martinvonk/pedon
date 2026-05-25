@@ -4,13 +4,13 @@ from bisect import bisect_right
 from dataclasses import dataclass, field
 from logging import getLogger
 from pathlib import Path
-from typing import Literal, Self, cast
+from typing import Any, Literal, Self, cast
 
 from numpy import abs as npabs
 from numpy import (
     append,
     array,
-    array2string,
+    asarray,
     cos,
     divide,
     exp,
@@ -19,9 +19,8 @@ from numpy import (
     log10,
     multiply,
     ndarray,
-    asarray,
 )
-from pandas import Series, DataFrame, isna, read_csv
+from pandas import DataFrame, Series, isna, read_csv
 from scipy.optimize import fixed_point, least_squares
 
 from ._params import get_params
@@ -780,7 +779,7 @@ class SoilSample:
                     logger.warning(
                         "HYPAGS routine only accepts single k value, choosing the first k value in the array."
                     )
-                k = float(self.k[0])  # type: ignore[index]
+                k = float(self.k.item(0))
             else:
                 k = float(self.k)
 
@@ -911,10 +910,10 @@ class Soil:
                 smn = cast(str, sm.__name__)
             else:
                 smn = sm.__class__.__name__
-                sm = type(sm)
+                sm: Any = type(sm)
         elif isinstance(sm, str):
             smn = sm
-            sm = get_soilmodel(smn)
+            sm: Any = get_soilmodel(smn)
         else:
             raise TypeError(
                 f"Argument must either be Type[SoilModel] | SoilModel | str,"
@@ -934,7 +933,7 @@ class Soil:
         if source is None and len(sersm) > 1:
             raise ValueError(
                 f"Multiple sources for soil {self.name}: "
-                f"{array2string(sersm.loc[:, 'source'].values)}. "  # type: ignore[arg-type]
+                f"{sersm.loc[:, 'source'].to_numpy(dtype=str)}. "
                 f"Please provide the source using the source argument"
             )
         elif (source is not None) and len(sersm) > 1:
@@ -945,6 +944,7 @@ class Soil:
             sers.at["description"] = sers["soil type"]
         setattr(self, "source", sers.pop("source"))
         setattr(self, "description", sers.pop("description"))
+        sm: Any = sm
         smserd = {
             x: sers.at[x]
             for x in sm.__dataclass_fields__
@@ -954,7 +954,7 @@ class Soil:
         return self
 
     @staticmethod
-    def list_names(sm: type[SoilModel] | SoilModel | str) -> list[str]:
+    def list_names(sm: type[SoilModel] | SoilModel | SoilModelNames) -> list[str]:
         """Return a list of available soil names for a given soil model."""
         if isinstance(sm, SoilModel):
             if hasattr(sm, "__name__"):
@@ -963,8 +963,8 @@ class Soil:
                 smn = sm.__class__.__name__
                 sm = type(sm)
         elif isinstance(sm, str):
-            smn = cast(str, sm)
-            sm = get_soilmodel(smn)  # type: ignore
+            smn = sm
+            sm = get_soilmodel(smn)
         else:
             raise TypeError(
                 f"Argument must either be Type[SoilModel] | SoilModel | str,"
