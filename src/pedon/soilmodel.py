@@ -5,7 +5,8 @@ from typing import Protocol, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
-from numpy import exp, full, linspace, log, log10
+from numpy import asarray, exp, full, linspace, log, log10
+from scipy.integrate import trapezoid
 from scipy.special import lambertw
 
 from ._typing import FloatArray, SoilModelNames
@@ -534,11 +535,6 @@ class Fredlund:
     m: float
         Empirical soil parameter related to the residual water content [-]
 
-    References
-    ----------
-    Fredlund, D. G., & Xing, A. (1994). Equations for the soil-water
-    characteristic curve.
-
     """
 
     k_s: float
@@ -556,41 +552,49 @@ class Fredlund:
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         if s is not None:
             raise NotImplementedError(
-                "Can only calculate the hydraulic conductivity"
+                "Can only calculate the hydraulic conductivity "
                 "using the pressure head, not the saturation"
             )
 
         def theta_d(
-            h: FloatArray, a: float, n: float, m: float, theta_s: float
+            h_val: FloatArray, a: float, n: float, m: float, theta_s: float
         ) -> FloatArray:
             """Compute the derivative of theta."""
             return -(
                 theta_s
                 * m
                 * n
-                * (h / a) ** n
-                * (log((h / a) ** n + exp(1))) ** (-m - 1)
-            ) / (h * (h / a) ** n + exp(1) * h)
+                * (h_val / a) ** n
+                * (log((h_val / a) ** n + exp(1))) ** (-m - 1)
+            ) / (h_val * (h_val / a) ** n + exp(1) * h_val)
 
         h_b = 0.03
         n_steps = 100
 
-        teller = 0
-        for y in linspace(log(h), log(1e6), n_steps):
-            teller += (
-                (self.theta(exp(y)) - self.theta(h))
-                / exp(y)
-                * theta_d(exp(y), self.a, self.n, self.m, self.theta_s)
-            )
+        h = asarray(npabs(h), dtype=float)
+        # Integrate along the integration steps (axis=0) using trapezoidal rule
+        y_num = linspace(log(h), log(1e6), n_steps)  # shape: (n_steps, len(h_arr))
+        exp_y_num = exp(y_num)
+        integrand_num = (
+            (self.theta(exp_y_num) - self.theta(h))
+            / exp_y_num
+            * theta_d(exp_y_num, self.a, self.n, self.m, self.theta_s)
+        )  # shape: (n_steps, len(h_arr))
+        numerator = trapezoid(integrand_num, x=y_num, axis=0)
 
-        noemer = 0
-        for y in linspace(log(h_b), log(1e6), n_steps):
-            noemer += (
-                (self.theta(exp(y)) - self.theta_s)
-                / exp(y)
-                * theta_d(exp(y), self.a, self.n, self.m, self.theta_s)
-            )
-        return teller / noemer
+        y_den = linspace(log(h_b), log(1e6), n_steps)  # shape: (n_steps,)
+        exp_y_den = exp(y_den)
+        integrand_den = (
+            (self.theta(exp_y_den) - self.theta_s)
+            / exp_y_den
+            * theta_d(exp_y_den, self.a, self.n, self.m, self.theta_s)
+        )  # shape: (n_steps,)
+        denominator = trapezoid(integrand_den, x=y_den)
+
+        result = numerator / denominator
+
+        # Return a clean scalar if the user originally passed a scalar instead of an array
+        return result
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
