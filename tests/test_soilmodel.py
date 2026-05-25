@@ -17,12 +17,6 @@ def assert_close(actual: FloatArray, expected: FloatArray) -> None:
 
 
 @pytest.fixture
-def gen() -> pe.SoilModel:
-    """Fixture for a van Genuchten soil model with specific parameters for testing."""
-    return pe.Genuchten(k_s=10, theta_r=0.01, theta_s=0.43, alpha=0.02, n=1.1, l=0.5)
-
-
-@pytest.fixture
 def bro() -> pe.SoilModel:
     """Fixture for a Brooks-Corey soil model with specific parameters for testing."""
     return pe.Brooks(k_s=10, theta_r=0.01, theta_s=0.43, h_b=10, l=2)

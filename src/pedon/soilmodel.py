@@ -5,9 +5,10 @@ from typing import Protocol, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
-from numpy import exp, full, linspace, log, log10, logspace
+from numpy import exp, full, linspace, log, log10
 
 from ._typing import FloatArray, SoilModelNames
+from .plot import swrc as plot_swrc
 
 
 @runtime_checkable
@@ -46,8 +47,8 @@ class SoilModel(Protocol):
         ...         return ...
         ...
         ...     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
-        ...         # Plot the soil water retention curve by calling `plot_swrc`
-        ...         return plot_swrc(self, ax=ax)
+        ...         # Plot the soil water retention curve by calling `pe.plot.swrc`
+        ...         return pe.plot.swrc(self, ax=ax)
 
     """
 
@@ -576,56 +577,3 @@ def get_soilmodel(
         "GenuchtenKool": GenuchtenKool,
     }
     return sms[soilmodel_name]
-
-
-def plot_swrc(
-    sm: SoilModel, saturation: bool = False, ax: plt.Axes | None = None, **kwargs
-) -> plt.Axes:
-    """Plot soil water retention curve."""
-    if ax is None:
-        _, ax = plt.subplots(1, 1, figsize=(3, 6))
-        ax.set_yscale("log")
-
-    h = -logspace(-6, 10, num=1000)
-
-    if saturation:
-        sw = sm.s(h=h)
-        ax.set_xlim(-0.01, 1.01)
-    else:
-        sw = sm.theta(h=h)
-
-    if "label" in kwargs:
-        label = kwargs.pop("label")
-    else:
-        label = sm.__class__.__name__
-
-    ax.plot(sw, -h, label=label, **kwargs)
-    ax.set_ylim(1e-3, 1e6)
-    ax.grid(True)
-    return ax
-
-
-def plot_hcf(
-    sm: SoilModel,
-    ax: plt.Axes | None = None,
-    **kwargs,
-) -> plt.Axes:
-    """Plot the hydraulic conductivity function."""
-    if ax is None:
-        _, ax = plt.subplots(1, 1, figsize=(3, 6))
-        ax.set_yscale("log")
-        ax.set_xscale("log")
-
-    h = logspace(-6, 10, num=1000)
-    k = sm.k(h=h)
-
-    if "label" in kwargs:
-        label = kwargs.pop("label")
-    else:
-        label = sm.__class__.__name__
-
-    ax.plot(k, h, label=label, **kwargs)
-    ax.set_ylim(1e-3, 1e6)
-    ax.set_xlim()
-    ax.grid(True)
-    return ax
