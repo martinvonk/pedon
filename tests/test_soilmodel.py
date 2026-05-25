@@ -503,3 +503,19 @@ def test_h_haverkamp_inverse(
     h_out = hav.h(theta=theta)
     assert_close(h_out, expected)
     assert_close(hav.theta(h=h_out), theta)
+
+
+@pytest.mark.parametrize(
+    "fixture_name",
+    ["gen", "bro", "sor", "gar", "gr", "gg", "hav"],
+)
+def test_h_theta_roundtrip_for_invertible_models(
+    fixture_name: str,
+    request: pytest.FixtureRequest,
+    theta: FloatArray = theta,
+) -> None:
+    """Test that h and theta are inverse pairs for models with closed-form inverses."""
+    model = request.getfixturevalue(fixture_name)
+    h_out = model.h(theta=theta)
+    theta_out = model.theta(h=h_out)
+    assert_close(theta, theta_out)
