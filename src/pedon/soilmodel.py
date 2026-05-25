@@ -6,6 +6,7 @@ from typing import Protocol, runtime_checkable
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
 from numpy import exp, full, linspace, log, log10
+from scipy.special import lambertw
 
 from ._typing import FloatArray, SoilModelNames
 from .plot import swrc as plot_swrc
@@ -414,9 +415,11 @@ class Rucker:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        return -(1.0 / self.m) * log(
-            (theta - self.theta_r) / (self.theta_s - self.theta_r)
-        )
+        se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        y = se ** ((self.m + 2.0) / 2.0)
+        # Invert (1 + x) * exp(-x) = y via x = -W_{-1}(-y / e) - 1.
+        x = -lambertw(-y / exp(1.0), k=-1).real - 1.0
+        return (2.0 / self.c) * x
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
