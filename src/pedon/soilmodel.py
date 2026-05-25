@@ -88,8 +88,36 @@ class SoilModel(Protocol):
 class Genuchten:
     """Mualem-van Genuchten Soil Model.
 
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+    theta_r: float
+        Residual soil water content [-]
+    theta_s: float
+        Saturated soil water content [-]
+    n: float
+        Dimensionless measure of the pore-size distribution
+    alpha: float
+        Empirical shape parameter that is physically related
+        to the inverse of the air-entry pressure [1/L]
+    l: float, optional
+        Pore-connectivity or tortuosity parameter [-]
+        Default value 0.5 is commonly used and is based on the Mualem model.
+
+    Attributes
+    ----------
+    m: float, optional
+        Calculated from n as m = 1 - 1/n [-] (Mualem restriction)
+
+    References
+    ----------
     van Genuchten, M. Th. (1980) - A Closed-form Equation for Predicting the
     Hydraulic Conductivity of Unsaturated Soil.
+
+    Mualem, Y. (1976). A new model for predicting the hydraulic conductivity
+    of unsaturated porous media.
+
     """
 
     k_s: float
@@ -136,7 +164,23 @@ class Genuchten:
 class Brooks:
     """Brooks and Corey Soil Model.
 
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+    theta_r: float
+        Residual soil water content [-]
+    theta_s: float
+        Saturated soil water content [-]
+    h_b: float
+        Bubbling pressure or air-entry suction [L]
+    l: float
+        Pore-size distribution index [-]
+
+    References
+    ----------
     Brooks, R.H. and Corey, A.T. (1964) - Hydraulic Properties of Porous Media.
+
     """
 
     k_s: float
@@ -205,8 +249,29 @@ class Brooks:
 class Haverkamp:
     """Haverkamp Soil Model.
 
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+    theta_r: float
+        Residual soil water content [-]
+    theta_s: float
+        Saturated soil water content [-]
+    alpha: float
+        Empirical constant for the soil water retention curve [-]
+    beta: float
+        Empirical exponent for the soil water retention curve.
+        In this implementation, it is also used as the exponent
+        for the hydraulic conductivity curve (assuming B = beta) [-]
+    a: float
+        Empirical constant for the hydraulic conductivity curve
+        (Often denoted as 'A' in literature)
+
+    References
+    ----------
     Haverkamp, R., Vauclin, M., Touma, J., Wierenga, P. J., & Vachaud, G. (1977).
     A comparison of numerical simulation models for one-dimensional infiltration.
+
     """
 
     k_s: float
@@ -247,10 +312,26 @@ class Haverkamp:
 class Gardner:
     """Gardner(-Kozeny) Soil Model.
 
-    Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+    theta_s: float
+        Saturated soil water content [-]
+    m: float
+        Empirical exponent parameter for the soil water retention curve [1/L]
+    c: float
+        Empirical exponent parameter for the hydraulic conductivity curve [1/L]
+        (Often denoted as alpha in the classic Gardner exponential model)
+
+    References
+    ----------
+    Gardner, W. H. (1958). Some steady-state solutions of the unsaturated
     moisture flow equation with application to evaporation from soils.
-    Bakker and Nieber (2009) - Damping of Sinusoidal Surface Flux Fluctuations
-    with Soil Depth.
+
+    Bakker, M., & Nieber, J. L. (2009). Damping of sinusoidal surface flux
+    fluctuations with soil depth.
+
     """
 
     k_s: float
@@ -284,11 +365,28 @@ class Gardner:
 class Rucker:
     """Gardner(-Rucker) Soil Model.
 
-    Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
-    moisture flow equation with application to evaporation from soils
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+    theta_r: float
+        Residual soil water content [-]
+    theta_s: float
+        Saturated soil water content [-]
+    m: float
+        Empirical shape parameter for the soil water retention curve [-]
+    c: float
+        Empirical parameter for the hydraulic conductivity curve [1/L]
+
+    References
+    ----------
+    Gardner, W. H. (1958). Some steady-state solutions of the unsaturated
+    moisture flow equation with application to evaporation from soils.
+
     Rucker, D. F., Warrick, A. W., & Ferré, T. P. (2005). Parameter equivalence
     for the Gardner and van Genuchten soil hydraulic conductivity functions
     for steady vertical flow with inclusions.
+
     """
 
     k_s: float
@@ -326,9 +424,47 @@ class Rucker:
 
 @dataclass
 class Panday:
-    """Panday Soil Model as used in MODFLOW-USG Tranport and MODFLOW's UZF package.
+    """Panday Soil Model as used in MODFLOW-USG Transport and MODFLOW UZF.
 
-    Panday, S. - USG-Transport: Transport and other Enhancements to MODFLOW-USG.
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+        Note: The empirical specific yield calculation assumes this is provided
+        in cm-based units (e.g., cm/day or cm/s).
+    theta_r: float
+        Residual soil water content [-]
+    theta_s: float
+        Saturated soil water content [-]
+    alpha: float
+        Inverse of the air-entry suction [1/L]
+        (Represents the van Genuchten alpha parameter)
+    beta: float
+        Pore-size distribution parameter [-]
+        (Represents the van Genuchten n parameter)
+    brook: float
+        Exponent for the relative permeability function [-]
+        (Represents the Brooks-Corey pore-connectivity parameter)
+    h_b: float, optional
+        Bubbling pressure or air-entry offset [L] (default: 0.0)
+    ss: float, optional
+        Specific storage [1/L] (default: 1e-6)
+
+    Attributes
+    ----------
+    sr: float
+        Residual saturation calculated as theta_r / theta_s [-]
+    gamma: float
+        Calculated from beta as 1 - 1 / beta [-]
+        (Represents the Mualem m restriction)
+    sy: float
+        Specific yield, calculated empirically based on k_s and beta [-]
+
+    References
+    ----------
+    Panday, S. (2026). USG-Transport: Transport and other Enhancements to
+    MODFLOW-USG. Documentation and User's Guide.
+
     """
 
     k_s: float
@@ -380,8 +516,24 @@ class Panday:
 class Fredlund:
     """Fredlund and Xing Soil Model.
 
-    Fredlund, D.G. and Xing, A. (1994) - Equations for the soil-water
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+    theta_s: float
+        Saturated soil water content [-]
+    a: float
+        Soil parameter related to the air-entry value [L]
+    n: float
+        Empirical soil parameter controlling the slope of the SWCC [-]
+    m: float
+        Empirical soil parameter related to the residual water content [-]
+
+    References
+    ----------
+    Fredlund, D. G., & Xing, A. (1994). Equations for the soil-water
     characteristic curve.
+
     """
 
     k_s: float
@@ -454,10 +606,37 @@ class GenuchtenGardner:
     Uses the van Genuchten soil water retention curve and the Gardner
     hydraulic conductivity function.
 
-    Gardner, W.H. (1958) - Some steady-state solutions of the unsaturated
-    moisture flow equation with application to evaporation from soils
-    van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
-    Hydraulic Conductivity of Unsaturated Soil
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+    theta_r: float
+        Residual soil water content [-]
+    theta_s: float
+        Saturated soil water content [-]
+    alpha: float
+        Inverse of the air-entry pressure [1/L]
+        (van Genuchten parameter)
+    n: float
+        Pore-size distribution parameter [-]
+        (van Genuchten parameter)
+    c: float
+        Empirical parameter for the hydraulic conductivity curve [1/L]
+        (Gardner parameter)
+
+    Attributes
+    ----------
+    m: float
+        Calculated from n as m = 1 - 1/n [-] (Mualem restriction)
+
+    References
+    ----------
+    Gardner, W. H. (1958). Some steady-state solutions of the unsaturated
+    moisture flow equation with application to evaporation from soils.
+
+    van Genuchten, M. Th. (1980). A closed-form equation for predicting the
+    hydraulic conductivity of unsaturated soils.
+
     """
 
     k_s: float
@@ -503,16 +682,45 @@ class GenuchtenGardner:
 
 @dataclass
 class GenuchtenKool:
-    """Soil model with scaling factor for hysteresis.
+    """Soil model with a scaling factor for hysteresis.
 
-    Uses the van Genuchten soil water retention curve and
-    hydraulic conductivity function with a scaling factor xi to get the
-    hysteresis behavior as described in Kool and Parker (1987).
+    Uses the van Genuchten soil water retention curve and hydraulic
+    conductivity function with a scaling factor xi to approximate hysteresis
+    behavior as described in Kool and Parker (1987).
 
-    van Genuchten, M. Th. (1970) - A Closed-form Equation for Predicting the
-    Hydraulic Conductivity of Unsaturated Soil.
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+    theta_r: float
+        Residual soil water content [-]
+    theta_s: float
+        Saturated soil water content [-]
+    alpha: float
+        Inverse of the air-entry pressure for the main drying curve [1/L]
+    n: float
+        Pore-size distribution parameter [-]
+    l: float, optional
+        Pore-connectivity or tortuosity parameter [-] (default: 0.5)
+    xi: float, optional
+        Hysteresis scaling factor, typically defined as alpha_wetting / alpha_drying [-]
+        (default: 2.0)
+
+    Attributes
+    ----------
+    m: float
+        Calculated from n as m = 1 - 1/n [-] (Mualem restriction)
+    alpha_w: float
+        Scaled alpha parameter for the water retention curve [1/L]
+
+    References
+    ----------
     Kool, J. B., & Parker, J. C. (1987). Development and evaluation of
     closed-form expressions for hysteretic soil hydraulic properties.
+
+    van Genuchten, M. Th. (1980). A closed-form equation for predicting the
+    hydraulic conductivity of unsaturated soils.
+
     """
 
     k_s: float
