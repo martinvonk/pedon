@@ -30,7 +30,7 @@ repository = "https://github.com/martinvonk/pedon"
 
 [project.optional-dependencies]
 ruffing = ["ruff"]
-typing = ["mypy", "pandas-stubs", "ty"]
+typing = ["mypy", "pandas-stubs", "ty", "pedon[rosetta]"]
 rosetta = ["httpx"]
 pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar", "pedon[rosetta]"]
 coveraging = ["coverage"]
@@ -74,6 +74,7 @@ pythonpath = ["src"]
 [tool.ruff]
 extend-include = ["*.ipynb"]
 lint.extend-select = ["I", "D"]
+lint.ignore = ["D102", "D203", "D213"]
 show-fixes = true
 fix = true
 

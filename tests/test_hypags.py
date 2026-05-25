@@ -1,3 +1,5 @@
+"""Tests for the HYPAGS pedotransfer function in pedon.soilmodel."""
+
 import numpy as np
 import pandas as pd
 import pytest

@@ -1,3 +1,5 @@
+"""Soil models for soil water retention and hydraulic conductivity."""
+
 from dataclasses import dataclass, field
 from typing import Protocol, runtime_checkable
 
@@ -98,6 +100,7 @@ class Genuchten:
     m: float = field(init=False, repr=False)
 
     def __post_init__(self):
+        """Calculate m from n after initialization."""
         self.m = 1 - 1 / self.n
 
     def theta(self, h: FloatArray) -> FloatArray:
@@ -340,6 +343,7 @@ class Panday:
     ss: float = field(default=1e-6, repr=False)
 
     def __post_init__(self):
+        """Calculate additional parameters after initialization."""
         self.sr = self.theta_r / self.theta_s  # theta_r / theta_s
         self.gamma = 1 - 1 / self.beta  # m
         theta_fc = (
@@ -464,6 +468,7 @@ class GenuchtenGardner:
     m: float = field(init=False, repr=False)
 
     def __post_init__(self):
+        """Calculate m from n after initialization."""
         self.m = 1 - 1 / self.n
 
     def theta(self, h: FloatArray) -> FloatArray:
@@ -519,6 +524,7 @@ class GenuchtenKool:
     xi: float = field(default=2.0, repr=True)
 
     def __post_init__(self):
+        """Calculate m from n after initialization."""
         self.m = 1 - 1 / self.n
 
     @property
@@ -557,6 +563,7 @@ class GenuchtenKool:
 def get_soilmodel(
     soilmodel_name: SoilModelNames,
 ) -> type[SoilModel]:
+    """Get soil model class by name."""
     sms = {
         "Genuchten": Genuchten,
         "Brooks": Brooks,
