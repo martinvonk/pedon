@@ -22,9 +22,9 @@ tolerance = 2.0
     style="default",
     savefig_kwargs=savefig_kwargs,
 )
-def test_swrc_plot(gen: pe.SoilModel):
+def test_swrc_plot(genuchten: pe.SoilModel):
     """Compare the soil water retention curve against a baseline image."""
-    ax = swrc(gen, color="tab:blue")
+    ax = swrc(genuchten, color="tab:blue")
     return ax.figure
 
 
@@ -35,9 +35,9 @@ def test_swrc_plot(gen: pe.SoilModel):
     style="default",
     savefig_kwargs=savefig_kwargs,
 )
-def test_hcf_plot(gen: pe.SoilModel):
+def test_hcf_plot(genuchten: pe.SoilModel):
     """Compare the hydraulic conductivity curve against a baseline image."""
-    ax = hcf(gen, color="tab:green")
+    ax = hcf(genuchten, color="tab:green")
     return ax.figure
 
 
@@ -48,7 +48,7 @@ def test_hcf_plot(gen: pe.SoilModel):
     style="default",
     savefig_kwargs=savefig_kwargs,
 )
-def test_curves_plot(gen: pe.SoilModel):
+def test_curves_plot(genuchten: pe.SoilModel):
     """Compare the combined curves plot against a baseline image."""
-    axes = curves(gen, color="tab:orange")
+    axes = curves(genuchten, color="tab:orange")
     return axes[0].figure
