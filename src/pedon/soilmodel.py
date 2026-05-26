@@ -5,7 +5,7 @@ from typing import Protocol, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
-from numpy import asarray, exp, full, linspace, log, log10, sqrt
+from numpy import asarray, exp, full, linspace, log, log10, maximum, sqrt
 from scipy.integrate import trapezoid
 from scipy.special import erfc, erfcinv, lambertw
 
@@ -663,6 +663,57 @@ class Kosugi:
 
 
 @dataclass
+class Campbell:
+    """Campbell Soil Model.
+
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+    theta_s: float
+        Saturated soil water content [-]
+    h_e: float
+        Air-entry potential or bubbling pressure [L]
+    b: float
+        Empirical shape parameter controlling the slope of the curve [-]
+
+    References
+    ----------
+    Campbell, G. S. (1974). A simple method for determining unsaturated
+    conductivity from moisture retention data. Soil Science, 117(6), 311-314.
+
+    """
+
+    k_s: float
+    theta_s: float
+    h_e: float
+    b: float
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        # Use maximum to bound h to the air-entry pressure (h_e).
+        h = maximum(npabs(h), self.h_e)
+        return self.theta_s * (self.h_e / h) ** (1.0 / self.b)
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return self.theta(h) / self.theta_s
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is None:
+            s = self.s(h)
+
+        return s ** (2.0 * self.b + 3.0)
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        return self.h_e * (theta / self.theta_s) ** -self.b
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
+@dataclass
 class GenuchtenGardner:
     """Combination soil model.
 
@@ -845,6 +896,7 @@ def get_soilmodel(
         "Panday": Panday,
         "Fredlund": Fredlund,
         "Kosugi": Kosugi,
+        "Campbell": Campbell,
         "GenuchtenGardner": GenuchtenGardner,
         "GenuchtenKool": GenuchtenKool,
     }
