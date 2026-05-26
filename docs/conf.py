@@ -10,7 +10,7 @@
 from pedon import __version__
 
 project = "pedon"
-copyright = "2025, Martin Vonk"
+copyright = "2026, Martin Vonk"
 author = "Martin Vonk"
 release = __version__
 
