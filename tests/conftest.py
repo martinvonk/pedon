@@ -52,6 +52,12 @@ def fredlund() -> pe.SoilModel:
 
 
 @fixture
+def kosugi() -> pe.SoilModel:
+    """Fixture for a Kosugi soil model with specific parameters for testing."""
+    return pe.Kosugi(k_s=10.0, theta_r=0.01, theta_s=0.43, h_m=100.0, sigma=1.2)
+
+
+@fixture
 def haverkamp() -> pe.soilmodel.Haverkamp:
     """Fixture for a Haverkamp soil model with specific parameters for testing."""
     # Example parameters similar in style to other model tests

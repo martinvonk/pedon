@@ -461,6 +461,80 @@ def test_k_r_fredlund_rejects_s_kwarg(fredlund: pe.SoilModel) -> None:
         fredlund.k_r(h=array([1.0, 2.0, 3.0]), s=array([0.1, 0.2, 0.3]))
 
 
+def test_theta_kosugi(kosugi: pe.SoilModel) -> None:
+    """Test water content calculation for the Kosugi model."""
+    h_abs = abs(h)
+    expected = array(
+        [
+            0.43,
+            0.42999999819621027,
+            0.42997391351309045,
+            0.4184485298896685,
+            0.22,
+            0.021551470110331506,
+            0.010026086486909508,
+            0.010000001803789757,
+            0.010000000000003467,
+        ]
+    )
+    assert_close(kosugi.theta(h=h_abs), expected)
+
+
+def test_s_kosugi(kosugi: pe.SoilModel) -> None:
+    """Test degree of saturation calculation for the Kosugi model."""
+    h_abs = abs(h)
+    expected = array(
+        [
+            1.0,
+            0.9999999957052626,
+            0.999937889316882,
+            0.972496499737306,
+            0.5,
+            0.02750350026269398,
+            6.211068311787629e-05,
+            4.294737515113387e-09,
+            8.254664573734071e-15,
+        ]
+    )
+    assert_close(kosugi.s(h=h_abs), expected)
+
+
+def test_k_kosugi(kosugi: pe.SoilModel) -> None:
+    """Test hydraulic conductivity calculation for the Kosugi model."""
+    h_abs = abs(h)
+    expected = array(
+        [
+            10.0,
+            9.99994795699993,
+            9.916381557070964,
+            5.754238967213946,
+            0.09362821398232724,
+            1.3669488922238534e-06,
+            4.376455940449844e-15,
+            1.9946478748160554e-27,
+            1.1051085183358813e-43,
+        ]
+    )
+    assert_close(kosugi.k(h=h_abs), expected)
+
+
+def test_h_kosugi(kosugi: pe.SoilModel, theta: FloatArray = theta) -> None:
+    """Test pressure head calculation for the Kosugi model."""
+    expected = array(
+        [258.5622598127402, 115.43965450658366, 55.06583675346047, 17.234094056734545]
+    )
+    h_out = kosugi.h(theta=theta)
+    assert_close(h_out, expected)
+    assert_close(kosugi.theta(h=h_out), theta)
+
+
+def test_k_r_kosugi_accepts_s_kwarg(kosugi: pe.SoilModel) -> None:
+    """Test that Kosugi k_r method accepts a pre-computed saturation argument."""
+    kr_out = kosugi.k_r(h=array([1.0, 2.0, 3.0]), s=array([0.1, 0.2, 0.3]))
+    expected = array([1.3528004311960868e-05, 0.0001896793173053034, 0.0009808586637367542])
+    assert_close(kr_out, expected)
+
+
 def test_alpha_w_genuchtenkool(genuchtenkool: pe.soilmodel.GenuchtenKool) -> None:
     """Test scaled alpha parameter for the GenuchtenKool model."""
     assert genuchtenkool.alpha_w == 0.05
@@ -620,6 +694,7 @@ def test_h_haverkamp_inverse(
         "rucker",
         "genuchtengardner",
         "fredlund",
+        "kosugi",
         "genuchtenkool",
         "haverkamp",
     ],
