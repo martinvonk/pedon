@@ -639,7 +639,7 @@ class Kosugi:
     sigma: float
 
     def theta(self, h: FloatArray) -> FloatArray:
-        se = 0.5 * erfc(log(h / self.h_m) / (sqrt(2.0) * self.sigma))
+        se = 0.5 * erfc(log(npabs(h) / self.h_m) / (sqrt(2.0) * self.sigma))
         return self.theta_r + se * (self.theta_s - self.theta_r)
 
     def s(self, h: FloatArray) -> FloatArray:

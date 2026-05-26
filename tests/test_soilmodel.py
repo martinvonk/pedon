@@ -461,7 +461,6 @@ def test_k_r_fredlund_rejects_s_kwarg(fredlund: pe.Fredlund) -> None:
 
 def test_theta_kosugi(kosugi: pe.Kosugi) -> None:
     """Test water content calculation for the Kosugi model."""
-    h_abs = abs(h)
     expected = array(
         [
             0.43,
@@ -475,12 +474,11 @@ def test_theta_kosugi(kosugi: pe.Kosugi) -> None:
             0.010000000000003467,
         ]
     )
-    assert_close(kosugi.theta(h=h_abs), expected)
+    assert_close(kosugi.theta(h=h), expected)
 
 
 def test_s_kosugi(kosugi: pe.Kosugi) -> None:
     """Test degree of saturation calculation for the Kosugi model."""
-    h_abs = abs(h)
     expected = array(
         [
             1.0,
@@ -494,12 +492,11 @@ def test_s_kosugi(kosugi: pe.Kosugi) -> None:
             8.254664573734071e-15,
         ]
     )
-    assert_close(kosugi.s(h=h_abs), expected)
+    assert_close(kosugi.s(h=h), expected)
 
 
 def test_k_kosugi(kosugi: pe.Kosugi) -> None:
     """Test hydraulic conductivity calculation for the Kosugi model."""
-    h_abs = abs(h)
     expected = array(
         [
             10.0,
@@ -513,7 +510,7 @@ def test_k_kosugi(kosugi: pe.Kosugi) -> None:
             1.1051085183358813e-43,
         ]
     )
-    assert_close(kosugi.k(h=h_abs), expected)
+    assert_close(kosugi.k(h=h), expected)
 
 
 def test_h_kosugi(kosugi: pe.Kosugi) -> None:
