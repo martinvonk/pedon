@@ -60,7 +60,7 @@ def kosugi() -> pe.SoilModel:
 @fixture
 def campbell() -> pe.Campbell:
     """Fixture for a Campbell soil model with specific parameters for testing."""
-    return pe.Campbell(k_s=10.0, theta_s=0.43, h_e=10.0, b=4.0)
+    return pe.Campbell(k_s=10.0, theta_s=0.43, h_b=10.0, b=4.0)
 
 
 @fixture

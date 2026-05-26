@@ -672,7 +672,7 @@ class Campbell:
         Saturated hydraulic conductivity [L/T]
     theta_s: float
         Saturated soil water content [-]
-    h_e: float
+    h_b: float
         Air-entry potential or bubbling pressure [L]
     b: float
         Empirical shape parameter controlling the slope of the curve [-]
@@ -686,13 +686,13 @@ class Campbell:
 
     k_s: float
     theta_s: float
-    h_e: float
+    h_b: float
     b: float
 
     def theta(self, h: FloatArray) -> FloatArray:
-        # Use maximum to bound h to the air-entry pressure (h_e).
-        h = maximum(npabs(h), self.h_e)
-        return self.theta_s * (self.h_e / h) ** (1.0 / self.b)
+        # Use maximum to bound h to the air-entry pressure (h_b).
+        h = maximum(npabs(h), self.h_b)
+        return self.theta_s * (self.h_b / h) ** (1.0 / self.b)
 
     def s(self, h: FloatArray) -> FloatArray:
         return self.theta(h) / self.theta_s
@@ -707,7 +707,7 @@ class Campbell:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        return self.h_e * (theta / self.theta_s) ** -self.b
+        return self.h_b * (theta / self.theta_s) ** -self.b
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         return plot_swrc(self, ax=ax)
