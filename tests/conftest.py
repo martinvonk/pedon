@@ -78,7 +78,7 @@ def haverkamp() -> pe.Haverkamp:
 
 
 @fixture
-def genuchtenkool() -> pe.SoilModel:
+def genuchtenkool() -> pe.GenuchtenKool:
     """Fixture for a Genuchten-Kool soil model with specific parameters for testing."""
     return pe.GenuchtenKool(
         k_s=10.0,
