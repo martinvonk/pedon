@@ -9,12 +9,14 @@ from ._version import show_versions as show_versions
 from .soil import Soil as Soil
 from .soil import SoilSample as SoilSample
 from .soilmodel import Brooks as Brooks
+from .soilmodel import Campbell as Campbell
 from .soilmodel import Fredlund as Fredlund
 from .soilmodel import Gardner as Gardner
 from .soilmodel import Genuchten as Genuchten
 from .soilmodel import GenuchtenGardner as GenuchtenGardner
 from .soilmodel import GenuchtenKool as GenuchtenKool
 from .soilmodel import Haverkamp as Haverkamp
+from .soilmodel import Kosugi as Kosugi
 from .soilmodel import Panday as Panday
 from .soilmodel import Rucker as Rucker
 from .soilmodel import SoilModel as SoilModel

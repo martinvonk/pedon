@@ -5,9 +5,9 @@ from typing import Protocol, runtime_checkable
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
-from numpy import asarray, exp, full, linspace, log, log10
+from numpy import asarray, exp, full, linspace, log, log10, maximum, sqrt
 from scipy.integrate import trapezoid
-from scipy.special import lambertw
+from scipy.special import erfc, erfcinv, lambertw
 
 from ._typing import FloatArray, SoilModelNames
 from .plot import swrc as plot_swrc
@@ -609,6 +609,111 @@ class Fredlund:
 
 
 @dataclass
+class Kosugi:
+    """Kosugi 2-Parameter Lognormal Soil Model.
+
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+    theta_r: float
+        Residual soil water content [-]
+    theta_s: float
+        Saturated soil water content [-]
+    h_m: float
+        Median capillary pressure head [L]
+    sigma: float
+        Standard deviation of log-transformed soil pore radii [-]
+
+    References
+    ----------
+    Kosugi, K. (1996). Lognormal distribution model for unsaturated soil
+    hydraulic properties.
+
+    """
+
+    k_s: float
+    theta_r: float
+    theta_s: float
+    h_m: float
+    sigma: float
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        se = 0.5 * erfc(log(npabs(h) / self.h_m) / (sqrt(2.0) * self.sigma))
+        return self.theta_r + se * (self.theta_s - self.theta_r)
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is None:
+            s = self.s(h)
+
+        return s**0.5 * (0.5 * erfc(erfcinv(2.0 * s) + self.sigma / sqrt(2.0))) ** 2
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
+        return self.h_m * exp(sqrt(2.0) * self.sigma * erfcinv(2.0 * se))
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
+@dataclass
+class Campbell:
+    """Campbell Soil Model.
+
+    Parameters
+    ----------
+    k_s: float
+        Saturated hydraulic conductivity [L/T]
+    theta_s: float
+        Saturated soil water content [-]
+    h_b: float
+        Air-entry potential or bubbling pressure [L]
+    b: float
+        Empirical shape parameter controlling the slope of the curve [-]
+
+    References
+    ----------
+    Campbell, G. S. (1974). A simple method for determining unsaturated
+    conductivity from moisture retention data. Soil Science, 117(6), 311-314.
+
+    """
+
+    k_s: float
+    theta_s: float
+    h_b: float
+    b: float
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        # Use maximum to bound h to the air-entry pressure (h_b).
+        h = maximum(npabs(h), self.h_b)
+        return self.theta_s * (self.h_b / h) ** (1.0 / self.b)
+
+    def s(self, h: FloatArray) -> FloatArray:
+        return self.theta(h) / self.theta_s
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        if s is None:
+            s = self.s(h)
+
+        return s ** (2.0 * self.b + 3.0)
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        return self.h_b * (theta / self.theta_s) ** -self.b
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
+@dataclass
 class GenuchtenGardner:
     """Combination soil model.
 
@@ -790,6 +895,8 @@ def get_soilmodel(
         "Rucker": Rucker,
         "Panday": Panday,
         "Fredlund": Fredlund,
+        "Kosugi": Kosugi,
+        "Campbell": Campbell,
         "GenuchtenGardner": GenuchtenGardner,
         "GenuchtenKool": GenuchtenKool,
     }
