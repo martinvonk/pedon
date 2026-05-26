@@ -58,7 +58,13 @@ def kosugi() -> pe.SoilModel:
 
 
 @fixture
-def haverkamp() -> pe.soilmodel.Haverkamp:
+def campbell() -> pe.Campbell:
+    """Fixture for a Campbell soil model with specific parameters for testing."""
+    return pe.Campbell(k_s=10.0, theta_s=0.43, h_e=10.0, b=4.0)
+
+
+@fixture
+def haverkamp() -> pe.Haverkamp:
     """Fixture for a Haverkamp soil model with specific parameters for testing."""
     # Example parameters similar in style to other model tests
     return pe.Haverkamp(

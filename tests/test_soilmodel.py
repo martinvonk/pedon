@@ -531,7 +531,78 @@ def test_h_kosugi(kosugi: pe.SoilModel, theta: FloatArray = theta) -> None:
 def test_k_r_kosugi_accepts_s_kwarg(kosugi: pe.SoilModel) -> None:
     """Test that Kosugi k_r method accepts a pre-computed saturation argument."""
     kr_out = kosugi.k_r(h=array([1.0, 2.0, 3.0]), s=array([0.1, 0.2, 0.3]))
-    expected = array([1.3528004311960868e-05, 0.0001896793173053034, 0.0009808586637367542])
+    expected = array(
+        [1.3528004311960868e-05, 0.0001896793173053034, 0.0009808586637367542]
+    )
+    assert_close(kr_out, expected)
+
+
+def test_theta_campbell(campbell: pe.Campbell) -> None:
+    """Test water content calculation for the Campbell model."""
+    expected = array(
+        [
+            0.43,
+            0.43,
+            0.43,
+            0.43,
+            0.24180676503776996,
+            0.13597793773835225,
+            0.07646600797136199,
+            0.043000000000000003,
+            0.024180676503776996,
+        ]
+    )
+    assert_close(campbell.theta(h=h), expected)
+
+
+def test_s_campbell(campbell: pe.Campbell) -> None:
+    """Test degree of saturation calculation for the Campbell model."""
+    expected = array(
+        [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.5623413140413255,
+            0.31622776601683794,
+            0.1778279410038923,
+            0.1,
+            0.05623413140413257,
+        ]
+    )
+    assert_close(campbell.s(h=h), expected)
+
+
+def test_k_campbell(campbell: pe.Campbell) -> None:
+    """Test hydraulic conductivity calculation for the Campbell model."""
+    expected = array(
+        [
+            10.0,
+            10.0,
+            10.0,
+            10.0,
+            0.01778279410038923,
+            3.1622776601683795e-05,
+            5.623413251903492e-08,
+            1.0000000000000002e-10,
+            1.7782794100389228e-13,
+        ]
+    )
+    assert_close(campbell.k(h=h), expected)
+
+
+def test_h_campbell(campbell: pe.Campbell) -> None:
+    """Test pressure head calculation for the Campbell model."""
+    expected = array([3418.801, 213.6750625, 42.207419753086415, 13.354691406249997])
+    h_out = campbell.h(theta=theta)
+    assert_close(h_out, expected)
+    assert_close(campbell.theta(h=h_out), theta)
+
+
+def test_k_r_campbell_accepts_s_kwarg(campbell: pe.Campbell) -> None:
+    """Test that Campbell k_r method accepts a pre-computed saturation argument."""
+    kr_out = campbell.k_r(h=array([1.0, 2.0, 3.0]), s=array([0.1, 0.2, 0.3]))
+    expected = array([1e-11, 2.048e-08, 1.7714699999999997e-06])
     assert_close(kr_out, expected)
 
 
@@ -695,6 +766,7 @@ def test_h_haverkamp_inverse(
         "genuchtengardner",
         "fredlund",
         "kosugi",
+        "campbell",
         "genuchtenkool",
         "haverkamp",
     ],
