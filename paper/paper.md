@@ -42,9 +42,12 @@ A soil hydraulic model (soil model in short) is a parametric description of soil
 - `pedon.Panday`: Mualem-van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2026]
 - `pedon.Fredlund`: Fredlund-Xing [@fredlund_xing_1994]
 - `pedon.Haverkamp`: Haverkamp [@haverkamp_model_1977]
+- `pedon.Kosugi`: Kosugi [@kosugi_model_1996]
+- `pedon.Campbell`: Campbell [@campbell_model_1974]
 - `pedon.Gardner`: Gardner(-Kozeny) [@gardner_model_1958; @brutsaert_kozeny_1967; @bakker_gardner_2009; @mathias_gardner_2006]
 - `pedon.Rucker`: Gardner-Rucker [@rucker_gardner_2005]
 - `pedon.GenuchtenGardner`: Mualem-van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_model_1958]
+- `pedon.GenuchtenKool`: Mualem-van Genuchten SWRC with hysteresis [@genuchten_mualem_1980; @kool_parker_1987]
 
 ## Software design
 The soil models are implemented as Python classes with model-specific methods for evaluating the SWRC and HCF. For example, the Mualem–van Genuchten model can be used as follows:
