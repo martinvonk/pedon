@@ -40,7 +40,7 @@ def get_params(
         smn = sm
         sm = get_soilmodel(smn)
     else:
-        raise ValueError(
+        raise TypeError(
             f"Argument must either be Type[SoilModel] | SoilModel | str, not {type(sm)}"
         )
 

@@ -1,3 +1,4 @@
+"""Sphinx configuration for pedon documentation."""
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -9,7 +10,7 @@
 from pedon import __version__
 
 project = "pedon"
-copyright = "2025, Martin Vonk"
+copyright = "2026, Martin Vonk"
 author = "Martin Vonk"
 release = __version__
 

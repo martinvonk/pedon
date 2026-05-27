@@ -48,3 +48,6 @@ To get the development version download the GitHub code to your computer. Use cd
 
 `pip install -e .`
 
+## Documentation
+
+The documentation for Pedon is available at [https://martinvonk.github.io/pedon/](https://martinvonk.github.io/pedon/). It includes an extensive user guide with Jupyter Notebooks as examples and an API reference.
