@@ -258,6 +258,8 @@ class SoilSample:
     def wosten(self, ts: bool = False) -> Genuchten:
         """Pedotransfer function for general soils.
 
+        Sometimes also referred to as HYPRES: HYdraulic PRoperties of European Soils
+
         References
         ----------
         Wosten et al (1999) - Development and use of a database of hydraulic
@@ -958,6 +960,9 @@ class Soil:
 
         References
         ----------
+        Clapp, R. B., & Hornberger, G. M. (1978). Empirical equations for some soil
+        hydraulic properties. doi: 10.1029/WR014i004p00601
+
         Carsel, R. F. and Parrish, R. S. (1988). Developing Joint Probability
         Distributions of Soil Water Retention Characteristics.
         doi: 10.1029/WR024i005p00755

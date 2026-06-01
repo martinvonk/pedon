@@ -31,6 +31,7 @@ To support parameterization without direct measurements, Pedon includes access t
   - [HYDRUS](https://www.pc-progress.com/downloads/pgm_hydrus1d/hydrus1d-4.08.pdf)
   - [VS2D](https://doi.org/10.3133/wri904025)
   - Staring Series: [2001](https://edepot.wur.nl/43272) and [2018](https://doi.org/10.18174/512761)
+  - [Clapp & Hornberger (1978)](https://doi.org/10.1029/WR014i004p00601)
 
 In addition, Pedon implements multiple pedotransfer functions that estimate soil hydraulic parameters from easily measured soil properties:
   - Van Genuchten: [Wösten](https://doi.org/10.1016/S0016-7061(98)00132-3)
