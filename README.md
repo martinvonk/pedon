@@ -7,6 +7,8 @@
 [![License](https://img.shields.io/pypi/l/pedon?style=flat-square&color=0a3d62&logo=open-source-initiative&logoColor=white)](https://pypi.org/project/pedon/)
 
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.18222514-ff6600?style=flat-square)](https://doi.org/10.5281/zenodo.18222514)
+[![JOSS](https://joss.theoj.org/papers/095927c33334e8ebb4612243ea40fdae/status.svg?style=flat-square)](https://joss.theoj.org/papers/095927c33334e8ebb4612243ea40fdae)
+
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/martinvonk/pedon/tests.yml?style=flat-square&color=green)](https://github.com/martinvonk/pedon/actions/workflows/tests.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/martinvonk/a891dd883f258c46826ba657cf9a89cf/raw/coverage.json&style=flat-square&color=green)](https://github.com/martinvonk/pedon/actions/workflows/tests.yml)
