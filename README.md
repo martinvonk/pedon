@@ -9,7 +9,7 @@
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.18222514-ff6600?style=flat-square)](https://doi.org/10.5281/zenodo.18222514)
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/martinvonk/pedon/tests.yml?style=flat-square&color=green)](https://github.com/martinvonk/pedon/actions/workflows/tests.yml)
-[![Typed: MyPy](https://img.shields.io/badge/type_checker-mypy-darkgreen?style=flat-square)](https://mypy-lang.org/)
+[![Typed: Ty](https://img.shields.io/badge/type_checker-ty-darkgreen?style=flat-square)](https://docs.astral.sh/ty/)
 [![Formatter and Linter: ruff](https://img.shields.io/badge/linter-ruff-darkgreen?style=flat-square)](https://github.com/charliermarsh/ruff)
 
 Pedon (*from Greek: πέδον, pedon -> soil*) is a Python package for working with unsaturated soil hydraulic properties. It provides an object-oriented framework for soils, soil samples, and soil hydraulic models, making it easy to describe, analyze, and parameterize soil water retention and hydraulic conductivity behavior. At its core, Pedon treats each soil model as a Python class that defines a soil water retention curve and an unsaturated hydraulic conductivity function. The package currently includes implementations of several widely used models:
