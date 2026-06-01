@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 from typing import Protocol, runtime_checkable
+from warnings import warn
 
 import matplotlib.pyplot as plt
 from numpy import abs as npabs
@@ -16,9 +17,13 @@ from .plot import swrc as plot_swrc
 
 def plot_hcf(*args, **kwargs):
     """Plot the hydraulic conductivity function."""
-    DeprecationWarning(
-        "The `plot_hcf` function is deprecated and will be removed"
-        " in a future release. Please use `pedon.plot.hcf` instead."
+    warn(
+        message=(
+            "The `pe.soilmodel.plot_hcf` function is deprecated and will be removed"
+            " in a future release. Please use `pedon.plot.hcf` instead."
+        ),
+        category=DeprecationWarning,
+        stacklevel=2,
     )
     return hcf(*args, **kwargs)
 
