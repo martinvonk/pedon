@@ -74,7 +74,7 @@ def curves(sm: "SoilModel", axes: list[Axes] | None = None, **kwargs) -> list[Ax
     if axes is None:
         _, axs = plt.subplots(1, 2, figsize=(6.0, 6.0), sharey=True, layout="tight")
     else:
-        axs: list[Axes] = axes
+        axs = axes
 
     axs[0] = swrc(sm, ax=axs[0], **kwargs)
     axs[1] = hcf(sm, ax=axs[1], **kwargs)

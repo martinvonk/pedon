@@ -1,12 +1,12 @@
 from dataclasses import MISSING, fields
 from logging import getLogger
-from typing import Type
+from typing import Any, Type, cast
 
 from numpy import inf, nan
 from pandas import DataFrame
 
 from pedon._typing import SoilModelNames
-from pedon.soilmodel import SoilModel, get_soilmodel
+from pedon.soilmodel import SoilModel, resolve_soilmodel
 
 logger = getLogger(__name__)
 
@@ -15,7 +15,7 @@ def _get_default_params(sm: Type[SoilModel]) -> DataFrame:
     """Return an empty DataFrame with the same structure as parameter DataFrames."""
     index = [
         f.name
-        for f in fields(sm)
+        for f in fields(cast(Any, sm))
         if f.init and f.default is MISSING and f.default_factory is MISSING
     ]
     df = DataFrame(
@@ -31,20 +31,9 @@ def get_params(
     sm: Type[SoilModel] | SoilModel | SoilModelNames,
 ) -> DataFrame:
     """Get the parameter bounds for a specific soil model."""
-    if isinstance(sm, type) and issubclass(sm, SoilModel):
-        smn = sm.__name__
-    elif isinstance(sm, SoilModel):
-        smn = getattr(sm, "__name__", sm.__class__.__name__)
-        sm = type(sm)
-    elif isinstance(sm, str):
-        smn = sm
-        sm = get_soilmodel(smn)
-    else:
-        raise TypeError(
-            f"Argument must either be Type[SoilModel] | SoilModel | str, not {type(sm)}"
-        )
+    smn, sm_cls = resolve_soilmodel(sm)
 
-    params = _get_default_params(sm)
+    params = _get_default_params(sm_cls)
 
     param_bounds = {
         "Genuchten": {
