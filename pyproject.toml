@@ -76,6 +76,8 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+addopts = "--cov=pedon --cov-report=term-missing --cov-branch"
+
 
 [tool.ruff]
 extend-include = ["*.ipynb"]
