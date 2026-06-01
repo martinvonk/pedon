@@ -97,7 +97,19 @@ class SoilSample:
     )  # moisture content measurement
 
     def from_staring(self, name: str, year: str = "2018") -> "SoilSample":
-        """Get properties and measurements from Staring series."""
+        """Get properties and measurements from Staring series.
+
+        References
+        ----------
+        Wösten, J. H. M. and Veerman, G. J. and de Groot, W. J. M. and Stolte, J. (2001).
+        Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+        Nederland: De Staringreeks. url: https://edepot.wur.nl/43272
+
+        Heinen, M. and Bakker, G. and Wösten, J. H. M. (2020). Waterretentie- en
+        Doorlatendheidskarakteristieken van Boven- en Ondergronden in Nederland:
+        De Staringreeks; (Update 2018). doi: 10.18174/512761
+
+        """
         if year not in ("2001", "2018"):
             raise ValueError(
                 f"No Staring series available for year '{year}'"
@@ -167,6 +179,12 @@ class SoilSample:
             - If k_s is provided it will be fixed during optimization.
             - Input/outputs and bounds are expected in the units used by the soil model.
 
+        References
+        ----------
+        van Genuchten, M. Th. and Leij, F. J. and Yates, S. R. (1991). The RETC Code for
+        Quantifying the Hydraulic Functions.
+        url: https://cfpub.epa.gov/si/si_public_record_report.cfm?dirEntryId=130162
+
         """
         theta = asarray(self.theta, dtype=float)
         N = len(theta)
@@ -234,7 +252,14 @@ class SoilSample:
         return sm(**opt_pars)
 
     def wosten(self, ts: bool = False) -> Genuchten:
-        """Wosten et al (1999) - Development and use of a database of hydraulic properties of European soils."""
+        """Pedotransfer function for general soils.
+
+        References
+        ----------
+        Wosten et al (1999) - Development and use of a database of hydraulic
+        properties of European soils. doi: 10.1016/S0016-7061(98)00132-3
+
+        """
         assert (
             self.clay_p is not None
             and self.rho is not None
@@ -332,6 +357,7 @@ class SoilSample:
 
         Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
         van boven- en ondergronden in Nederland: de Staringreeks.
+        url: https://edepot.wur.nl/43272
         """
         msg = "Wosten sand pedotransfer function requires 'rho', 'm50', 'silt_p' and 'om_p' to be set."
         assert self.rho is not None, msg
@@ -413,8 +439,12 @@ class SoilSample:
     def wosten_clay(self) -> Genuchten:
         """Pedotransfer function for clay soils.
 
+        References
+        ----------
         Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
         van boven- en ondergronden in Nederland: de Staringreeks.
+        url: https://edepot.wur.nl/43272
+
         """
         msg = "Wosten clay pedotransfer function requires 'clay_p', 'rho', and 'om_p' to be set."
         assert self.clay_p is not None, msg
@@ -475,6 +505,11 @@ class SoilSample:
 
         Cooper (2021) - Using data assimilation to optimize pedotransfer
         functions using field-scale in situ soil moisture observations.
+        doi: 10.5194/hess-25-2445-2021
+
+        Cosby et al. (1984) - A statistical exploration of the relationships of soil moisture
+        characteristics to the physical properties of soils. doi: 10.1029/WR020i006p00682
+
         """
         msg = "Cosby pedotransfer function requires 'clay_p' and 'sand_p' to be set."
         assert self.clay_p is not None, msg
@@ -497,7 +532,14 @@ class SoilSample:
         )
 
     def rosetta(self, version: Literal[1, 2, 3] = 3) -> Genuchten:
-        """Rosetta (Schaap et al., 2001) - Predicting soil water retention from soil."""
+        """Pedotransfer function using the Rosetta API.
+
+        References
+        ----------
+        Schaap et al., (2001) - Predicting soil water retention from soil.
+        doi: 10.1016/S0022-1694(01)00466-8"
+
+        """
         try:
             from httpx import post as httpx_post
         except ImportError:
@@ -564,9 +606,11 @@ class SoilSample:
         ----------
         Peche, A., Houben, G., & Altfelder, S. (2024). Approximation of van Genuchten
         Parameter Ranges from Hydraulic Conductivity Data. Groundwater, 62(3), 469-479.
+        doi: 10.1111/gwat.13365
 
         Peche, A., & Houben, G. J. (2023). Estimating characteristic grain sizes and
         effective porosity from hydraulic conductivity data. Groundwater, 61(4), 574-585.
+        doi: 10.1111/gwat.13266
 
         """
         # constants and coefficients
@@ -904,7 +948,34 @@ class Soil:
         sm: type[SoilModel] | SoilModel | SoilModelNames,
         source: str | None = None,
     ) -> Self:
-        """Load soil parameters from a CSV database by soil name and model type."""
+        """Load soil parameters from a CSV database by soil name and model type.
+
+        Available sources include HYDRUS, VS2D, Staring_2001, Staring_2018.
+
+        References
+        ----------
+        Carsel, R. F. and Parrish, R. S. (1988). Developing Joint Probability
+        Distributions of Soil Water Retention Characteristics.
+        doi: 10.1029/WR024i005p00755
+
+        Simunek, J. and Sejna, M. and Saito, H. and Sakai, M. and van Genuchten, M. Th. (2009).
+        The HYDRUS-1D software package for simulating the one-dimensional movement of water,
+        heat, and multiple solutes in variably-saturated media. Version 4.08.
+        url: https://www.pc-progress.com/downloads/pgm_hydrus1d/hydrus1d-4.08.pdf}
+
+        Healy, R. W. (1990). Simulation of Solute Transport in Variably Saturated Porous Media
+        with Supplemental Information on Modifications to the U.S. Geological Survey Computer
+        Program VS2D. doi: 10.3133/wri904025
+
+        Wösten, J. H. M. and Veerman, G. J. and de Groot, W. J. M. and Stolte, J. (2001).
+        Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+        Nederland: De Staringreeks. url: https://edepot.wur.nl/43272
+
+        Heinen, M. and Bakker, G. and Wösten, J. H. M. (2020). Waterretentie- en
+        Doorlatendheidskarakteristieken van Boven- en Ondergronden in Nederland:
+        De Staringreeks; (Update 2018). doi: 10.18174/512761
+
+        """
         if isinstance(sm, SoilModel):
             if hasattr(sm, "__name__"):
                 smn = cast(str, sm.__name__)

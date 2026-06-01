@@ -115,10 +115,10 @@ class Genuchten:
     References
     ----------
     van Genuchten, M. Th. (1980) - A Closed-form Equation for Predicting the
-    Hydraulic Conductivity of Unsaturated Soil.
+    Hydraulic Conductivity of Unsaturated Soil. doi: 10.2136/sssaj1980.03615995004400050002x
 
     Mualem, Y. (1976). A new model for predicting the hydraulic conductivity
-    of unsaturated porous media.
+    of unsaturated porous media. doi: 10.1029/WR012i003p00513
 
     """
 
@@ -182,6 +182,7 @@ class Brooks:
     References
     ----------
     Brooks, R.H. and Corey, A.T. (1964) - Hydraulic Properties of Porous Media.
+    url: https://mountainscholar.org/items/3c7b98df-13e3-486c-9d1e-949a7a869f76
 
     """
 
@@ -273,6 +274,7 @@ class Haverkamp:
     ----------
     Haverkamp, R., Vauclin, M., Touma, J., Wierenga, P. J., & Vachaud, G. (1977).
     A comparison of numerical simulation models for one-dimensional infiltration.
+    doi: 10.2136/sssaj1977.03615995004100020024x
 
     """
 
@@ -330,9 +332,10 @@ class Gardner:
     ----------
     Gardner, W. H. (1958). Some steady-state solutions of the unsaturated
     moisture flow equation with application to evaporation from soils.
+    doi: 10.1097/00010694-195804000-00006
 
     Bakker, M., & Nieber, J. L. (2009). Damping of sinusoidal surface flux
-    fluctuations with soil depth.
+    fluctuations with soil depth. doi: 10.2136/vzj2008.0084
 
     """
 
@@ -384,10 +387,11 @@ class Rucker:
     ----------
     Gardner, W. H. (1958). Some steady-state solutions of the unsaturated
     moisture flow equation with application to evaporation from soils.
+    doi: 10.1097/00010694-195804000-00006
 
     Rucker, D. F., Warrick, A. W., & Ferré, T. P. (2005). Parameter equivalence
     for the Gardner and van Genuchten soil hydraulic conductivity functions
-    for steady vertical flow with inclusions.
+    for steady vertical flow with inclusions. doi: 10.1016/j.advwatres.2005.01.004
 
     """
 
@@ -468,6 +472,7 @@ class Panday:
     ----------
     Panday, S. (2026). USG-Transport: Transport and other Enhancements to
     MODFLOW-USG. Documentation and User's Guide.
+    url: https://www.gsienv.com/software/modflow-usg/modflow-usg/
 
     """
 
@@ -534,6 +539,9 @@ class Fredlund:
         Empirical soil parameter controlling the slope of the SWCC [-]
     m: float
         Empirical soil parameter related to the residual water content [-]
+
+    Fredlund, D. G. and Xing, A. (1994). Equations for the soil-water
+    characteristic curve. doi: 10.1139/t94-061
 
     """
 
@@ -628,7 +636,7 @@ class Kosugi:
     References
     ----------
     Kosugi, K. (1996). Lognormal distribution model for unsaturated soil
-    hydraulic properties.
+    hydraulic properties. doi: 10.1029/96WR01776
 
     """
 
@@ -680,7 +688,7 @@ class Campbell:
     References
     ----------
     Campbell, G. S. (1974). A simple method for determining unsaturated
-    conductivity from moisture retention data. Soil Science, 117(6), 311-314.
+    conductivity from moisture retention data. doi: 10.1097/00010694-197406000-00001
 
     """
 
@@ -747,9 +755,11 @@ class GenuchtenGardner:
     ----------
     Gardner, W. H. (1958). Some steady-state solutions of the unsaturated
     moisture flow equation with application to evaporation from soils.
+    doi: 10.1097/00010694-195804000-00006
 
     van Genuchten, M. Th. (1980). A closed-form equation for predicting the
     hydraulic conductivity of unsaturated soils.
+    doi: 10.2136/sssaj1980.03615995004400050002x
 
     """
 
@@ -831,9 +841,11 @@ class GenuchtenKool:
     ----------
     Kool, J. B., & Parker, J. C. (1987). Development and evaluation of
     closed-form expressions for hysteretic soil hydraulic properties.
+    doi: 10.1029/WR023i001p00105
 
     van Genuchten, M. Th. (1980). A closed-form equation for predicting the
     hydraulic conductivity of unsaturated soils.
+    doi: 10.2136/sssaj1980.03615995004400050002x
 
     """
 
