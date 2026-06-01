@@ -923,3 +923,20 @@ def get_soilmodel(
         "GenuchtenKool": GenuchtenKool,
     }
     return sms[soilmodel_name]
+
+
+def resolve_soilmodel(
+    sm: type[SoilModel] | SoilModel | SoilModelNames,
+) -> tuple[str, type[SoilModel]]:
+    """Normalize a soilmodel input to a `(name, class)` pair."""
+    if isinstance(sm, type):
+        return sm.__name__, sm
+    if isinstance(sm, SoilModel):
+        sm_cls = type(sm)
+        return sm_cls.__name__, sm_cls
+    if isinstance(sm, str):
+        sm_cls = get_soilmodel(sm)
+        return sm, sm_cls
+    raise TypeError(
+        f"Argument must either be Type[SoilModel] | SoilModel | str, not {type(sm)}"
+    )

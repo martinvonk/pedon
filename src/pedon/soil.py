@@ -980,20 +980,7 @@ class Soil:
         De Staringreeks; (Update 2018). doi: 10.18174/512761
 
         """
-        if isinstance(sm, type):
-            smn = sm.__name__
-            sm_cls = sm
-        elif isinstance(sm, SoilModel):
-            smn = sm.__class__.__name__
-            sm_cls = type(sm)
-        elif isinstance(sm, str):
-            smn = sm
-            sm_cls = get_soilmodel(smn)
-        else:
-            raise TypeError(
-                f"Argument must either be Type[SoilModel] | SoilModel | str,"
-                f"not {type(sm)}"
-            )
+        smn, sm_cls = resolve_soilmodel(sm)
 
         path = Path(__file__).parent / "datasets/soilsamples.csv"
         ser = read_csv(path, delimiter=";", index_col=0)
@@ -1004,7 +991,7 @@ class Soil:
                 "Removed 'HYDRUS_' from soil name. For future use"
                 "please provide source='HYDRUS' argument"
             )
-        sersm = ser.query("soilmodel == @smn").loc[[self.name], :]
+        sersm = ser.query(f"soilmodel == '{smn}'").loc[[self.name], :]
         if source is None and len(sersm) > 1:
             raise ValueError(
                 f"Multiple sources for soil {self.name}: "
@@ -1012,7 +999,7 @@ class Soil:
                 f"Please provide the source using the source argument"
             )
         elif (source is not None) and len(sersm) > 1:
-            sersm = sersm.query("source == @source")
+            sersm = sersm.query(f"source == '{source}'")
 
         sers: Any = sersm.iloc[0].copy()
         if isna(sers.at["description"]):
@@ -1027,22 +1014,12 @@ class Soil:
     @staticmethod
     def list_names(sm: type[SoilModel] | SoilModel | SoilModelNames) -> list[str]:
         """Return a list of available soil names for a given soil model."""
-        if isinstance(sm, type):
-            smn = sm.__name__
-        elif isinstance(sm, SoilModel):
-            smn = sm.__class__.__name__
-        elif isinstance(sm, str):
-            smn = sm
-        else:
-            raise TypeError(
-                f"Argument must either be Type[SoilModel] | SoilModel | str,"
-                f"not {type(sm)}"
-            )
+        smn, _ = resolve_soilmodel(sm)
 
         path = Path(__file__).parent / "datasets/soilsamples.csv"
         names = read_csv(path, delimiter=";")
 
-        return names.query(f"soilmodel=='{smn}'").loc[:, "name"].unique().tolist()
+        return names.query(f"soilmodel == '{smn}'").loc[:, "name"].unique().tolist()
 
     def from_staring(self, year: str = "2018") -> Self:
         """Load soil parameters from the Staring series database."""
