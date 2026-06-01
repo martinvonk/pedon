@@ -52,3 +52,23 @@ def test_curves_plot(genuchten: pe.SoilModel):
     """Compare the combined curves plot against a baseline image."""
     axes = curves(genuchten, color="tab:orange")
     return axes[0].figure
+
+
+def test_swrc_plot_saturation_branch(genuchten: pe.SoilModel):
+    """Exercise saturation=True branch and explicit axis path."""
+    fig, ax = matplotlib.pyplot.subplots(1, 1)
+    out_ax = swrc(genuchten, saturation=True, ax=ax)
+    assert out_ax is ax
+    assert ax.get_xlim() == pytest.approx((-0.01, 1.01))
+    matplotlib.pyplot.close(fig)
+
+
+def test_curves_reuses_passed_axes(genuchten: pe.SoilModel):
+    """Exercise the branch where pre-created axes are provided."""
+    fig, axs = matplotlib.pyplot.subplots(1, 2)
+    axes = [axs[0], axs[1]]
+    out_axes = curves(genuchten, axes=axes)
+    assert out_axes is axes
+    assert out_axes[0] is axs[0]
+    assert out_axes[1] is axs[1]
+    matplotlib.pyplot.close(fig)

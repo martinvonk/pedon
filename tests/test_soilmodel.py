@@ -27,6 +27,23 @@ def test_get_soilmodel(
     assert smt.__name__ == soilmodel_name
 
 
+def test_plot_hcf_wrapper(genuchten: pe.Genuchten) -> None:
+    """Legacy plot_hcf wrapper should return an axis."""
+    ax = pe.soilmodel.plot_hcf(genuchten)
+    assert hasattr(ax, "plot")
+
+
+def test_brooks_scalar_branches_theta_and_s(brooks: pe.Brooks) -> None:
+    """Scalar h input should exercise Brooks short-branch behavior."""
+    assert brooks.theta(h=1.0) == brooks.theta_s
+    assert brooks.s(h=1.0) == 1
+
+
+def test_brooks_scalar_h_below_theta_r_returns_hb(brooks: pe.Brooks) -> None:
+    """Scalar theta below theta_r should return bubbling pressure."""
+    assert brooks.h(theta=0.0) == brooks.h_b
+
+
 def test_theta_genuchten(genuchten: pe.Genuchten) -> None:
     """Test water content calculation for the van Genuchten model."""
     expected = array(

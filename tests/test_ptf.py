@@ -118,3 +118,15 @@ def test_rosetta_invalidpercentage(ss: pe.soil.SoilSample) -> None:
     with patch("httpx.post", return_value=mock_response):
         with pytest.raises(ValueError, match="Rosetta API returned None values"):
             _ = ss.rosetta()
+
+
+def test_rosetta_api_error(ss: pe.soil.SoilSample) -> None:
+    """Test that ROSETTA raises ValueError on API error responses."""
+    from unittest.mock import Mock, patch
+
+    mock_response = Mock()
+    mock_response.is_error = True
+
+    with patch("httpx.post", return_value=mock_response):
+        with pytest.raises(ValueError, match="Rosetta API error"):
+            _ = ss.rosetta()
