@@ -9,6 +9,7 @@
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.18222514-ff6600?style=flat-square)](https://doi.org/10.5281/zenodo.18222514)
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/martinvonk/pedon/tests.yml?style=flat-square&color=green)](https://github.com/martinvonk/pedon/actions/workflows/tests.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/martinvonk/a891dd883f258c46826ba657cf9a89cf/raw/pedon-coverage.json&style=flat-square)](https://github.com/martinvonk/pedon/actions/workflows/tests.yml)
 [![Typed: Mypy](https://img.shields.io/badge/typing-mypy-darkgreen?style=flat-square)](https://mypy-lang.org/)
 [![Typed: Ty](https://img.shields.io/badge/typing-ty-darkgreen?style=flat-square)](https://docs.astral.sh/ty/)
 [![Formatter and Linter: Ruff](https://img.shields.io/badge/linter-ruff-darkgreen?style=flat-square)](https://docs.astral.sh/ruff/)

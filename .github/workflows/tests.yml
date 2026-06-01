@@ -33,14 +33,19 @@ jobs:
             toxenv: py314
             experimental: false
           - name: Formatting and linting with ruff
-            python: "3.11"
+            python: "3.13"
             os: ubuntu-latest
             toxenv: ruff
             experimental: false
           - name: Type checking with ty
-            python: "3.11"
+            python: "3.13"
             os: ubuntu-latest
             toxenv: typety
+            experimental: false
+          - name: Type checking with mypy
+            python: "3.13"
+            os: ubuntu-latest
+            toxenv: type
             experimental: false
 
     name: ${{ matrix.name }}
@@ -63,7 +68,6 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python }}
-          check-latest: true
 
       - name: Install dependencies
         run: |
@@ -75,3 +79,30 @@ jobs:
 
       - name: Test
         run: uv run tox -e ${{ matrix.toxenv }} --skip-pkg-install
+
+      - name: Export Coverage Percent
+        if: matrix.toxenv == 'py313'
+        id: coverage
+        run: |
+          uv run coverage json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          data = json.loads(Path("coverage.json").read_text())
+          coverage = data["totals"]["percent_covered_display"]
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a") as fh:
+              fh.write(f"coverage={coverage}\n")
+          PY
+
+      - name: Update Coverage Badge
+        if: matrix.toxenv == 'py313' && github.event_name == 'push' && github.ref == 'refs/heads/dev'
+        uses: Schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.BADGE_GIST_COVERAGE_TOKEN }}
+          gistID: "a891dd883f258c46826ba657cf9a89cf"
+          filename: coverage.json
+          label: coverage
+          message: ${{ steps.coverage.outputs.coverage }}%
+          color: 34D058
