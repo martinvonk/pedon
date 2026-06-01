@@ -84,7 +84,6 @@ jobs:
         if: matrix.toxenv == 'py313'
         id: coverage
         run: |
-          uv run coverage json
           python - <<'PY'
           import json
           import os
