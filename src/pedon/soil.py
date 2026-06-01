@@ -1,7 +1,7 @@
 """Soil sample class and pedotransfer functions."""
 
 from bisect import bisect_right
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from logging import getLogger
 from pathlib import Path
 from typing import Any, Literal, Self, cast
@@ -186,7 +186,11 @@ class SoilSample:
         url: https://cfpub.epa.gov/si/si_public_record_report.cfm?dirEntryId=130162
 
         """
+        if self.theta is None or self.k is None or self.h is None:
+            raise ValueError("theta, k, and h measurements are required for fitting")
+
         theta = asarray(self.theta, dtype=float)
+        h = asarray(self.h, dtype=float)
         N = len(theta)
         k = asarray(self.k, dtype=float)
         M = N + len(k)
@@ -227,8 +231,8 @@ class SoilSample:
             if k_s is not None:
                 est_pars["k_s"] = k_s
             sml = sm(**est_pars)
-            theta_diff = sml.theta(h=self.h) - theta
-            k_diff = log10(sml.k(h=self.h)) - log10(k)
+            theta_diff = sml.theta(h=h) - theta
+            k_diff = log10(sml.k(h=h)) - log10(k)
             diff = append(weights[0:N] * theta_diff, weights[N:M] * W1 * W2 * k_diff)
             return diff
 
@@ -721,9 +725,9 @@ class SoilSample:
             default_error = (1.811, 2.858)
 
             i = bisect_right(bounds, k)
-            errors = errors[i - 1] if i <= len(errors) else default_error
+            sel_error = errors[i - 1] if i <= len(errors) else default_error
 
-            return errors
+            return sel_error
 
         def get_n_errors(alpha: float) -> tuple[float, float]:
             """Return bootstrap confidence interval errors for a given alpha value.
@@ -757,8 +761,8 @@ class SoilSample:
             default_error = (3.006, 0.377)
 
             i = bisect_right(bounds, alpha)
-            errors = errors[i - 1] if i <= len(errors) else default_error
-            return errors
+            sel_error = errors[i - 1] if i <= len(errors) else default_error
+            return sel_error
 
         def get_res_water_content(k: float) -> tuple[float, float, float]:
             """Return residual water content (θr) with lower and upper bounds for a given k value.
@@ -976,15 +980,15 @@ class Soil:
         De Staringreeks; (Update 2018). doi: 10.18174/512761
 
         """
-        if isinstance(sm, SoilModel):
-            if hasattr(sm, "__name__"):
-                smn = cast(str, sm.__name__)
-            else:
-                smn = sm.__class__.__name__
-                sm: Any = type(sm)
+        if isinstance(sm, type):
+            smn = sm.__name__
+            sm_cls = sm
+        elif isinstance(sm, SoilModel):
+            smn = sm.__class__.__name__
+            sm_cls = type(sm)
         elif isinstance(sm, str):
             smn = sm
-            sm: Any = get_soilmodel(smn)
+            sm_cls = get_soilmodel(smn)
         else:
             raise TypeError(
                 f"Argument must either be Type[SoilModel] | SoilModel | str,"
@@ -1015,27 +1019,20 @@ class Soil:
             sers.loc["description"] = sers.at["soil type"]
         setattr(self, "source", sers.pop("source"))
         setattr(self, "description", sers.pop("description"))
-        sm: Any = sm
-        smserd = {
-            x: sers.at[x]
-            for x in sm.__dataclass_fields__
-            if sm.__dataclass_fields__[x].init
-        }
-        setattr(self, "model", sm(**smserd))
+        model_fields = [f.name for f in fields(cast(Any, sm_cls)) if f.init]
+        smserd = {x: sers.at[x] for x in model_fields}
+        setattr(self, "model", cast(Any, sm_cls)(**smserd))
         return self
 
     @staticmethod
     def list_names(sm: type[SoilModel] | SoilModel | SoilModelNames) -> list[str]:
         """Return a list of available soil names for a given soil model."""
-        if isinstance(sm, SoilModel):
-            if hasattr(sm, "__name__"):
-                smn = cast(str, sm.__name__)
-            else:
-                smn = sm.__class__.__name__
-                sm = type(sm)
+        if isinstance(sm, type):
+            smn = sm.__name__
+        elif isinstance(sm, SoilModel):
+            smn = sm.__class__.__name__
         elif isinstance(sm, str):
             smn = sm
-            sm = get_soilmodel(smn)
         else:
             raise TypeError(
                 f"Argument must either be Type[SoilModel] | SoilModel | str,"
@@ -1045,7 +1042,7 @@ class Soil:
         path = Path(__file__).parent / "datasets/soilsamples.csv"
         names = read_csv(path, delimiter=";")
 
-        return names.query("soilmodel==@smn").loc[:, "name"].unique().tolist()
+        return names.query(f"soilmodel=='{smn}'").loc[:, "name"].unique().tolist()
 
     def from_staring(self, year: str = "2018") -> Self:
         """Load soil parameters from the Staring series database."""

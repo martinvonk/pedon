@@ -1,6 +1,6 @@
 from dataclasses import MISSING, fields
 from logging import getLogger
-from typing import Type
+from typing import Any, Type, cast
 
 from numpy import inf, nan
 from pandas import DataFrame
@@ -15,7 +15,7 @@ def _get_default_params(sm: Type[SoilModel]) -> DataFrame:
     """Return an empty DataFrame with the same structure as parameter DataFrames."""
     index = [
         f.name
-        for f in fields(sm)
+        for f in fields(cast(Any, sm))
         if f.init and f.default is MISSING and f.default_factory is MISSING
     ]
     df = DataFrame(
