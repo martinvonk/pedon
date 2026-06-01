@@ -17,3 +17,10 @@ SoilModelNames = Literal[
     "GenuchtenKool",
     "GenuchtenGardner",
 ]
+
+SourceNames = Literal[
+    "HYDRUS",
+    "VS2D",
+    "Staring_2001",
+    "Staring_2018",
+]

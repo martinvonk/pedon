@@ -24,8 +24,8 @@ from pandas import DataFrame, isna, read_csv
 from scipy.optimize import fixed_point, least_squares
 
 from ._params import get_params
-from ._typing import FloatArray, SoilModelNames
-from .soilmodel import Brooks, Genuchten, SoilModel, get_soilmodel
+from ._typing import FloatArray, SoilModelNames, SourceNames
+from .soilmodel import Brooks, Genuchten, SoilModel, resolve_soilmodel
 
 logger = getLogger(__name__)
 
@@ -944,13 +944,13 @@ class Soil:
     name: str
     model: SoilModel | None = None
     sample: SoilSample | None = None
-    source: str | None = None
+    source: SourceNames | None = None
     description: str | None = None
 
     def from_name(
         self,
         sm: type[SoilModel] | SoilModel | SoilModelNames,
-        source: str | None = None,
+        source: SourceNames | None = None,
     ) -> Self:
         """Load soil parameters from a CSV database by soil name and model type.
 
@@ -1021,12 +1021,13 @@ class Soil:
 
         return names.query(f"soilmodel == '{smn}'").loc[:, "name"].unique().tolist()
 
-    def from_staring(self, year: str = "2018") -> Self:
+    def from_staring(self, year: Literal["2001", "2018"] = "2018") -> Self:
         """Load soil parameters from the Staring series database."""
         if year not in ("2001", 2001, "2018", 2018):
             raise ValueError(f"Year must either be '2001' or '2018', not {year}")
 
-        self.from_name(sm=Genuchten, source=f"Staring_{year}")
+        source: SourceNames = "Staring_2001" if str(year) == "2001" else "Staring_2018"
+        self.from_name(sm=Genuchten, source=source)
         ss = SoilSample().from_staring(name=self.name, year=year)
         setattr(self, "sample", ss)
         return self

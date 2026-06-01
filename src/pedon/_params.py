@@ -6,7 +6,7 @@ from numpy import inf, nan
 from pandas import DataFrame
 
 from pedon._typing import SoilModelNames
-from pedon.soilmodel import SoilModel, get_soilmodel
+from pedon.soilmodel import SoilModel, resolve_soilmodel
 
 logger = getLogger(__name__)
 
