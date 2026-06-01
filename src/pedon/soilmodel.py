@@ -10,7 +10,17 @@ from scipy.integrate import trapezoid
 from scipy.special import erfc, erfcinv, lambertw
 
 from ._typing import FloatArray, SoilModelNames
+from .plot import hcf
 from .plot import swrc as plot_swrc
+
+
+def plot_hcf(*args, **kwargs):
+    """Plot the hydraulic conductivity function."""
+    DeprecationWarning(
+        "The `plot_hcf` function is deprecated and will be removed"
+        " in a future release. Please use `pedon.plot.hcf` instead."
+    )
+    return hcf(*args, **kwargs)
 
 
 @runtime_checkable
