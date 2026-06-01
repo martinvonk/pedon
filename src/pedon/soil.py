@@ -1026,8 +1026,9 @@ class Soil:
         if year not in ("2001", 2001, "2018", 2018):
             raise ValueError(f"Year must either be '2001' or '2018', not {year}")
 
-        source: SourceNames = "Staring_2001" if str(year) == "2001" else "Staring_2018"
+        year_str = str(year)
+        source: SourceNames = "Staring_2001" if year_str == "2001" else "Staring_2018"
         self.from_name(sm=Genuchten, source=source)
-        ss = SoilSample().from_staring(name=self.name, year=year)
+        ss = SoilSample().from_staring(name=self.name, year=year_str)
         setattr(self, "sample", ss)
         return self
