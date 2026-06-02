@@ -255,10 +255,16 @@ class SoilSample:
 
         return sm(**opt_pars)
 
-    def wosten(self, ts: bool = False) -> Genuchten:
+    def wosten(self, topsoil: bool = False) -> Genuchten:
         """Pedotransfer function for general soils.
 
         Sometimes also referred to as HYPRES: HYdraulic PRoperties of European Soils
+
+        Parameters
+        ----------
+        topsoil : bool, optional
+            If True, applies the topsoil adjustment to the pedotransfer
+            function. Default is False.
 
         References
         ----------
@@ -272,7 +278,7 @@ class SoilSample:
             and self.silt_p is not None
             and self.om_p is not None
         )
-        topsoil = 1.0 * ts
+        ts = 1.0 * topsoil
 
         theta_s = (
             0.7919
@@ -286,7 +292,7 @@ class SoilSample:
             - 0.0000733 * self.om_p * self.clay_p
             - 0.000619 * self.rho * self.clay_p
             - 0.001183 * self.rho * self.om_p
-            - 0.0001664 * topsoil * self.silt_p
+            - 0.0001664 * ts * self.silt_p
         )
         alpha_ = (
             -14.96
@@ -294,7 +300,7 @@ class SoilSample:
             + 0.0351 * self.silt_p
             + 0.646 * self.om_p
             + 15.29 * self.rho
-            - 0.192 * topsoil
+            - 0.192 * ts
             - 4.671 * self.rho**2
             - 0.000781 * self.clay_p**2
             - 0.00687 * self.om_p**2
@@ -303,7 +309,7 @@ class SoilSample:
             + 0.1482 * log(self.om_p)
             - 0.04546 * self.rho * self.silt_p
             - 0.4852 * self.rho * self.om_p
-            + 0.00673 * topsoil * self.clay_p
+            + 0.00673 * ts * self.clay_p
         )
         n_ = (
             -25.23
@@ -322,7 +328,7 @@ class SoilSample:
             - 44.6 * log(self.rho)
             - 0.02264 * self.rho * self.clay_p
             + 0.0896 * self.rho * self.om_p
-            + 0.00718 * topsoil * self.clay_p
+            + 0.00718 * ts * self.clay_p
         )
         l_ = (
             0.0202
@@ -336,7 +342,7 @@ class SoilSample:
         ks_ = (
             7.755
             + 0.0352 * self.silt_p
-            + 0.93 * topsoil
+            + 0.93 * ts
             - 0.967 * self.rho**2
             - 0.000484 * self.clay_p**2
             - 0.000322 * self.silt_p**2
@@ -345,8 +351,8 @@ class SoilSample:
             - 0.643 * log(self.silt_p)
             - 0.01398 * self.rho * self.clay_p
             - 0.1673 * self.rho * self.om_p
-            + 0.02986 * topsoil * self.clay_p
-            - 0.03305 * topsoil * self.silt_p
+            + 0.02986 * ts * self.clay_p
+            - 0.03305 * ts * self.silt_p
         )
         theta_r = 0.01
         return Genuchten(
@@ -358,12 +364,19 @@ class SoilSample:
             l=(10 * exp(l_) - 10) / (1 + exp(l_)),
         )
 
-    def wosten_sand(self, ts: bool = False) -> Genuchten:
+    def wosten_sand(self, topsoil: bool = False) -> Genuchten:
         """Pedotransfer function for sandy soils.
+
+        Parameters
+        ----------
+        topsoil : bool, optional
+            If True, applies the topsoil adjustment to the pedotransfer
+            function. Default is False.
 
         Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
         van boven- en ondergronden in Nederland: de Staringreeks.
         url: https://edepot.wur.nl/43272
+
         """
         msg = "Wosten sand pedotransfer function requires 'rho', 'm50', 'silt_p' and 'om_p' to be set."
         assert self.rho is not None, msg
@@ -371,7 +384,7 @@ class SoilSample:
         assert self.silt_p is not None, msg
         assert self.om_p is not None, msg
 
-        topsoil = 1.0 * ts
+        ts = 1.0 * topsoil
         theta_s = (
             -35.7
             - 0.1843 * self.rho
@@ -396,7 +409,7 @@ class SoilSample:
         alpha = exp(
             13.66
             - 5.91 * self.rho
-            - 0.172 * topsoil
+            - 0.172 * ts
             + 0.003248 * self.m50
             - 11.89 * self.rho**-1
             - 2.121 * self.silt_p**-1
