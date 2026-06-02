@@ -667,10 +667,10 @@ class SoilSample:
     def vereecken(self) -> Genuchten:
         """Pedotransfer function returning van Genuchten parameters.
 
-        Implements the classic continuous pedotransfer functions from et al. (1989)
-        (Table 7) to estimate soil moisture retention parameters from texture,
-        bulk density, and carbon content, combined with the saturated hydraulic
-        conductivity (k_s) regression from Vereecken et al. (1990).
+        Implements the classic continuous pedotransfer functions from Vereecken
+        et al. (1989) (Table 7) to estimate soil moisture retention parameters
+        from texture, bulk density, and carbon content, combined with the saturated
+        hydraulic conductivity (k_s) regression from Vereecken et al. (1990).
 
         The Vereecken PTF relies on Organic Carbon (OC) in %. This method converts
         `om_p` to OC using the standard 1.724 factor.
@@ -870,7 +870,7 @@ class SoilSample:
             else:
                 log10_ks = 1.53
         else:  # oc_p >= 0.96
-            if topsoil:  # Subsoil logic
+            if topsoil:
                 if 0.96 <= oc_p < 2.09:
                     if self.silt_p < 10.85:
                         log10_ks = 0.01
@@ -1421,7 +1421,7 @@ class Soil:
     ) -> Self:
         """Load soil parameters from a CSV database by soil name and model type.
 
-        Available sources include HYDRUS, VS2D, Staring_2001, Staring_2018.
+        Available sources include HYDRUS, VS2D, Staring_2001, Staring_2018 and Clapp.
 
         References
         ----------
