@@ -33,12 +33,18 @@ To support parameterization without direct measurements, Pedon includes access t
   - [HYDRUS](https://www.pc-progress.com/downloads/pgm_hydrus1d/hydrus1d-4.08.pdf)
   - [VS2D](https://doi.org/10.3133/wri904025)
   - Staring Series: [2001](https://edepot.wur.nl/43272) and [2018](https://doi.org/10.18174/512761)
+  - [Clapp & Hornberger (1978)](https://doi.org/10.1029/WR014i004p00601)
 
 In addition, Pedon implements multiple pedotransfer functions that estimate soil hydraulic parameters from easily measured soil properties:
   - Van Genuchten: [Wösten](https://doi.org/10.1016/S0016-7061(98)00132-3)
   - Van Genuchten: [Staring Series](https://edepot.wur.nl/43272)
   - Van Genuchten: [Rosetta v1, 2 & 3 (Schaap et al. 2001)](https://doi.org/10.1016/S0022-1694(01)00466-8)
+  - Van Genuchten: [Vereecken](https://doi.org/10.1097/00010694-198912000-00001)
+  - Van Genuchten: [Weynants](https://doi.org/10.2136/vzj2008.0062)
+  - Van Genuchten: [Tóth](https://doi.org/10.1111/ejss.12192)
+  - Van Genuchten: [Hodnett & Tomasella](https://doi.org/10.1016/S0016-7061(02)00105-2)
   - Brooks-Corey: [Cosby](https://doi.org/10.1029/WR020i006p00682) (see also [Cooper et al. 2021](https://doi.org/10.5194/hess-25-2445-2021))
+  - Brooks-Corey: [Saxton](https://doi.org/10.2136/sssaj1986.03615995005000040039x)
   - van Genuchten: HYPAGS ([Peche et al. 2024](https://doi.org/10.1111/gwat.13365); [Peche & Houben 2023](https://doi.org/10.1111/gwat.13266))
 
 By combining soil hydraulic models, reference datasets, pedotransfer functions, and fitting routines in a single, consistent framework, Pedon makes it straightforward to move from soil information—whether coarse texture data or detailed laboratory measurements—to parameterized soil models ready for use in variably saturated flow simulations.

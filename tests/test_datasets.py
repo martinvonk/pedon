@@ -51,10 +51,28 @@ def test_soil_from_staring() -> None:
     assert s.model.l == 2.868
 
 
+def test_soil_from_clapp() -> None:
+    """Test loading soil from the Clapp database."""
+    s = pe.soil.Soil("Sand").from_name(pe.Campbell, source="Clapp")
+    assert s.source == "Clapp"
+    assert s.description == "Sand"
+    assert isinstance(s.model, pe.Campbell)
+    assert s.model.k_s == 1520.64
+    assert s.model.theta_s == 0.395
+    assert s.model.h_b == 3.5
+    assert s.model.b == 3.0
+
+
 def test_soil_from_staring_with_int_year() -> None:
     """Test integer year input for from_staring."""
     s = pe.soil.Soil("O01").from_staring(2018)
     assert s.source == "Staring_2018"
+
+
+def test_soil_from_staring_invalid_year() -> None:
+    """Invalid Soil.from_staring year should raise a clear ValueError."""
+    with pytest.raises(ValueError, match="Year must either be '2001' or '2018'"):
+        pe.soil.Soil("O01").from_staring(1999)
 
 
 def test_soil_list_genuchten() -> None:

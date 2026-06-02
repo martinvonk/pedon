@@ -17,3 +17,5 @@ src/pedon.egg-info/
 uv.lock
 *.coverage
 coverage.json
+paper/*.pdf
+paper/jats/*
