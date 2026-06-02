@@ -838,7 +838,12 @@ class SoilSample:
         References
         ----------
         Schaap et al., (2001) - Predicting soil water retention from soil.
-        doi: 10.1016/S0022-1694(01)00466-8"
+        doi: 10.1016/S0022-1694(01)00466-8
+
+        Zhang Y. and Schaap, M. G. (2017) - Weighted recalibration of the
+        Rosetta pedotransfer model with improved estimates of hydraulic
+        parameter distributions and summary statistics (Rosetta3).
+        doi: 10.1016/j.jhydrol.2017.01.004
 
         """
         try:
