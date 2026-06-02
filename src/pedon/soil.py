@@ -18,6 +18,7 @@ from numpy import (
     log,
     log10,
     multiply,
+    nan,
     ndarray,
 )
 from pandas import DataFrame, isna, read_csv
@@ -843,6 +844,89 @@ class SoilSample:
             alpha=round(alpha, 7),
             n=round(n, 4),
             l=0.5,
+        )
+
+    def hodnett(self, ph: float = 5.8, cec: float = 15.0) -> Genuchten:
+        """Pedotransfer function for tropical soils.
+
+        Implements the continuous pedotransfer function from Hodnett & Tomasella (2002)
+        calibrated exclusively on tropical soils from the IGBP-DIS database. This PTF
+        relies on Organic Carbon (OC), not Organic Matter (OM). This method converts
+        the `om_p` to OC using a factor 1.724. Note that the k_s is not estimated by this
+        PTF and is set to NaN.
+
+        Parameters
+        ----------
+        ph : float, optional
+            Soil pH in water. Default is 5.8 (mean of the calibration dataset).
+        cec : float, optional
+            Cation Exchange Capacity (cmol kg^-1). Default is 15.0 (mean of the calibration dataset).
+
+        References
+        ----------
+        Hodnett, M. G., & Tomasella, J. (2002). Marked differences between van Genuchten
+        soil water-retention parameters for temperate and tropical soils: a new water-retention
+        pedo-transfer functions developed for tropical soils.
+        doi: 10.1016/S0016-7061(02)00105-2
+
+        """
+        msg = "Hodnett & Tomasella PTF requires 'sand_p', 'silt_p', 'clay_p', 'rho', and 'om_p'."
+        assert self.sand_p is not None, msg
+        assert self.silt_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        oc_p = self.om_p / 1.7240
+
+        alpha = (
+            exp(
+                (
+                    -2.294
+                    - 3.526 * self.silt_p
+                    + 2.440 * oc_p
+                    - 0.076 * cec
+                    - 11.331 * ph
+                    + 0.019 * (self.silt_p**2)
+                )
+                / 100.0
+            )
+            / 10.1972  # from kpa to 1/cm
+        )
+        n = exp(
+            (
+                62.986
+                - 0.833 * self.clay_p
+                - 0.529 * oc_p
+                + 0.593 * ph
+                + 0.0070 * (self.clay_p**2)
+                - 0.014 * (self.sand_p * self.silt_p)
+            )
+            / 100.0
+        )
+        theta_s = (
+            81.799
+            + 0.099 * self.clay_p
+            - 31.420 * self.rho
+            + 0.235 * cec
+            - 0.831 * ph
+            + 0.0018 * (self.clay_p**2)
+            + 0.0005 * (self.sand_p * self.clay_p)
+        ) / 100.0
+        theta_r = (
+            22.733
+            - 0.164 * self.silt_p
+            + 0.018 * cec
+            + 0.451 * ph
+            - 0.0026 * (self.sand_p * self.clay_p)
+        ) / 100.0
+
+        return Genuchten(
+            k_s=nan,
+            theta_r=round(theta_r, 4),
+            theta_s=round(theta_s, 4),
+            alpha=round(alpha, 7),
+            n=round(n, 4),
         )
 
     def rosetta(self, version: Literal[1, 2, 3] = 3) -> Genuchten:
