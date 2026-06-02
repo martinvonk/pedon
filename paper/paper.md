@@ -37,20 +37,20 @@ Researchers and engineers working with unsaturated soils need estimates of soil 
 # Soil hydraulic models
 A soil hydraulic model (or soil model for short) is a parametric description of soil hydraulic functions: the soil water retention curve (SWRC) and the unsaturated hydraulic conductivity function (HCF). These relate soil water content and flow to pressure head and vice versa for use in variably saturated groundwater flow models. At this time, `pedon` provides the following soil models:
 
-- `pedon.Genuchten`: Mualem-van Genuchten [@genuchten_mualem_1980]
+- `pedon.Genuchten`: Mualem-van Genuchten [@mualem_model_1976; @genuchten_mualem_1980]
 - `pedon.Brooks`: Brooks-Corey [@brooks_corey_1964]
-- `pedon.Panday`: Mualem-van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2026]
+- `pedon.Panday`: van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2026]
 - `pedon.Fredlund`: Fredlund-Xing [@fredlund_xing_1994]
 - `pedon.Haverkamp`: Haverkamp [@haverkamp_model_1977]
 - `pedon.Kosugi`: Kosugi [@kosugi_model_1996]
 - `pedon.Campbell`: Campbell [@campbell_model_1974]
 - `pedon.Gardner`: Gardner(-Kozeny) [@gardner_model_1958; @brutsaert_kozeny_1967; @bakker_gardner_2009; @mathias_gardner_2006]
 - `pedon.Rucker`: Gardner-Rucker [@rucker_gardner_2005]
-- `pedon.GenuchtenGardner`: Mualem-van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_model_1958]
-- `pedon.GenuchtenKool`: Mualem-van Genuchten SWRC with hysteresis [@genuchten_mualem_1980; @kool_parker_1987]
+- `pedon.GenuchtenGardner`: van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_model_1958]
+- `pedon.GenuchtenKool`: van Genuchten SWRC with hysteresis [@genuchten_mualem_1980; @kool_parker_1987]
 
 ## Software design
-The soil models are implemented as Python classes with model-specific methods for evaluating the SWRC and HCF. For example, the Mualem–van Genuchten model can be used as follows:
+The soil models are implemented as Python classes with model-specific methods for evaluating the SWRC and HCF. For example, the Mualem–van Genuchten soil model can be used as follows:
 
 ```python
 import numpy as np
