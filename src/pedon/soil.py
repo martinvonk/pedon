@@ -18,6 +18,7 @@ from numpy import (
     log,
     log10,
     multiply,
+    nan,
     ndarray,
 )
 from pandas import DataFrame, isna, read_csv
@@ -255,8 +256,16 @@ class SoilSample:
 
         return sm(**opt_pars)
 
-    def wosten(self, ts: bool = False) -> Genuchten:
+    def wosten(self, topsoil: bool = False) -> Genuchten:
         """Pedotransfer function for general soils.
+
+        Sometimes also referred to as HYPRES: HYdraulic PRoperties of European Soils
+
+        Parameters
+        ----------
+        topsoil : bool, optional
+            If True, applies the topsoil adjustment to the pedotransfer
+            function. Default is False.
 
         References
         ----------
@@ -270,7 +279,7 @@ class SoilSample:
             and self.silt_p is not None
             and self.om_p is not None
         )
-        topsoil = 1.0 * ts
+        ts = 1.0 * topsoil
 
         theta_s = (
             0.7919
@@ -284,7 +293,7 @@ class SoilSample:
             - 0.0000733 * self.om_p * self.clay_p
             - 0.000619 * self.rho * self.clay_p
             - 0.001183 * self.rho * self.om_p
-            - 0.0001664 * topsoil * self.silt_p
+            - 0.0001664 * ts * self.silt_p
         )
         alpha_ = (
             -14.96
@@ -292,7 +301,7 @@ class SoilSample:
             + 0.0351 * self.silt_p
             + 0.646 * self.om_p
             + 15.29 * self.rho
-            - 0.192 * topsoil
+            - 0.192 * ts
             - 4.671 * self.rho**2
             - 0.000781 * self.clay_p**2
             - 0.00687 * self.om_p**2
@@ -301,7 +310,7 @@ class SoilSample:
             + 0.1482 * log(self.om_p)
             - 0.04546 * self.rho * self.silt_p
             - 0.4852 * self.rho * self.om_p
-            + 0.00673 * topsoil * self.clay_p
+            + 0.00673 * ts * self.clay_p
         )
         n_ = (
             -25.23
@@ -320,7 +329,7 @@ class SoilSample:
             - 44.6 * log(self.rho)
             - 0.02264 * self.rho * self.clay_p
             + 0.0896 * self.rho * self.om_p
-            + 0.00718 * topsoil * self.clay_p
+            + 0.00718 * ts * self.clay_p
         )
         l_ = (
             0.0202
@@ -334,7 +343,7 @@ class SoilSample:
         ks_ = (
             7.755
             + 0.0352 * self.silt_p
-            + 0.93 * topsoil
+            + 0.93 * ts
             - 0.967 * self.rho**2
             - 0.000484 * self.clay_p**2
             - 0.000322 * self.silt_p**2
@@ -343,8 +352,8 @@ class SoilSample:
             - 0.643 * log(self.silt_p)
             - 0.01398 * self.rho * self.clay_p
             - 0.1673 * self.rho * self.om_p
-            + 0.02986 * topsoil * self.clay_p
-            - 0.03305 * topsoil * self.silt_p
+            + 0.02986 * ts * self.clay_p
+            - 0.03305 * ts * self.silt_p
         )
         theta_r = 0.01
         return Genuchten(
@@ -356,12 +365,19 @@ class SoilSample:
             l=(10 * exp(l_) - 10) / (1 + exp(l_)),
         )
 
-    def wosten_sand(self, ts: bool = False) -> Genuchten:
+    def wosten_sand(self, topsoil: bool = False) -> Genuchten:
         """Pedotransfer function for sandy soils.
+
+        Parameters
+        ----------
+        topsoil : bool, optional
+            If True, applies the topsoil adjustment to the pedotransfer
+            function. Default is False.
 
         Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
         van boven- en ondergronden in Nederland: de Staringreeks.
         url: https://edepot.wur.nl/43272
+
         """
         msg = "Wosten sand pedotransfer function requires 'rho', 'm50', 'silt_p' and 'om_p' to be set."
         assert self.rho is not None, msg
@@ -369,7 +385,7 @@ class SoilSample:
         assert self.silt_p is not None, msg
         assert self.om_p is not None, msg
 
-        topsoil = 1.0 * ts
+        ts = 1.0 * topsoil
         theta_s = (
             -35.7
             - 0.1843 * self.rho
@@ -394,7 +410,7 @@ class SoilSample:
         alpha = exp(
             13.66
             - 5.91 * self.rho
-            - 0.172 * topsoil
+            - 0.172 * ts
             + 0.003248 * self.m50
             - 11.89 * self.rho**-1
             - 2.121 * self.silt_p**-1
@@ -535,13 +551,464 @@ class SoilSample:
             l=round(labda, 5),
         )
 
+    def saxton(self, df: float = 1.0) -> Brooks:
+        """Pedotransfer function returning Brooks-Corey parameters.
+
+        Implements the equations from Saxton and Rawls (2006) which estimate
+        soil water characteristics from soil texture and organic matter.
+
+        Parameters
+        ----------
+        df : float, optional
+            Density adjustment factor (normally between 0.9 and 1.3) to account
+            for compaction or loosening. Default is 1.0 (normal density).
+
+        References
+        ----------
+        Saxton, K. E., Rawls, W. J., Romberger, J. S., & Papendick, R. I. (1986).
+        Estimating generalized soil-water characteristics from texture.
+        doi: 10.2136/sssaj1986.03615995005000040039x
+
+        Saxton, K. E., & Rawls, W. J. (2006). Soil water characteristic estimates
+        by texture and organic matter for hydrologic solutions.
+        doi: 10.2136/sssaj2005.0117
+
+        """
+        msg = "Saxton-Rawls pedotransfer function requires 'sand_p', 'clay_p', and 'om_p' to be set."
+        assert self.sand_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.om_p is not None, msg
+
+        # Sand and Clay are calculated as fractions, OM is kept as a percentage
+        s_f = self.sand_p / 100.0
+        c_f = self.clay_p / 100.0
+
+        # 1500 kPa moisture (Wilting Point)
+        th1500t = (
+            -0.024 * s_f
+            + 0.487 * c_f
+            + 0.006 * self.om_p
+            + 0.005 * (s_f * self.om_p)
+            - 0.013 * (c_f * self.om_p)
+            + 0.068 * (s_f * c_f)
+            + 0.031
+        )
+        th1500 = th1500t + (0.14 * th1500t - 0.02)
+
+        # 33 kPa moisture (Field capacity)
+        th33t = (
+            -0.251 * s_f
+            + 0.195 * c_f
+            + 0.011 * self.om_p
+            + 0.006 * (s_f * self.om_p)
+            - 0.027 * (c_f * self.om_p)
+            + 0.452 * (s_f * c_f)
+            + 0.299
+        )
+        th33 = th33t + (1.283 * th33t**2 - 0.374 * th33t - 0.015)
+
+        # Saturation - 33 kPa moisture
+        ths_33t = (
+            0.278 * s_f
+            + 0.034 * c_f
+            + 0.022 * self.om_p
+            - 0.018 * (s_f * self.om_p)
+            - 0.027 * (c_f * self.om_p)
+            - 0.584 * (s_f * c_f)
+            + 0.078
+        )
+        ths_33 = ths_33t + (0.636 * ths_33t - 0.107)
+
+        # Saturation moisture & density
+        ths = th33 + ths_33 - 0.097 * s_f + 0.043
+        rho_n = (1 - ths) * 2.65
+
+        # Apply density factor adjustment
+        if df != 1.0:
+            rho_df = rho_n * df
+            ths_df = 1 - (rho_df / 2.65)
+            th33_df = th33 - 0.2 * (ths - ths_df)
+            ths_33_df = ths_df - th33_df
+
+            # Update variables with adjusted density
+            ths = ths_df
+            th33 = th33_df
+            ths_33 = ths_33_df
+
+        # Air entry tension (bubbling pressure) in kPa
+        psi_et = (
+            -21.67 * s_f
+            - 27.93 * c_f
+            - 81.97 * ths_33
+            + 71.12 * (s_f * ths_33)
+            + 8.29 * (c_f * ths_33)
+            + 14.05 * (s_f * c_f)
+            + 27.16
+        )
+        # Prevent mathematically negative air-entry tensions in edge-case soil bounds
+        psi_e = max(psi_et + (0.02 * psi_et**2 - 0.113 * psi_et - 0.70), 0.1)
+        # Convert air entry tension from kPa to cm water column (~10.1972)
+        h_b = psi_e * 10.1972
+
+        # Brooks-Corey parameters (Corrected inversion)
+        lp = (log(th33) - log(th1500)) / (log(1500) - log(33))
+
+        # Saturated hydraulic conductivity (cm/d = 2.4 mm/h)
+        k_s = 1930 * (ths - th33) ** (3 - lp) * 2.4
+
+        return Brooks(
+            k_s=round(k_s, 4),
+            theta_r=0.0,
+            theta_s=round(ths, 4),
+            h_b=round(h_b, 5),
+            l=round(lp, 5),
+        )
+
+    def vereecken(self) -> Genuchten:
+        """Pedotransfer function returning van Genuchten parameters.
+
+        Implements the classic continuous pedotransfer functions from Vereecken
+        et al. (1989) (Table 7) to estimate soil moisture retention parameters
+        from texture, bulk density, and carbon content, combined with the saturated
+        hydraulic conductivity (k_s) regression from Vereecken et al. (1990).
+
+        The Vereecken PTF relies on Organic Carbon (OC) in %. This method converts
+        `om_p` to OC using the standard 1.724 factor.
+
+        Warning: This method brute-forces a Gardner-calibrated k_s into a standard
+        Mualem-van Genuchten model framework. The resulting unsaturated conductivity
+        curve will follow Mualem-van Genuchten's format, not Vereecken's 1990 Gardner
+        function. Adjust accordingly when interpreting results or comparing to original
+        Vereecken curves.
+
+        References
+        ----------
+        Vereecken, H., Maes, J., Feyen, J., & Darius, P. (1989). Estimating the
+        soil moisture retention characteristic from texture, bulk density, and
+        carbon content. doi: 10.1097/00010694-198912000-00001
+
+        Vereecken, H., Maes, J., & Feyen, J. (1990). Estimating unsaturated
+        hydraulic conductivity from easily measured soil properties.
+        doi: 10.1097/00010694-199001000-00001
+
+        """
+        msg = "Vereecken (1989) PTF requires 'sand_p', 'clay_p', 'rho', and 'om_p' to be set."
+        assert self.sand_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        oc_p = self.om_p / 1.724
+        theta_s = 0.81 - 0.283 * self.rho + 0.001 * self.clay_p
+        theta_r = 0.015 + 0.005 * self.clay_p + 0.014 * oc_p
+        alpha = exp(
+            -2.486
+            + 0.025 * self.sand_p
+            - 0.351 * oc_p
+            - 2.617 * self.rho
+            - 0.023 * self.clay_p
+        )
+        n = exp(
+            0.053
+            - 0.009 * self.sand_p
+            - 0.013 * self.clay_p
+            + 0.00015 * (self.sand_p**2)
+        )
+        k_s = exp(
+            20.62
+            - 0.96 * log(self.clay_p)
+            - 0.66 * log(self.sand_p)
+            - 0.46 * log(oc_p)
+            - 8.43 * self.rho
+        )
+
+        gen = Genuchten(
+            k_s=round(k_s, 4),
+            theta_r=round(theta_r, 4),
+            theta_s=round(theta_s, 4),
+            alpha=round(alpha, 7),
+            n=round(n, 4),
+        )
+        gen.m = 1.0
+        return gen
+
+    def weynants(self) -> Genuchten:
+        """Pedotransfer function returning Mualem-van Genuchten parameters.
+
+        The Weynants PTF relies on Organic Carbon (OC), not Organic Matter (OM).
+        This method converts the `om_p` to OC using a factor 1.724.
+
+        References
+        ----------
+        Weynants, M., Vereecken, H., & Javaux, M. (2009). Revisiting Vereecken
+        Pedotransfer Functions: Introducing a Closed-Form Hydraulic Model.
+        doi: 10.2136/vzj2008.0062
+
+        Weihermüller, L., Herbst, M., Javaux, M., & Weynants, M. (2017). Erratum to
+        "Revisiting Vereecken Pedotransfer Functions: Introducing a Closed-Form
+        Hydraulic Model". doi: 10.2136/vzj2008.0062er
+
+        Vereecken, H., Maes, J., Feyen, J., & Darius, P. (1989). Estimating the
+        soil moisture retention characteristic from texture, bulk density, and
+        carbon content. doi: 10.1097/00010694-198912000-00001
+
+        """
+        msg = "Weynants pedotransfer function requires 'sand_p', 'clay_p', 'rho', and 'om_p' to be set."
+        assert self.sand_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        # Convert organic matter percentage to organic carbon percentage
+        oc_p = self.om_p / 1.724
+
+        theta_s = 0.6355 + 0.0013 * self.clay_p - 0.1631 * self.rho
+        alpha = exp(
+            -4.3003 - 0.0097 * self.clay_p + 0.0138 * self.sand_p - 0.0992 * oc_p
+        )
+        n = (
+            exp(
+                -1.0846
+                - 0.0236 * self.clay_p
+                - 0.0085 * self.sand_p
+                + 0.0001 * (self.sand_p**2)
+            )
+            + 1.0
+        )
+
+        k0 = exp(1.9582 + 0.0308 * self.sand_p - 0.6142 * self.rho - 0.1566 * oc_p)
+        lt = -1.8642 - 0.1317 * self.clay_p + 0.0067 * self.sand_p
+
+        return Genuchten(
+            k_s=round(k0, 4),
+            theta_r=0.0,
+            theta_s=round(theta_s, 4),
+            alpha=round(alpha, 7),
+            n=round(n, 4),
+            l=round(lt, 4),
+        )
+
+    def toth(self, topsoil: bool = False) -> Genuchten:
+        """Pedotransfer function returning Mualem-van Genuchten parameters.
+
+        Implements the continuous pedotransfer functions from Tóth et al. (2015)
+        based on the EU-HYDI database. Uses Eq (21) for the Moisture Retention
+        Characteristic and Eq (16) for Saturated Hydraulic Conductivity.
+
+        Parameters
+        ----------
+        topsoil : bool, optional
+            If True, applies the topsoil adjustment to the pedotransfer
+            function. Default is False.
+
+        Returns
+        -------
+        Genuchten
+            Van Genuchten soil model with estimated parameters.
+
+        References
+        ----------
+        Tóth, B., Weynants, M., Nemes, A., Makó, A., Bilas, G., & Tóth, G. (2015).
+        New generation of hydraulic pedotransfer functions for Europe.
+        doi: 10.1111/ejss.12192
+
+        """
+        msg = "Tóth 2015 PTF requires 'sand_p', 'silt_p', 'clay_p', 'rho', and 'om_p'."
+        assert self.sand_p is not None, msg
+        assert self.silt_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        oc_p = self.om_p / 1.724  # Converts OM to Organic Carbon
+        ts = 1.0 * topsoil
+
+        theta_r = 0.041 if self.sand_p >= 2.00 else 0.179
+        theta_s = (
+            0.83080
+            - 0.28217 * self.rho
+            + 0.0002728 * self.clay_p
+            + 0.000187 * self.silt_p
+        )
+        alpha = 10 ** (
+            -0.43348
+            - 0.41729 * self.rho
+            - 0.04762 * oc_p
+            + 0.21810 * ts
+            - 0.01581 * self.clay_p
+            - 0.01207 * self.silt_p
+        )
+        n = (
+            10
+            ** (
+                0.22236
+                - 0.30189 * self.rho
+                - 0.05558 * ts
+                - 0.005306 * self.clay_p
+                - 0.003084 * self.silt_p
+                - 0.01072 * oc_p
+            )
+        ) + 1.0
+
+        if oc_p < 0.07:
+            log10_ks = 0.55
+        elif 0.07 <= oc_p < 0.40:
+            if self.sand_p < 5.77:
+                log10_ks = -0.11
+            elif 5.77 <= self.sand_p < 69.72:
+                log10_ks = 1.28
+            else:  # self.sand_p >= 69.72
+                log10_ks = 1.96
+        elif 0.40 <= oc_p < 0.41:
+            if self.silt_p >= 32.11:
+                log10_ks = -1.81
+            else:
+                log10_ks = -0.40
+        elif 0.41 <= oc_p < 0.96:
+            if self.clay_p >= 37.4:
+                log10_ks = 0.67
+            else:
+                log10_ks = 1.53
+        else:  # oc_p >= 0.96
+            if topsoil:
+                if 0.96 <= oc_p < 2.09:
+                    if self.silt_p < 10.85:
+                        log10_ks = 0.01
+                    else:  # self.silt_p >= 10.85
+                        if 0.96 <= oc_p < 1.52:
+                            log10_ks = 1.82
+                        elif 1.52 <= oc_p < 1.54:
+                            log10_ks = -0.46
+                        else:  # 1.54 <= oc_p < 2.09
+                            log10_ks = 1.72
+                elif 2.09 <= oc_p < 2.10:
+                    log10_ks = -0.87
+                else:  # oc_p >= 2.10
+                    if self.sand_p >= 38.95:
+                        log10_ks = 1.44
+                    else:  # self.sand_p < 38.95
+                        if 2.10 <= oc_p < 2.42:
+                            log10_ks = 1.82
+                        else:  # oc_p >= 2.42
+                            log10_ks = -0.22
+            else:
+                if 0.96 <= oc_p < 0.97:
+                    log10_ks = -0.95
+                elif 0.97 <= oc_p < 1.52:
+                    log10_ks = 1.13
+                elif 1.52 <= oc_p < 1.54:
+                    log10_ks = -0.75
+                elif 1.54 <= oc_p < 2.04:
+                    log10_ks = 1.33
+                else:  # oc_p >= 2.04
+                    log10_ks = -0.25
+
+        k_s = 10**log10_ks
+
+        return Genuchten(
+            k_s=round(k_s, 4),
+            theta_r=round(theta_r, 4),
+            theta_s=round(theta_s, 4),
+            alpha=round(alpha, 7),
+            n=round(n, 4),
+            l=0.5,
+        )
+
+    def hodnett(self, ph: float = 5.8, cec: float = 15.0) -> Genuchten:
+        """Pedotransfer function for tropical soils.
+
+        Implements the continuous pedotransfer function from Hodnett & Tomasella (2002)
+        calibrated exclusively on tropical soils from the IGBP-DIS database. This PTF
+        relies on Organic Carbon (OC), not Organic Matter (OM). This method converts
+        the `om_p` to OC using a factor 1.724. Note that the k_s is not estimated by this
+        PTF and is set to NaN.
+
+        Parameters
+        ----------
+        ph : float, optional
+            Soil pH in water. Default is 5.8 (mean of the calibration dataset).
+        cec : float, optional
+            Cation Exchange Capacity (cmol kg^-1). Default is 15.0 (mean of the calibration dataset).
+
+        References
+        ----------
+        Hodnett, M. G., & Tomasella, J. (2002). Marked differences between van Genuchten
+        soil water-retention parameters for temperate and tropical soils: a new water-retention
+        pedo-transfer functions developed for tropical soils.
+        doi: 10.1016/S0016-7061(02)00105-2
+
+        """
+        msg = "Hodnett & Tomasella PTF requires 'sand_p', 'silt_p', 'clay_p', 'rho', and 'om_p'."
+        assert self.sand_p is not None, msg
+        assert self.silt_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        oc_p = self.om_p / 1.7240
+
+        alpha = (
+            exp(
+                (
+                    -2.294
+                    - 3.526 * self.silt_p
+                    + 2.440 * oc_p
+                    - 0.076 * cec
+                    - 11.331 * ph
+                    + 0.019 * (self.silt_p**2)
+                )
+                / 100.0
+            )
+            / 10.1972  # from kpa to 1/cm
+        )
+        n = exp(
+            (
+                62.986
+                - 0.833 * self.clay_p
+                - 0.529 * oc_p
+                + 0.593 * ph
+                + 0.0070 * (self.clay_p**2)
+                - 0.014 * (self.sand_p * self.silt_p)
+            )
+            / 100.0
+        )
+        theta_s = (
+            81.799
+            + 0.099 * self.clay_p
+            - 31.420 * self.rho
+            + 0.235 * cec
+            - 0.831 * ph
+            + 0.0018 * (self.clay_p**2)
+            + 0.0005 * (self.sand_p * self.clay_p)
+        ) / 100.0
+        theta_r = (
+            22.733
+            - 0.164 * self.silt_p
+            + 0.018 * cec
+            + 0.451 * ph
+            - 0.0026 * (self.sand_p * self.clay_p)
+        ) / 100.0
+
+        return Genuchten(
+            k_s=nan,
+            theta_r=round(theta_r, 4),
+            theta_s=round(theta_s, 4),
+            alpha=round(alpha, 7),
+            n=round(n, 4),
+        )
+
     def rosetta(self, version: Literal[1, 2, 3] = 3) -> Genuchten:
         """Pedotransfer function using the Rosetta API.
 
         References
         ----------
         Schaap et al., (2001) - Predicting soil water retention from soil.
-        doi: 10.1016/S0022-1694(01)00466-8"
+        doi: 10.1016/S0022-1694(01)00466-8
+
+        Zhang Y. and Schaap, M. G. (2017) - Weighted recalibration of the
+        Rosetta pedotransfer model with improved estimates of hydraulic
+        parameter distributions and summary statistics (Rosetta3).
+        doi: 10.1016/j.jhydrol.2017.01.004
 
         """
         try:
@@ -954,10 +1421,13 @@ class Soil:
     ) -> Self:
         """Load soil parameters from a CSV database by soil name and model type.
 
-        Available sources include HYDRUS, VS2D, Staring_2001, Staring_2018.
+        Available sources include HYDRUS, VS2D, Staring_2001, Staring_2018 and Clapp.
 
         References
         ----------
+        Clapp, R. B., & Hornberger, G. M. (1978). Empirical equations for some soil
+        hydraulic properties. doi: 10.1029/WR014i004p00601
+
         Carsel, R. F. and Parrish, R. S. (1988). Developing Joint Probability
         Distributions of Soil Water Retention Characteristics.
         doi: 10.1029/WR024i005p00755
