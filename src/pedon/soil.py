@@ -706,6 +706,132 @@ class SoilSample:
             l=round(lt, 4),
         )
 
+    def toth(self, topsoil: bool = False) -> Genuchten:
+        """Pedotransfer function returning Mualem-van Genuchten parameters.
+
+        Implements the continuous pedotransfer functions from Tóth et al. (2015)
+        based on the EU-HYDI database. Uses Eq (21) for the Moisture Retention
+        Characteristic and Eq (16) for Saturated Hydraulic Conductivity.
+
+        Parameters
+        ----------
+        topsoil : bool, optional
+            If True, applies the topsoil adjustment to the pedotransfer
+            function. Default is False.
+
+        Returns
+        -------
+        Genuchten
+            Van Genuchten soil model with estimated parameters.
+
+        References
+        ----------
+        Tóth, B., Weynants, M., Nemes, A., Makó, A., Bilas, G., & Tóth, G. (2015).
+        New generation of hydraulic pedotransfer functions for Europe.
+        doi: 10.1111/ejss.12192
+
+        """
+        msg = "Tóth 2015 PTF requires 'sand_p', 'silt_p', 'clay_p', 'rho', and 'om_p'."
+        assert self.sand_p is not None, msg
+        assert self.silt_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        oc_p = self.om_p / 1.724  # Converts OM to Organic Carbon
+        ts = 1.0 * topsoil
+
+        theta_r = 0.041 if self.sand_p >= 2.00 else 0.179
+        theta_s = (
+            0.83080
+            - 0.28217 * self.rho
+            + 0.0002728 * self.clay_p
+            + 0.000187 * self.silt_p
+        )
+        alpha = 10 ** (
+            -0.43348
+            - 0.41729 * self.rho
+            - 0.04762 * oc_p
+            + 0.21810 * ts
+            - 0.01581 * self.clay_p
+            - 0.01207 * self.silt_p
+        )
+        n = (
+            10
+            ** (
+                0.22236
+                - 0.30189 * self.rho
+                - 0.05558 * ts
+                - 0.005306 * self.clay_p
+                - 0.003084 * self.silt_p
+                - 0.01072 * oc_p
+            )
+        ) + 1.0
+
+        if oc_p < 0.07:
+            log10_ks = 0.55
+        elif 0.07 <= oc_p < 0.40:
+            if self.sand_p < 5.77:
+                log10_ks = -0.11
+            elif 5.77 <= self.sand_p < 69.72:
+                log10_ks = 1.28
+            else:  # self.sand_p >= 69.72
+                log10_ks = 1.96
+        elif 0.40 <= oc_p < 0.41:
+            if self.silt_p >= 32.11:
+                log10_ks = -1.81
+            else:
+                log10_ks = -0.40
+        elif 0.41 <= oc_p < 0.96:
+            if self.clay_p >= 37.4:
+                log10_ks = 0.67
+            else:
+                log10_ks = 1.53
+        else:  # oc_p >= 0.96
+            if topsoil:  # Subsoil logic
+                if 0.96 <= oc_p < 2.09:
+                    if self.silt_p < 10.85:
+                        log10_ks = 0.01
+                    else:  # self.silt_p >= 10.85
+                        if 0.96 <= oc_p < 1.52:
+                            log10_ks = 1.82
+                        elif 1.52 <= oc_p < 1.54:
+                            log10_ks = -0.46
+                        else:  # 1.54 <= oc_p < 2.09
+                            log10_ks = 1.72
+                elif 2.09 <= oc_p < 2.10:
+                    log10_ks = -0.87
+                else:  # oc_p >= 2.10
+                    if self.sand_p >= 38.95:
+                        log10_ks = 1.44
+                    else:  # self.sand_p < 38.95
+                        if 2.10 <= oc_p < 2.42:
+                            log10_ks = 1.82
+                        else:  # oc_p >= 2.42
+                            log10_ks = -0.22
+            else:
+                if 0.96 <= oc_p < 0.97:
+                    log10_ks = -0.95
+                elif 0.97 <= oc_p < 1.52:
+                    log10_ks = 1.13
+                elif 1.52 <= oc_p < 1.54:
+                    log10_ks = -0.75
+                elif 1.54 <= oc_p < 2.04:
+                    log10_ks = 1.33
+                else:  # oc_p >= 2.04
+                    log10_ks = -0.25
+
+        k_s = 10**log10_ks
+
+        return Genuchten(
+            k_s=round(k_s, 4),
+            theta_r=round(theta_r, 4),
+            theta_s=round(theta_s, 4),
+            alpha=round(alpha, 7),
+            n=round(n, 4),
+            l=0.5,
+        )
+
     def rosetta(self, version: Literal[1, 2, 3] = 3) -> Genuchten:
         """Pedotransfer function using the Rosetta API.
 
