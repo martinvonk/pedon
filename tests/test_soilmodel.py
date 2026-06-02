@@ -783,3 +783,11 @@ def test_h_theta_roundtrip(fixture_name: str, request: pytest.FixtureRequest) ->
     h_out = model.h(theta=theta)
     theta_out = model.theta(h=h_out)
     assert_close(theta, theta_out)
+
+
+def test_fit_requires_measurements() -> None:
+    """Fit should require theta, k, and h measurements."""
+    with pytest.raises(
+        ValueError, match="theta, k, and h measurements are required for fitting"
+    ):
+        pe.SoilSample().fit(pe.Genuchten)

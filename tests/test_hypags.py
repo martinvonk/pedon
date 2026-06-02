@@ -144,3 +144,34 @@ def test_hypags_logs_out_of_range_d20(caplog):
     sample.hypags()
 
     assert any("out of hypags model limits" in rec.message for rec in caplog.records)
+
+
+def test_hypags_with_scalar_k() -> None:
+    """Test hypags when k is passed as a plain float."""
+    sample = SoilSample(k=1e-4)
+    result = sample.hypags()
+
+    assert isinstance(result, Genuchten)
+    assert isinstance(sample.d10, float)
+    assert isinstance(sample.d20, float)
+
+
+def test_hypags_with_numpy_scalar_k() -> None:
+    """Test hypags when k is passed as a numpy scalar."""
+    sample = SoilSample(k=np.float64(1e-4))
+    result = sample.hypags()
+
+    assert isinstance(result, Genuchten)
+    assert isinstance(sample.d10, float)
+    assert isinstance(sample.d20, float)
+
+
+def test_hypags_with_k_array_warns(caplog) -> None:
+    """Test hypags when k is passed as a multi-value array."""
+    sample = SoilSample(k=np.array([1e-4, 2e-4], dtype=float))
+    result = sample.hypags()
+
+    assert isinstance(result, Genuchten)
+    assert isinstance(sample.d10, float)
+    assert isinstance(sample.d20, float)
+    assert any("only accepts single k value" in rec.message for rec in caplog.records)

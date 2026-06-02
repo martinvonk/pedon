@@ -69,6 +69,12 @@ def test_soil_from_staring_with_int_year() -> None:
     assert s.source == "Staring_2018"
 
 
+def test_soil_from_staring_invalid_year() -> None:
+    """Invalid Soil.from_staring year should raise a clear ValueError."""
+    with pytest.raises(ValueError, match="Year must either be '2001' or '2018'"):
+        pe.soil.Soil("O01").from_staring(1999)
+
+
 def test_soil_list_genuchten() -> None:
     """Test listing soil names for Genuchten model."""
     gen_soils = pe.soil.Soil.list_names(pe.Genuchten)
