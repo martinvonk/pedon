@@ -618,13 +618,13 @@ def test_k_r_campbell_accepts_s_kwarg(campbell: pe.Campbell) -> None:
     assert_close(kr_out, expected)
 
 
-def test_alpha_w_genuchtenkool(genuchtenkool: pe.GenuchtenKool) -> None:
-    """Test scaled alpha parameter for the GenuchtenKool model."""
-    assert genuchtenkool.alpha_w == 0.05
+def test_alpha_w_kool(kool: pe.Kool) -> None:
+    """Test scaled alpha parameter for the Kool model."""
+    assert kool.alpha_w == 0.05
 
 
-def test_theta_genuchtenkool(genuchtenkool: pe.GenuchtenKool) -> None:
-    """Test water content calculation for the GenuchtenKool model."""
+def test_theta_kool(kool: pe.Kool) -> None:
+    """Test water content calculation for the Kool model."""
     expected = array(
         [
             0.4299910737668094,
@@ -638,11 +638,11 @@ def test_theta_genuchtenkool(genuchtenkool: pe.GenuchtenKool) -> None:
             0.1523482139298137,
         ]
     )
-    assert_close(genuchtenkool.theta(h=h), expected)
+    assert_close(kool.theta(h=h), expected)
 
 
-def test_s_genuchtenkool(genuchtenkool: pe.GenuchtenKool) -> None:
-    """Test degree of saturation calculation for the GenuchtenKool model."""
+def test_s_kool(kool: pe.Kool) -> None:
+    """Test degree of saturation calculation for the Kool model."""
     expected = array(
         [
             0.9999787470638319,
@@ -656,11 +656,11 @@ def test_s_genuchtenkool(genuchtenkool: pe.GenuchtenKool) -> None:
             0.33892431888050883,
         ]
     )
-    assert_close(genuchtenkool.s(h=h), expected)
+    assert_close(kool.s(h=h), expected)
 
 
-def test_k_genuchtenkool(genuchtenkool: pe.GenuchtenKool) -> None:
-    """Test hydraulic conductivity calculation for the GenuchtenKool model."""
+def test_k_kool(kool: pe.Kool) -> None:
+    """Test hydraulic conductivity calculation for the Kool model."""
     expected = array(
         [
             2.8343153705439206,
@@ -674,15 +674,15 @@ def test_k_genuchtenkool(genuchtenkool: pe.GenuchtenKool) -> None:
             2.2106947229727662e-12,
         ]
     )
-    assert_close(genuchtenkool.k(h=h), expected)
+    assert_close(kool.k(h=h), expected)
 
 
-def test_h_genuchtenkool(genuchtenkool: pe.GenuchtenKool) -> None:
-    """Test pressure head calculation for the GenuchtenKool model."""
+def test_h_kool(kool: pe.Kool) -> None:
+    """Test pressure head calculation for the Kool model."""
     expected = array(
         [97971055.72421077, 55708.66779383144, 799.4116130609773, 24.66894112455789]
     )
-    assert_close(genuchtenkool.h(theta=theta), expected)
+    assert_close(kool.h(theta=theta), expected)
 
 
 def test_theta_haverkamp(haverkamp: pe.Haverkamp) -> None:
@@ -773,7 +773,7 @@ def test_h_haverkamp_inverse(haverkamp: pe.Haverkamp) -> None:
         "fredlund",
         "kosugi",
         "campbell",
-        "genuchtenkool",
+        "kool",
         "haverkamp",
     ],
 )

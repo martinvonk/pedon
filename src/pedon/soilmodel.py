@@ -820,7 +820,7 @@ class GenuchtenGardner:
 
 
 @dataclass
-class GenuchtenKool:
+class Kool:
     """Soil model with a scaling factor for hysteresis.
 
     Uses the van Genuchten soil water retention curve and hydraulic
@@ -925,7 +925,7 @@ def get_soilmodel(
         "Kosugi": Kosugi,
         "Campbell": Campbell,
         "GenuchtenGardner": GenuchtenGardner,
-        "GenuchtenKool": GenuchtenKool,
+        "Kool": Kool,
     }
     return sms[soilmodel_name]
 
