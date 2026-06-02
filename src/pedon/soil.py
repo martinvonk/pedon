@@ -649,8 +649,8 @@ class SoilSample:
         # Convert air entry tension from kPa to cm water column (~10.1972)
         h_b = psi_e * 10.1972
 
-        # Brooks-Corey parameters
-        lp = 1 / (log(1500) - log(33)) / (log(th33) - log(th1500))
+        # Brooks-Corey parameters (Corrected inversion)
+        lp = (log(th33) - log(th1500)) / (log(1500) - log(33))
 
         # Saturated hydraulic conductivity (cm/d = 2.4 mm/h)
         k_s = 1930 * (ths - th33) ** (3 - lp) * 2.4
@@ -667,7 +667,7 @@ class SoilSample:
         """Pedotransfer function returning Mualem-van Genuchten parameters.
 
         The Weynants PTF relies on Organic Carbon (OC), not Organic Matter (OM).
-        This method converts the `om_p` to OC using a  factor 1.724.
+        This method converts the `om_p` to OC using a factor 1.724.
 
         References
         ----------
@@ -697,16 +697,16 @@ class SoilSample:
         alpha = exp(
             -4.3003 - 0.0097 * self.clay_p + 0.0138 * self.sand_p - 0.0992 * oc_p
         )
-        ln_n_minus_1 = (
+        n = (
             exp(
                 -1.0846
                 - 0.0236 * self.clay_p
                 - 0.0085 * self.sand_p
                 + 0.0001 * (self.sand_p**2)
             )
-            - 1
+            + 1.0
         )
-        n = exp(ln_n_minus_1) + 1.0
+
         k0 = exp(1.9582 + 0.0308 * self.sand_p - 0.6142 * self.rho - 0.1566 * oc_p)
         lt = -1.8642 - 0.1317 * self.clay_p + 0.0067 * self.sand_p
 
