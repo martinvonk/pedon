@@ -664,6 +664,74 @@ class SoilSample:
             l=round(lp, 5),
         )
 
+    def vereecken(self) -> Genuchten:
+        """Pedotransfer function returning van Genuchten parameters.
+
+        Implements the classic continuous pedotransfer functions from et al. (1989)
+        (Table 7) to estimate soil moisture retention parameters from texture,
+        bulk density, and carbon content, combined with the saturated hydraulic
+        conductivity (k_s) regression from Vereecken et al. (1990).
+
+        The Vereecken PTF relies on Organic Carbon (OC) in %. This method converts
+        `om_p` to OC using the standard 1.724 factor.
+
+        Warning: This method brute-forces a Gardner-calibrated k_s into a standard
+        Mualem-van Genuchten model framework. The resulting unsaturated conductivity
+        curve will follow Mualem-van Genuchten's format, not Vereecken's 1990 Gardner
+        function. Adjust accordingly when interpreting results or comparing to original
+        Vereecken curves.
+
+        References
+        ----------
+        Vereecken, H., Maes, J., Feyen, J., & Darius, P. (1989). Estimating the
+        soil moisture retention characteristic from texture, bulk density, and
+        carbon content. doi: 10.1097/00010694-198912000-00001
+
+        Vereecken, H., Maes, J., & Feyen, J. (1990). Estimating unsaturated
+        hydraulic conductivity from easily measured soil properties.
+        doi: 10.1097/00010694-199001000-00001
+
+        """
+        msg = "Vereecken (1989) PTF requires 'sand_p', 'clay_p', 'rho', and 'om_p' to be set."
+        assert self.sand_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        oc_p = self.om_p / 1.724
+        theta_s = 0.81 - 0.283 * self.rho + 0.001 * self.clay_p
+        theta_r = 0.015 + 0.005 * self.clay_p + 0.014 * oc_p
+        alpha = exp(
+            -2.486
+            + 0.025 * self.sand_p
+            - 0.351 * oc_p
+            - 2.617 * self.rho
+            - 0.023 * self.clay_p
+        )
+        n = exp(
+            0.053
+            - 0.009 * self.sand_p
+            - 0.013 * self.clay_p
+            + 0.00015 * (self.sand_p**2)
+        )
+        k_s = exp(
+            20.62
+            - 0.96 * log(self.clay_p)
+            - 0.66 * log(self.sand_p)
+            - 0.46 * log(oc_p)
+            - 8.43 * self.rho
+        )
+
+        gen = Genuchten(
+            k_s=round(k_s, 4),
+            theta_r=round(theta_r, 4),
+            theta_s=round(theta_s, 4),
+            alpha=round(alpha, 7),
+            n=round(n, 4),
+        )
+        gen.m = 1.0
+        return gen
+
     def weynants(self) -> Genuchten:
         """Pedotransfer function returning Mualem-van Genuchten parameters.
 
