@@ -537,6 +537,130 @@ class SoilSample:
             l=round(labda, 5),
         )
 
+    def saxton(self, df: float = 1.0) -> Brooks:
+        """Pedotransfer function returning Brooks-Corey parameters.
+
+        Implements the equations from Saxton and Rawls (2006) which estimate
+        soil water characteristics from soil texture and organic matter.
+
+        Parameters
+        ----------
+        df : float, optional
+            Density adjustment factor (normally between 0.9 and 1.3) to account
+            for compaction or loosening. Default is 1.0 (normal density).
+
+        Returns
+        -------
+        Brooks
+            Brooks-Corey soil model with estimated parameters.
+
+        References
+        ----------
+        Saxton, K. E., Rawls, W. J., Romberger, J. S., & Papendick, R. I. (1986).
+        Estimating generalized soil-water characteristics from texture.
+        doi: 10.2136/sssaj1986.03615995005000040039x
+
+        Saxton, K. E., & Rawls, W. J. (2006). Soil water characteristic estimates
+        by texture and organic matter for hydrologic solutions.
+        doi: 10.2136/sssaj2005.0117
+
+        """
+        msg = "Saxton-Rawls pedotransfer function requires 'sand_p', 'clay_p', and 'om_p' to be set."
+        assert self.sand_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.om_p is not None, msg
+
+        # Sand and Clay are calculated as fractions, OM is kept as a percentage
+        s = self.sand_p / 100.0
+        c = self.clay_p / 100.0
+        om = self.om_p
+
+        # 1500 kPa moisture (Wilting Point)
+        th1500t = (
+            -0.024 * s
+            + 0.487 * c
+            + 0.006 * om
+            + 0.005 * (s * om)
+            - 0.013 * (c * om)
+            + 0.068 * (s * c)
+            + 0.031
+        )
+        th1500 = th1500t + (0.14 * th1500t - 0.02)
+
+        # 33 kPa moisture (Field capacity)
+        th33t = (
+            -0.251 * s
+            + 0.195 * c
+            + 0.011 * om
+            + 0.006 * (s * om)
+            - 0.027 * (c * om)
+            + 0.452 * (s * c)
+            + 0.299
+        )
+        th33 = th33t + (1.283 * th33t**2 - 0.374 * th33t - 0.015)
+
+        # Saturation - 33 kPa moisture
+        ths_33t = (
+            0.278 * s
+            + 0.034 * c
+            + 0.022 * om
+            - 0.018 * (s * om)
+            - 0.027 * (c * om)
+            - 0.584 * (s * c)
+            + 0.078
+        )
+        ths_33 = ths_33t + (0.636 * ths_33t - 0.107)
+
+        # Saturation moisture & density
+        ths = th33 + ths_33 - 0.097 * s + 0.043
+        rho_n = (1 - ths) * 2.65
+
+        # Apply density factor adjustment
+        if df != 1.0:
+            rho_df = rho_n * df
+            ths_df = 1 - (rho_df / 2.65)
+            th33_df = th33 - 0.2 * (ths - ths_df)
+            ths_33_df = ths_df - th33_df
+
+            # Update variables with adjusted density
+            ths = ths_df
+            th33 = th33_df
+            ths_33 = ths_33_df
+
+        # Air entry tension (bubbling pressure) in kPa
+        psi_et = (
+            -21.67 * s
+            - 27.93 * c
+            - 81.97 * ths_33
+            + 71.12 * (s * ths_33)
+            + 8.29 * (c * ths_33)
+            + 14.05 * (s * c)
+            + 27.16
+        )
+        # Prevent mathematically negative air-entry tensions in edge-case soil bounds
+        psi_e = max(psi_et + (0.02 * psi_et**2 - 0.113 * psi_et - 0.70), 0.1)
+
+        # Brooks-Corey parameters
+        B = (log(1500) - log(33)) / (log(th33) - log(th1500))
+        l = 1 / B
+
+        # Saturated hydraulic conductivity (mm/h)
+        k_s_mmh = 1930 * (ths - th33) ** (3 - l)
+
+        # Convert k_s from mm/h to cm/d
+        k_s_cmd = k_s_mmh * 2.4
+
+        # Convert air entry tension from kPa to cm water column (~10.1972)
+        h_b = psi_e * 10.1972
+
+        return Brooks(
+            k_s=round(k_s_cmd, 4),
+            theta_r=0.0,
+            theta_s=round(ths, 4),
+            h_b=round(h_b, 5),
+            l=round(l, 5),
+        )
+
     def rosetta(self, version: Literal[1, 2, 3] = 3) -> Genuchten:
         """Pedotransfer function using the Rosetta API.
 
