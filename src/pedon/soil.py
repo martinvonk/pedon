@@ -666,6 +666,10 @@ class SoilSample:
         "Revisiting Vereecken Pedotransfer Functions: Introducing a Closed-Form
         Hydraulic Model". doi: 10.2136/vzj2008.0062er
 
+        Vereecken, H., Maes, J., Feyen, J., & Darius, P. (1989). Estimating the
+        soil moisture retention characteristic from texture, bulk density, and
+        carbon content. doi: 10.1097/00010694-198912000-00001
+
         """
         msg = "Weynants pedotransfer function requires 'sand_p', 'clay_p', 'rho', and 'om_p' to be set."
         assert self.sand_p is not None, msg
