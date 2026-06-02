@@ -1,5 +1,6 @@
 """Tests for pedotransfer functions."""
 
+import numpy as np
 import pytest
 
 import pedon as pe
@@ -17,7 +18,7 @@ def ss() -> pe.soil.SoilSample:
 
 def test_wosten(ss: pe.soil.SoilSample) -> None:
     """Test Wösten pedotransfer function with texture-dependent parameters."""
-    sm = ss.wosten(ts=True)
+    sm = ss.wosten(topsoil=True)
     assert isinstance(sm, pe.Genuchten)
     assert sm.k_s == pytest.approx(0.6547824638330241, rel=REL)
     assert sm.theta_r == pytest.approx(0.01, rel=REL)
@@ -30,7 +31,7 @@ def test_wosten(ss: pe.soil.SoilSample) -> None:
 
 def test_wosten_sand(ss: pe.soil.SoilSample) -> None:
     """Test Wösten sand-specific pedotransfer function."""
-    sm = ss.wosten_sand(ts=True)
+    sm = ss.wosten_sand(topsoil=True)
     assert isinstance(sm, pe.Genuchten)
     assert sm.k_s == pytest.approx(20.793, rel=REL)
     assert sm.theta_r == pytest.approx(0.01, rel=REL)
@@ -63,6 +64,93 @@ def test_cosby(ss: pe.soil.SoilSample) -> None:
     assert sm.theta_s == pytest.approx(0.4192, rel=REL)
     assert sm.h_b == pytest.approx(13.42765, rel=REL)
     assert sm.l == pytest.approx(0.10834, rel=REL)
+
+
+def test_saxton(ss: pe.soil.SoilSample) -> None:
+    """Test Saxton-Rawls pedotransfer function."""
+    sm = ss.saxton()
+    assert isinstance(sm, pe.Brooks)
+    assert sm.k_s == pytest.approx(17.1624, rel=REL)
+    assert sm.theta_r == pytest.approx(0.0, rel=REL)
+    assert sm.theta_s == pytest.approx(0.5961, rel=REL)
+    assert sm.h_b == pytest.approx(6.39505, rel=REL)
+    assert sm.l == pytest.approx(0.09416, rel=REL)
+
+
+def test_saxton_density_factor(ss: pe.soil.SoilSample) -> None:
+    """Test Saxton-Rawls pedotransfer function with a density adjustment."""
+    sm = ss.saxton(df=1.1)
+    assert isinstance(sm, pe.Brooks)
+    assert sm.k_s == pytest.approx(8.1961, rel=REL)
+    assert sm.theta_r == pytest.approx(0.0, rel=REL)
+    assert sm.theta_s == pytest.approx(0.5557, rel=REL)
+    assert sm.h_b == pytest.approx(22.63674, rel=REL)
+    assert sm.l == pytest.approx(0.08942, rel=REL)
+
+
+def test_vereecken(ss: pe.soil.SoilSample) -> None:
+    """Test Vereecken pedotransfer function."""
+    sm = ss.vereecken()
+    assert isinstance(sm, pe.Genuchten)
+    assert sm.k_s == pytest.approx(2.0632, rel=REL)
+    assert sm.theta_r == pytest.approx(0.3774, rel=REL)
+    assert sm.theta_s == pytest.approx(0.4255, rel=REL)
+    assert sm.alpha == pytest.approx(3.89e-05, rel=REL)
+    assert sm.n == pytest.approx(0.5816, rel=REL)
+    assert sm.l == pytest.approx(0.5, rel=REL)
+    assert sm.m == pytest.approx(1.0, rel=REL)
+
+
+def test_weynants(ss: pe.soil.SoilSample) -> None:
+    """Test Weynants pedotransfer function."""
+    sm = ss.weynants()
+    assert isinstance(sm, pe.Genuchten)
+    assert sm.k_s == pytest.approx(2.1387, rel=REL)
+    assert sm.theta_r == pytest.approx(0.0, rel=REL)
+    assert sm.theta_s == pytest.approx(0.4429, rel=REL)
+    assert sm.alpha == pytest.approx(0.0058046, rel=REL)
+    assert sm.n == pytest.approx(1.1104, rel=REL)
+    assert sm.l == pytest.approx(-6.7972, rel=REL)
+    assert sm.m == pytest.approx(0.09942363112391939, rel=REL)
+
+
+def test_toth(ss: pe.soil.SoilSample) -> None:
+    """Test Tóth pedotransfer function."""
+    sm = ss.toth()
+    assert isinstance(sm, pe.Genuchten)
+    assert sm.k_s == pytest.approx(0.5623, rel=REL)
+    assert sm.theta_r == pytest.approx(0.041, rel=REL)
+    assert sm.theta_s == pytest.approx(0.4203, rel=REL)
+    assert sm.alpha == pytest.approx(0.0043157, rel=REL)
+    assert sm.n == pytest.approx(1.2524, rel=REL)
+    assert sm.l == pytest.approx(0.5, rel=REL)
+    assert sm.m == pytest.approx(0.2015330565314596, rel=REL)
+
+
+def test_toth_topsoil(ss: pe.soil.SoilSample) -> None:
+    """Test Tóth pedotransfer function with topsoil adjustment."""
+    sm = ss.toth(topsoil=True)
+    assert isinstance(sm, pe.Genuchten)
+    assert sm.k_s == pytest.approx(27.5423, rel=REL)
+    assert sm.theta_r == pytest.approx(0.041, rel=REL)
+    assert sm.theta_s == pytest.approx(0.4203, rel=REL)
+    assert sm.alpha == pytest.approx(0.007131, rel=REL)
+    assert sm.n == pytest.approx(1.2221, rel=REL)
+    assert sm.l == pytest.approx(0.5, rel=REL)
+    assert sm.m == pytest.approx(0.18173635545372713, rel=REL)
+
+
+def test_hodnett(ss: pe.soil.SoilSample) -> None:
+    """Test Hodnett and Tomasella pedotransfer function."""
+    sm = ss.hodnett()
+    assert isinstance(sm, pe.Genuchten)
+    assert np.isnan(sm.k_s)
+    assert sm.theta_r == pytest.approx(0.1878, rel=REL)
+    assert sm.theta_s == pytest.approx(0.4121, rel=REL)
+    assert sm.alpha == pytest.approx(0.0466917, rel=REL)
+    assert sm.n == pytest.approx(1.3657, rel=REL)
+    assert sm.l == pytest.approx(0.5, rel=REL)
+    assert sm.m == pytest.approx(0.2677747675184886, rel=REL)
 
 
 def test_rosetta(ss: pe.soil.SoilSample) -> None:
