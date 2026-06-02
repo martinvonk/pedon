@@ -661,6 +661,58 @@ class SoilSample:
             l=round(l, 5),
         )
 
+    def weynants(self) -> Genuchten:
+        """Pedotransfer function returning Mualem-van Genuchten parameters.
+
+        The Weynants PTF relies on Organic Carbon (OC), not Organic Matter (OM).
+        This method converts the `om_p` to OC using a  factor 1.724.
+
+        References
+        ----------
+        Weynants, M., Vereecken, H., & Javaux, M. (2009). Revisiting Vereecken
+        Pedotransfer Functions: Introducing a Closed-Form Hydraulic Model.
+        doi: 10.2136/vzj2008.0062
+
+        Weihermüller, L., Herbst, M., Javaux, M., & Weynants, M. (2017). Erratum to
+        "Revisiting Vereecken Pedotransfer Functions: Introducing a Closed-Form
+        Hydraulic Model". doi: 10.2136/vzj2008.0062er
+
+        """
+        msg = "Weynants pedotransfer function requires 'sand_p', 'clay_p', 'rho', and 'om_p' to be set."
+        assert self.sand_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        # Convert organic matter percentage to organic carbon percentage
+        oc_p = self.om_p / 1.724
+
+        theta_s = 0.6355 + 0.0013 * self.clay_p - 0.1631 * self.rho
+        alpha = exp(
+            -4.3003 - 0.0097 * self.clay_p + 0.0138 * self.sand_p - 0.0992 * oc_p
+        )
+        ln_n_minus_1 = (
+            exp(
+                -1.0846
+                - 0.0236 * self.clay_p
+                - 0.0085 * self.sand_p
+                + 0.0001 * (self.sand_p**2)
+            )
+            - 1
+        )
+        n = exp(ln_n_minus_1) + 1.0
+        k0 = exp(1.9582 + 0.0308 * self.sand_p - 0.6142 * self.rho - 0.1566 * oc_p)
+        lt = -1.8642 - 0.1317 * self.clay_p + 0.0067 * self.sand_p
+
+        return Genuchten(
+            k_s=round(k0, 4),
+            theta_r=0.0,
+            theta_s=round(theta_s, 4),
+            alpha=round(alpha, 7),
+            n=round(n, 4),
+            l=round(lt, 4),
+        )
+
     def rosetta(self, version: Literal[1, 2, 3] = 3) -> Genuchten:
         """Pedotransfer function using the Rosetta API.
 
