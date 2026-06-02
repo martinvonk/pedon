@@ -56,6 +56,7 @@ The soil models are implemented as Python classes with model-specific methods fo
 import numpy as np
 import pedon as pe
 
+# Mualem-van Genuchten parameters for Sandy Loam
 mg = pe.Genuchten(
     k_s=106.1,  # saturated conductivity (cm/d)
     theta_r=0.065,  # residual water content (-)
@@ -64,7 +65,7 @@ mg = pe.Genuchten(
     n=1.89,  # shape parameter (-)
 )
 
-h = np.logspace(-2, 6, 9)  # pressure head (cm)
+h = np.logspace(-1, 4, 6)  # pressure head (cm)
 theta = mg.theta(h)  # water content (-) at pressure head values
 k = mg.k(h)  # hydraulic conductivity (cm/d) at pressure head values
 ```
