@@ -94,16 +94,32 @@ clapp = pe.Soil("Sand").from_name(pe.Campbell, source="Clapp")
 `pedon` provides two approaches for obtaining soil model parameters from soil data. The first uses pedotransfer functions based on easily measured soil properties. The second relies on direct measurements of soil water content and hydraulic conductivity.
 
 ### Pedotransfer functions
-Pedotransfer functions relate easily measured soil properties (e.g. sand, silt, clay or organic matter content and bulk density) to soil model parameters [@bouma_pedotransfer_1989; @looy_pedotransfer_2017]. `pedon` implements functions from the literature, including those of @wosten_pedotransfer_1999; @wosten_staringreeks_2001; @cosby_pedotransfer_1984, and @cooper_pedotransfer_2021. It also provides access to parameter databases such as Rosetta [@schaap_rosetta_2001; @zhang_rosetta3_2017] (optional dependency) and HYPAGS [@peche_hypags_2023; @peche_genuchten_2024], the latter enabling estimation from a single value of saturated hydraulic conductivity or representative grain diameters.
+Pedotransfer functions relate easily measured soil properties (e.g. sand, silt, clay or organic matter content and bulk density) to soil model parameters [@bouma_pedotransfer_1989; @looy_pedotransfer_2017]. pedon implements a comprehensive suite of pedotransfer functions from the literature, including those of @cosby_pedotransfer_1984, @cooper_pedotransfer_2021, @saxton_pedotransfer_1986, @saxton_pedotransfer_2006, @vereecken_pedotransfer_1989,  @vereecken_pedotransfer_1990, @wosten_pedotransfer_1999, Rosetta [@schaap_rosetta_2001; @zhang_rosetta3_2017], @wosten_staringreeks_2001, @hodnett_pedotransfer_2002, @weynants_pedotransfer_2009, @toth_pedotransfer_2015. Furthermore, it provides access to specialized tools such as HYPAGS [@peche_hypags_2023; @peche_genuchten_2024] which enables parameter estimation from a single value of saturated hydraulic conductivity or representative grain diameters.
 
 ```python
-# Estimate parameters using Cosby's pedotransfer function
-sand_p = 40.0  # sand (%)
-clay_p = 10.0  # clay (%)
-cosby: pe.Brooks = pe.SoilSample(sand_p=sand_p, clay_p=clay_p).cosby()
+# Create a soil sample with easily measured properties. Note that
+# not all pedotransfer functions require all of these properties,
+# but this is a common set that covers most cases.
+ss = pe.SoilSample(
+    sand_p=60.0,  # sand (%)
+    silt_p=30.0,  # silt (%)
+    clay_p=10.0,  # clay (%)
+    om_p=2.5,  # organic matter (%)
+    rho=1.5,  # bulk density (g/cm3)
+)
+
+# Estimate van Genuchten parameters using Wösten (HYPRES)
+wosten: pe.Genuchten = ss.wosten()
+
+# Estimate van Genuchten parameters using Rosetta v3
+# Optional dependency requiring installation of `httpx`
+rosetta: pe.Genuchten = ss.rosetta(version=3)
+
+# Estimate Brooks-Corey parameters using Saxton
+saxton: pe.Brooks = ss.saxton()
 
 # Estimate parameters using HYPAGS
-ks = 1e-4  # saturated hydraulic conductivity (m/s)
+ks = 1e-3  # saturated hydraulic conductivity (m/s)
 hypags: pe.Genuchten = pe.SoilSample(k=ks).hypags()
 ```
 
