@@ -62,6 +62,7 @@ def test_soil_from_clapp() -> None:
     assert s.model.h_b == 3.5
     assert s.model.b == 3.0
 
+
 def test_soil_from_rawls() -> None:
     """Test loading soil from the Rawls PTF."""
     s = pe.soil.Soil("Sand").from_name(pe.Brooks, source="Rawls")
@@ -73,6 +74,7 @@ def test_soil_from_rawls() -> None:
     assert s.model.theta_s == 0.437
     assert s.model.h_b == 7.26
     assert s.model.l == 0.592
+
 
 def test_soil_from_staring_with_int_year() -> None:
     """Test integer year input for from_staring."""

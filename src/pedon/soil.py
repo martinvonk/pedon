@@ -1075,19 +1075,24 @@ class SoilSample:
                 f"Rawls PTF requires 'cecc/clay_p' to be between 0.1 and 0.9. Got {cec:.2f}."
             )
             bd = (
-                1.51 + 0.0025 * self.sand_p
+                1.51
+                + 0.0025 * self.sand_p
                 - 0.0013 * self.sand_p * self.om_p
                 - 0.0006 * self.clay_p * self.om_p
                 - 0.0048 * self.clay_p * cec
             )
             theta_s = (2.65 - bd) / 2.65
-            eac = 1.0 - (
-                3.8
-                + 0.00019 * self.clay_p**2
-                - 0.0337 * self.sand_p # 0.337 in book, seems like a typod
-                + 0.126 * cec * self.clay_p
-                + self.om_p * (self.sand_p / 200.0) ** 2
-            ) / 100.0
+            eac = (
+                1.0
+                - (
+                    3.8
+                    + 0.00019 * self.clay_p**2
+                    - 0.0337 * self.sand_p  # 0.337 in book, seems like a typod
+                    + 0.126 * cec * self.clay_p
+                    + self.om_p * (self.sand_p / 200.0) ** 2
+                )
+                / 100.0
+            )
             # Rawls & Baumer 1989
             theta_r = (
                 (0.2 + 0.1 * self.om_p + 0.25 * self.clay_p * cec**0.45) * bd / 100.0
