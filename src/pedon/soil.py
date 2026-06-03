@@ -299,7 +299,7 @@ class SoilSample:
             - 0.001183 * self.rho * self.om_p
             - 0.0001664 * ts * self.silt_p
         )
-        alpha_ = (
+        alpha = exp(
             -14.96
             + 0.03135 * self.clay_p
             + 0.0351 * self.silt_p
@@ -316,24 +316,27 @@ class SoilSample:
             - 0.4852 * self.rho * self.om_p
             + 0.00673 * ts * self.clay_p
         )
-        n_ = (
-            -25.23
-            - 0.02195 * self.clay_p
-            + 0.0074 * self.silt_p
-            - 0.1940 * self.om_p
-            + 45.5 * self.rho
-            - 7.24 * self.rho**2
-            + 0.0003658 * self.clay_p**2
-            + 0.002885 * self.om_p**2
-            - 12.81 * self.rho**-1
-            - 0.1524 * self.silt_p**-1
-            - 0.01958 * self.om_p**-1
-            - 0.2876 * log(self.silt_p)
-            - 0.0709 * log(self.om_p)
-            - 44.6 * log(self.rho)
-            - 0.02264 * self.rho * self.clay_p
-            + 0.0896 * self.rho * self.om_p
-            + 0.00718 * ts * self.clay_p
+        n = (
+            exp(
+                -25.23
+                - 0.02195 * self.clay_p
+                + 0.0074 * self.silt_p
+                - 0.1940 * self.om_p
+                + 45.5 * self.rho
+                - 7.24 * self.rho**2
+                + 0.0003658 * self.clay_p**2
+                + 0.002885 * self.om_p**2
+                - 12.81 * self.rho**-1
+                - 0.1524 * self.silt_p**-1
+                - 0.01958 * self.om_p**-1
+                - 0.2876 * log(self.silt_p)
+                - 0.0709 * log(self.om_p)
+                - 44.6 * log(self.rho)
+                - 0.02264 * self.rho * self.clay_p
+                + 0.0896 * self.rho * self.om_p
+                + 0.00718 * ts * self.clay_p
+            )
+            + 1
         )
         l_ = (
             0.0202
@@ -344,7 +347,8 @@ class SoilSample:
             + 0.00283 * self.rho * self.silt_p
             + 0.0488 * self.rho * self.om_p
         )
-        ks_ = (
+        lb = (10 * exp(l_) - 10) / (1 + exp(l_))
+        k_s = exp(
             7.755
             + 0.0352 * self.silt_p
             + 0.93 * ts
@@ -359,14 +363,13 @@ class SoilSample:
             + 0.02986 * ts * self.clay_p
             - 0.03305 * ts * self.silt_p
         )
-        theta_r = 0.01
         return Genuchten(
-            k_s=max(exp(ks_), 0),
-            theta_r=theta_r,
+            k_s=k_s,
+            theta_r=0.01,
             theta_s=theta_s,
-            alpha=exp(alpha_),
-            n=exp(n_) + 1,
-            l=(10 * exp(l_) - 10) / (1 + exp(l_)),
+            alpha=alpha,
+            n=n,
+            l=lb,
         )
 
     def wosten_sand(self, topsoil: bool = False) -> Genuchten:
@@ -452,15 +455,15 @@ class SoilSample:
             + 2.364 * self.silt_p**-1
             + 1.014 * log(self.silt_p)
         )
-        l = min(max(2 * (exp(l_) - 1) / (exp(l_) + 1), -2.0), 2.0)  # noqa: E741
+        lb = min(max(2 * (exp(l_) - 1) / (exp(l_) + 1), -2.0), 2.0)  # noqa: E741
 
         return Genuchten(
-            k_s=round(k_s, 4),
+            k_s=k_s,
             theta_r=0.01,
-            theta_s=round(theta_s, 4),
-            alpha=round(alpha, 7),
-            n=round(n, 4),
-            l=round(l, 4),
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
+            l=lb,
         )
 
     def wosten_clay(self) -> Genuchten:
@@ -518,14 +521,14 @@ class SoilSample:
         )
 
         l_ = 0.102 + 0.0222 * self.clay_p - 0.043 * self.rho * self.clay_p
-        l = min(max(10.0 * (exp(l_) - 1) / (exp(l_) + 1), -10.0), 10.0)  # noqa: E741
+        lb = min(max(10.0 * (exp(l_) - 1) / (exp(l_) + 1), -10.0), 10.0)
         return Genuchten(
-            k_s=round(k_s, 4),
+            k_s=k_s,
             theta_r=0.01,
-            theta_s=round(theta_s, 4),
-            alpha=round(alpha, 7),
-            n=round(n, 4),
-            l=round(l, 4),
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
+            l=lb,
         )
 
     def cosby(self) -> Brooks:
@@ -553,15 +556,15 @@ class SoilSample:
         theta_s = 0.505 - 0.037 * c - 0.142 * s
         psi_s = 0.01 * 10 ** (2.170 - 0.630 * c - 1.580 * s)
         k_s = 10 ** (-0.600 - 0.640 * c + 1.260 * s) * 25.2 / 3600
-        labda = 1 / b
+        lb = 1 / b
         k_s = k_s * 8640000 / 1000  # kg/m2/s to cm/d
         psi_s = psi_s * 100  # m to cm
         return Brooks(
-            k_s=round(k_s, 4),
+            k_s=k_s,
             theta_r=0.0,
-            theta_s=round(theta_s, 4),
-            h_b=round(psi_s, 5),
-            l=round(labda, 5),
+            theta_s=theta_s,
+            h_b=psi_s,
+            l=lb,
         )
 
     def saxton(self, df: float = 1.0) -> Brooks:
@@ -672,11 +675,11 @@ class SoilSample:
         k_s = 1930 * (ths - th33) ** (3 - lp) * 2.4
 
         return Brooks(
-            k_s=round(k_s, 4),
+            k_s=k_s,
             theta_r=0.0,
-            theta_s=round(ths, 4),
-            h_b=round(h_b, 5),
-            l=round(lp, 5),
+            theta_s=ths,
+            h_b=h_b,
+            l=lp,
         )
 
     def vereecken(self) -> Genuchten:
@@ -739,11 +742,11 @@ class SoilSample:
         )
 
         gen = Genuchten(
-            k_s=round(k_s, 4),
-            theta_r=round(theta_r, 4),
-            theta_s=round(theta_s, 4),
-            alpha=round(alpha, 7),
-            n=round(n, 4),
+            k_s=k_s,
+            theta_r=theta_r,
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
         )
         gen.m = 1.0
         return gen
@@ -788,17 +791,16 @@ class SoilSample:
             )
             + 1.0
         )
-
+        lb = -1.8642 - 0.1317 * self.clay_p + 0.0067 * self.sand_p
         k0 = exp(1.9582 + 0.0308 * self.sand_p - 0.6142 * self.rho - 0.1566 * oc_p)
-        lt = -1.8642 - 0.1317 * self.clay_p + 0.0067 * self.sand_p
 
         return Genuchten(
-            k_s=round(k0, 4),
+            k_s=k0,
             theta_r=0.0,
-            theta_s=round(theta_s, 4),
-            alpha=round(alpha, 7),
-            n=round(n, 4),
-            l=round(lt, 4),
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
+            l=lb,
         )
 
     def toth(self, topsoil: bool = False) -> Genuchten:
@@ -920,11 +922,11 @@ class SoilSample:
         k_s = 10**log10_ks
 
         return Genuchten(
-            k_s=round(k_s, 4),
-            theta_r=round(theta_r, 4),
-            theta_s=round(theta_s, 4),
-            alpha=round(alpha, 7),
-            n=round(n, 4),
+            k_s=k_s,
+            theta_r=theta_r,
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
             l=0.5,
         )
 
@@ -1005,10 +1007,10 @@ class SoilSample:
 
         return Genuchten(
             k_s=nan,
-            theta_r=round(theta_r, 4),
-            theta_s=round(theta_s, 4),
-            alpha=round(alpha, 7),
-            n=round(n, 4),
+            theta_r=theta_r,
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
         )
 
     def rosetta(self, version: Literal[1, 2, 3] = 3) -> Genuchten:
