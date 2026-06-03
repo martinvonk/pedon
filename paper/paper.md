@@ -79,10 +79,10 @@ Soil hydraulic parameters determine the shape of a soil model’s SWRC and HCF, 
 `pedon` includes a large dataset of soil model parameters for a wide range of soils, currently compiled from the following sources:
 
 - HYDRUS [@carsel_dataset_1988; @simunek_hydrus_2008] and the Staring series [@wosten_staringreeks_2001; @heinen_staringreeks_2020; @heinen_bofek_2022] for Mualem–van Genuchten parameters. HYDRUS provides standard averages across twelve major soil textural groups, while the Staring series derives its values from hundreds of processed Dutch soil samples.
-- VS2D [@healy_vs2d_1990] and Rawls [@rawls_dataset_1982] for Brooks–Corey parameters.
-- Clapp [@clapp_hornberger_1978] for Campbell parameters.
+- VS2D [@healy_vs2d_1990] and @rawls_dataset_1982 for Brooks–Corey parameters.
+- @clapp_hornberger_1978 for Campbell parameters.
 
-For example, a parameter set for a sandy soil (using the "B05" classification for the Staring series) can easily be obtained from any of the databases via the following code, enabling direct comparison of the resulting SWRC's (Figure \ref{fig:dataset_swrc}).
+For example, a parameter set for a sandy soil (classified as "B05" in the Staring series) can easily be obtained from any of the databases via the following code, enabling direct comparison of the resulting SWRC's (Figure \ref{fig:dataset_swrc}).
 
 ```python
 hydrus = pe.Soil("Sand").from_name(pe.Genuchten, source="HYDRUS")
