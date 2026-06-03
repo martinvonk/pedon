@@ -102,13 +102,15 @@ class SoilSample:
 
         References
         ----------
-        Wösten, J. H. M. and Veerman, G. J. and de Groot, W. J. M. and Stolte, J. (2001).
+        Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., & Stolte, J. (2001).
         Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
-        Nederland: De Staringreeks. url: https://edepot.wur.nl/43272
+        Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
+        url: https://edepot.wur.nl/43272
 
-        Heinen, M. and Bakker, G. and Wösten, J. H. M. (2020). Waterretentie- en
+        Heinen, M., Bakker, G., & Wösten, J. H. M. (2020). Waterretentie- en
         Doorlatendheidskarakteristieken van Boven- en Ondergronden in Nederland:
-        De Staringreeks; (Update 2018). doi: 10.18174/512761
+        De Staringreeks; (Update 2018). Wageningen Environmental Research, Report 2978,
+        Wageningen, The Netherlands. doi: 10.18174/512761
 
         """
         if year not in ("2001", "2018"):
@@ -182,8 +184,9 @@ class SoilSample:
 
         References
         ----------
-        van Genuchten, M. Th. and Leij, F. J. and Yates, S. R. (1991). The RETC Code for
-        Quantifying the Hydraulic Functions.
+        van Genuchten, M. Th., Leij, F. J., & Yates, S. R. (1991). The RETC Code for
+        Quantifying the Hydraulic Functions. Version 1.0. U.S. Salinity Laboratory,
+        USDA, ARS, Riverside, CA. EPA Report 600/2-91/065.
         url: https://cfpub.epa.gov/si/si_public_record_report.cfm?dirEntryId=130162
 
         """
@@ -269,8 +272,9 @@ class SoilSample:
 
         References
         ----------
-        Wosten et al (1999) - Development and use of a database of hydraulic
-        properties of European soils. doi: 10.1016/S0016-7061(98)00132-3
+        Wösten, J. H. M., Nemes, A., Lilly, A., & Le Bas, C. (1999). Development and
+        use of a database of hydraulic properties of European soils. Geoderma, 90, 169--185.
+        doi: 10.1016/S0016-7061(98)00132-3
 
         """
         assert (
@@ -374,8 +378,11 @@ class SoilSample:
             If True, applies the topsoil adjustment to the pedotransfer
             function. Default is False.
 
-        Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
-        van boven- en ondergronden in Nederland: de Staringreeks.
+        References
+        ----------
+        Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., & Stolte, J. (2001).
+        Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+        Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
         url: https://edepot.wur.nl/43272
 
         """
@@ -461,8 +468,9 @@ class SoilSample:
 
         References
         ----------
-        Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
-        van boven- en ondergronden in Nederland: de Staringreeks.
+        Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., & Stolte, J. (2001).
+        Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+        Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
         url: https://edepot.wur.nl/43272
 
         """
@@ -523,12 +531,17 @@ class SoilSample:
     def cosby(self) -> Brooks:
         """Pedotransfer function returning Brooks-Corey parameters.
 
-        Cooper (2021) - Using data assimilation to optimize pedotransfer
-        functions using field-scale in situ soil moisture observations.
+        References
+        ----------
+        Cooper, E., Blyth, E., Cooper, H., Ellis, R., Pinnington, E., & Dadson, S. J. (2021).
+        Using Data Assimilation to Optimize Pedotransfer Functions Using Field-Scale In Situ
+        Soil Moisture Observations. Hydrology and Earth System Sciences, 25, 2445--2461.
         doi: 10.5194/hess-25-2445-2021
 
-        Cosby et al. (1984) - A statistical exploration of the relationships of soil moisture
-        characteristics to the physical properties of soils. doi: 10.1029/WR020i006p00682
+        Cosby, B. J., Hornberger, G. M., Clapp, R. B., & Ginn, T. R. (1984).
+        A Statistical Exploration of the Relationships of Soil Moisture Characteristics to the
+        Physical Properties of Soils. Water Resources Research, 20(6), 682--690.
+        doi: 10.1029/WR020i006p00682
 
         """
         msg = "Cosby pedotransfer function requires 'clay_p' and 'sand_p' to be set."
@@ -567,10 +580,12 @@ class SoilSample:
         ----------
         Saxton, K. E., Rawls, W. J., Romberger, J. S., & Papendick, R. I. (1986).
         Estimating generalized soil-water characteristics from texture.
+        Soil Science Society of America Journal, 50(4), 1031--1036.
         doi: 10.2136/sssaj1986.03615995005000040039x
 
-        Saxton, K. E., & Rawls, W. J. (2006). Soil water characteristic estimates
-        by texture and organic matter for hydrologic solutions.
+        Saxton, K. E., & Rawls, W. J. (2006). Soil Water Characteristic Estimates
+        by Texture and Organic Matter for Hydrologic Solutions.
+        Soil Science Society of America Journal, 70(5), 1569--1578.
         doi: 10.2136/sssaj2005.0117
 
         """
@@ -685,11 +700,12 @@ class SoilSample:
         ----------
         Vereecken, H., Maes, J., Feyen, J., & Darius, P. (1989). Estimating the
         soil moisture retention characteristic from texture, bulk density, and
-        carbon content. doi: 10.1097/00010694-198912000-00001
+        carbon content. Soil Science, 148(6), 389--403.
+        doi: 10.1097/00010694-198912000-00001
 
-        Vereecken, H., Maes, J., & Feyen, J. (1990). Estimating unsaturated
-        hydraulic conductivity from easily measured soil properties.
-        doi: 10.1097/00010694-199001000-00001
+        Vereecken, H., Maes, J., & Feyen, J. (1990). Estimating Unsaturated
+        Hydraulic Conductivity from Easily Measured Soil Properties.
+        Soil Science, 149(1), 1--12. doi: 10.1097/00010694-199001000-00001
 
         """
         msg = "Vereecken (1989) PTF requires 'sand_p', 'clay_p', 'rho', and 'om_p' to be set."
@@ -742,15 +758,12 @@ class SoilSample:
         ----------
         Weynants, M., Vereecken, H., & Javaux, M. (2009). Revisiting Vereecken
         Pedotransfer Functions: Introducing a Closed-Form Hydraulic Model.
-        doi: 10.2136/vzj2008.0062
-
-        Weihermüller, L., Herbst, M., Javaux, M., & Weynants, M. (2017). Erratum to
-        "Revisiting Vereecken Pedotransfer Functions: Introducing a Closed-Form
-        Hydraulic Model". doi: 10.2136/vzj2008.0062er
+        Vadose Zone Journal, 8(1), 86--95. doi: 10.2136/vzj2008.0062
 
         Vereecken, H., Maes, J., Feyen, J., & Darius, P. (1989). Estimating the
         soil moisture retention characteristic from texture, bulk density, and
-        carbon content. doi: 10.1097/00010694-198912000-00001
+        carbon content. Soil Science, 148(6), 389--403.
+        doi: 10.1097/00010694-198912000-00001
 
         """
         msg = "Weynants pedotransfer function requires 'sand_p', 'clay_p', 'rho', and 'om_p' to be set."
@@ -810,6 +823,7 @@ class SoilSample:
         ----------
         Tóth, B., Weynants, M., Nemes, A., Makó, A., Bilas, G., & Tóth, G. (2015).
         New generation of hydraulic pedotransfer functions for Europe.
+        European Journal of Soil Science, 66(1), 226--238.
         doi: 10.1111/ejss.12192
 
         """
@@ -934,7 +948,7 @@ class SoilSample:
         ----------
         Hodnett, M. G., & Tomasella, J. (2002). Marked differences between van Genuchten
         soil water-retention parameters for temperate and tropical soils: a new water-retention
-        pedo-transfer functions developed for tropical soils.
+        pedo-transfer functions developed for tropical soils. Geoderma, 108(3-4), 155--180.
         doi: 10.1016/S0016-7061(02)00105-2
 
         """
@@ -1002,14 +1016,13 @@ class SoilSample:
 
         References
         ----------
-        Schaap et al., (2001) - rosetta: a computer program for estimating
-        soil hydraulic parameters with hierarchical pedotransfer functions.
-        doi: 10.1016/S0022-1694(01)00466-8
+        Schaap, M. G., Leij, F. J., & van Genuchten, M. Th. (2001). Rosetta: A Computer Program
+        for Estimating Soil Hydraulic Parameters with Hierarchical Pedotransfer Functions.
+        Journal of Hydrology, 251(3--4), 163--176. doi: 10.1016/S0022-1694(01)00466-8
 
-        Zhang Y. and Schaap, M. G. (2017) - Weighted recalibration of the
-        Rosetta pedotransfer model with improved estimates of hydraulic
-        parameter distributions and summary statistics (Rosetta3).
-        doi: 10.1016/j.jhydrol.2017.01.004
+        Zhang, Y., & Schaap, M. G. (2017). Weighted recalibration of the Rosetta pedotransfer
+        model with improved estimates of hydraulic parameter distributions and summary statistics
+        (Rosetta3). Journal of Hydrology, 547, 39--53. doi: 10.1016/j.jhydrol.2017.01.004
 
         """
         try:
@@ -1051,15 +1064,16 @@ class SoilSample:
         )
 
     def rawls(self, cecc: float | None = None) -> Brooks:
-        """Estimate Brooks-Corey parameters using the Rawls & .
+        """Estimate Brooks-Corey parameters using the Rawls & Brakensiek method.
 
         cecc: Cation Exchange Capacity of clay (cmol kg^-1). Required if `rho` is not provided.
 
         References
         ----------
-        Rawls, W.J. and Brakensiek, D.L. (1989). Estimation of Soil Water Retention
-        and Hydraulic Properties. In: Morel-Seytoux, H.J. (eds) Unsaturated Flow in
-        Hydrologic Modeling. https://doi.org/10.1007/978-94-009-2352-2_10
+        Rawls, W. J., & Brakensiek, D. L. (1989). Estimation of Soil Water Retention and
+        Hydraulic Properties. In: Morel-Seytoux, H. J. (eds) Unsaturated Flow in Hydrologic
+        Modeling: Theory and Practice. Springer Netherlands, Dordrecht, pp. 275--300.
+        doi: 10.1007/978-94-009-2352-2_10
 
         """
         assert self.sand_p is not None, "Rawls PTF requires 'sand_p' to be set."
@@ -1563,31 +1577,35 @@ class Soil:
         References
         ----------
         Rawls, W. J., Brakensiek, D. L., & Saxton, K. E. (1982). Estimation of Soil
-        Water Properties. doi: 10.13031/2013.33720
+        Water Properties. Transactions of the ASAE, 25(5), 1316--1320.
+        doi: 10.13031/2013.33720
 
         Clapp, R. B., & Hornberger, G. M. (1978). Empirical equations for some soil
-        hydraulic properties. doi: 10.1029/WR014i004p00601
+        hydraulic properties. Water Resources Research, 14(4), 601--604.
+        doi: 10.1029/WR014i004p00601
 
         Carsel, R. F. and Parrish, R. S. (1988). Developing Joint Probability
-        Distributions of Soil Water Retention Characteristics.
-        doi: 10.1029/WR024i005p00755
+        Distributions of Soil Water Retention Characteristics. Water Resources Research,
+        24(5), 755--769. doi: 10.1029/WR024i005p00755
 
-        Simunek, J. and Sejna, M. and Saito, H. and Sakai, M. and van Genuchten, M. Th. (2009).
-        The HYDRUS-1D software package for simulating the one-dimensional movement of water,
-        heat, and multiple solutes in variably-saturated media. Version 4.08.
-        url: https://www.pc-progress.com/downloads/pgm_hydrus1d/hydrus1d-4.08.pdf}
+        Šimůnek, J., van Genuchten, M. Th., & Šejna, M. (2008). Development and applications
+        of the HYDRUS and STANMOD software packages and related codes. Vadose Zone Journal,
+        7(2), 587--600. doi: 10.2136/vzj2007.0077
 
         Healy, R. W. (1990). Simulation of Solute Transport in Variably Saturated Porous Media
         with Supplemental Information on Modifications to the U.S. Geological Survey Computer
-        Program VS2D. doi: 10.3133/wri904025
+        Program VS2D. Water-Resources Investigations Report, U.S. Geological Survey,
+        Denver, CO. Report 90-4025. doi: 10.3133/wri904025
 
-        Wösten, J. H. M. and Veerman, G. J. and de Groot, W. J. M. and Stolte, J. (2001).
+        Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., & Stolte, J. (2001).
         Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
-        Nederland: De Staringreeks. url: https://edepot.wur.nl/43272
+        Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
+        url: https://edepot.wur.nl/43272
 
-        Heinen, M. and Bakker, G. and Wösten, J. H. M. (2020). Waterretentie- en
+        Heinen, M., Bakker, G., & Wösten, J. H. M. (2020). Waterretentie- en
         Doorlatendheidskarakteristieken van Boven- en Ondergronden in Nederland:
-        De Staringreeks; (Update 2018). doi: 10.18174/512761
+        De Staringreeks; (Update 2018). Wageningen Environmental Research, Report 2978,
+        Wageningen, The Netherlands. doi: 10.18174/512761
 
         """
         smn, sm_cls = resolve_soilmodel(sm)
