@@ -345,9 +345,18 @@ class Gardner:
 
     References
     ----------
-    Gardner, W. H. (1958). Some steady-state solutions of the unsaturated
-    moisture flow equation with application to evaporation from soils.
+    Kozeny, J. (1927). Ueber kapillare Leitung des Wassers im Boden.
+
+    Gardner, W. R. (1958). Some steady-state solutions of the unsaturated
+    moisture flow equation with application to evaporation from a water table.
     doi: 10.1097/00010694-195804000-00006
+
+    Brutsaert, W. (1967). Some methods of calculating unsaturated permeability.
+    doi: 10.13031/2013.39683
+
+    Mathias, S. A., & Butler, A. P. (2006). Linearized Richards' equation
+    approach to pumping test analysis in compressible aquifers.
+    doi: 10.1029/2005WR004680
 
     Bakker, M., & Nieber, J. L. (2009). Damping of sinusoidal surface flux
     fluctuations with soil depth. doi: 10.2136/vzj2008.0084
@@ -400,7 +409,7 @@ class Rucker:
 
     References
     ----------
-    Gardner, W. H. (1958). Some steady-state solutions of the unsaturated
+    Gardner, W. R. (1958). Some steady-state solutions of the unsaturated
     moisture flow equation with application to evaporation from soils.
     doi: 10.1097/00010694-195804000-00006
 
@@ -768,7 +777,7 @@ class GenuchtenGardner:
 
     References
     ----------
-    Gardner, W. H. (1958). Some steady-state solutions of the unsaturated
+    Gardner, W. R. (1958). Some steady-state solutions of the unsaturated
     moisture flow equation with application to evaporation from soils.
     doi: 10.1097/00010694-195804000-00006
 
