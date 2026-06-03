@@ -97,7 +97,7 @@ class SoilSample:
         default=None, repr=False
     )  # moisture content measurement
 
-    def from_staring(self, name: str, year: str = "2018") -> "SoilSample":
+    def from_staring(self, name: str, year: str = "2018") -> Self:
         """Get properties and measurements from Staring series.
 
         References
@@ -1047,6 +1047,136 @@ class SoilSample:
             theta_s=vgpar[1],
             alpha=10 ** vgpar[2],
             n=10 ** vgpar[3],
+        )
+
+    def rawls(self, cecc: float | None = None) -> Brooks:
+        """Estimate Brooks-Corey parameters using the Rawls & .
+
+        cecc: Cation Exchange Capacity of clay (cmol kg^-1). Required if `rho` is not provided.
+
+        References
+        ----------
+        Rawls, W.J. and Brakensiek, D.L. (1989). Estimation of Soil Water Retention
+        and Hydraulic Properties. In: Morel-Seytoux, H.J. (eds) Unsaturated Flow in
+        Hydrologic Modeling. https://doi.org/10.1007/978-94-009-2352-2_10
+
+        """
+        assert self.sand_p is not None, "Rawls PTF requires 'sand_p' to be set."
+        assert self.clay_p is not None, "Rawls PTF requires 'clay_p' to be set."
+        assert self.om_p is not None, "Rawls PTF requires 'om_p' to be set."
+
+        if self.rho is None:
+            assert cecc is not None, (
+                "Rawls PTF requires 'cecc' to be provided if 'rho' is not set."
+            )
+            cec = cecc / self.clay_p
+            print(cec)
+            assert 0.1 <= cec <= 0.9, (
+                f"Rawls PTF requires 'cecc/clay_p' to be between 0.1 and 0.9. Got {cec:.2f}."
+            )
+            bd = (
+                1.51 + 0.0025 * self.sand_p
+                - 0.0013 * self.sand_p * self.om_p
+                - 0.0006 * self.clay_p * self.om_p
+                - 0.0048 * self.clay_p * cec
+            )
+            theta_s = (2.65 - bd) / 2.65
+            eac = 1.0 - (
+                3.8
+                + 0.00019 * self.clay_p**2
+                - 0.0337 * self.sand_p # 0.337 in book, seems like a typod
+                + 0.126 * cec * self.clay_p
+                + self.om_p * (self.sand_p / 200.0) ** 2
+            ) / 100.0
+            # Rawls & Baumer 1989
+            theta_r = (
+                (0.2 + 0.1 * self.om_p + 0.25 * self.clay_p * cec**0.45) * bd / 100.0
+            )
+            c1 = (
+                0.17
+                + 0.181 * self.clay_p
+                - 0.00000069 * self.sand_p**2 * self.clay_p**2
+                - 0.00000041 * self.sand_p**2 * (100.0 - self.sand_p - self.clay_p) ** 2
+                + 0.000118 * self.sand_p**2 * bd**2
+                + 0.00069 * self.clay_p**2 * bd**2
+                + 0.000049 * self.sand_p**2 * self.clay_p
+                - 0.000085 * (100.0 - self.sand_p - self.clay_p) * self.clay_p**2
+            )
+            k_s = (
+                0.00035
+                * (theta_s * eac - theta_r) ** 3
+                / (1 - theta_s * eac) ** 2
+                * (bd / theta_r) ** 2
+                * c1**2
+            ) * 24.0  # cm/d
+        else:
+            bd = self.rho
+            theta_s = (2.65 - bd) / 2.65
+            theta_r = (
+                -0.0182482
+                + 0.00087269 * self.sand_p
+                + 0.00513488 * self.clay_p
+                + 0.02939286 * theta_s
+                - 0.00015395 * self.clay_p**2
+                - 0.0010827 * self.sand_p * theta_s
+                - 0.00018233 * self.clay_p**2 * theta_s**2
+                + 0.00030703 * self.clay_p**2 * theta_s
+                - 0.0023584 * theta_s**2 * self.clay_p
+            )
+            k_s = (
+                exp(
+                    19.52348 * theta_s
+                    - 8.96847
+                    - 0.028212 * self.clay_p
+                    + 0.00018107 * self.sand_p**2
+                    - 0.0094125 * self.clay_p**2
+                    - 8.395215 * theta_s**2
+                    + 0.077718 * self.sand_p * theta_s
+                    - 0.00298 * self.sand_p**2 * theta_s**2
+                    - 0.019492 * self.clay_p**2 * theta_s**2
+                    + 0.0000173 * self.sand_p**2 * self.clay_p
+                    + 0.02733 * self.clay_p**2 * theta_s
+                    + 0.001434 * self.sand_p**2 * theta_s
+                    - 0.0000035 * self.clay_p**2 * self.sand_p
+                )
+                * 24.0
+            )  # cm/d
+
+        h_b = exp(
+            5.3396738
+            + 0.1845038 * self.clay_p
+            - 2.48394546 * theta_s
+            - 0.00213853 * self.clay_p**2
+            - 0.04356349 * self.sand_p * theta_s
+            - 0.61745089 * self.clay_p * theta_s
+            + 0.00143598 * self.sand_p**2 * theta_s**2
+            - 0.00855375 * self.clay_p**2 * theta_s**2
+            - 0.00001282 * self.sand_p**2 * self.clay_p
+            + 0.00895359 * self.clay_p**2 * theta_s
+            - 0.00072472 * self.sand_p**2 * theta_s
+            + 0.0000054 * self.clay_p**2 * self.sand_p
+            + 0.50028060 * theta_s**2 * self.clay_p
+        )
+        lb = exp(
+            -0.7842831
+            + 0.0177544 * self.sand_p
+            - 1.062498 * theta_s
+            - 0.00005304 * self.sand_p**2
+            - 0.00273493 * self.clay_p**2
+            + 1.11134946 * theta_s**2
+            - 0.03088295 * self.sand_p * theta_s
+            + 0.00026587 * self.sand_p**2 * theta_s**2
+            - 0.00610522 * self.clay_p**2 * theta_s**2
+            - 0.00000235 * self.sand_p**2 * self.clay_p
+            + 0.00798746 * self.clay_p**2 * theta_s
+            - 0.00674491 * theta_s**2 * self.clay_p
+        )
+        return Brooks(
+            k_s=k_s,
+            theta_r=theta_r,
+            theta_s=theta_s,
+            h_b=h_b,
+            l=lb,
         )
 
     def hypags(self) -> Genuchten:
