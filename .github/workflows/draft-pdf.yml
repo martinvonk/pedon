@@ -1,3 +1,11 @@
+# You can also run this locally with docker using:
+
+# docker run --rm \
+#     --volume $PWD/paper:/data \
+#     --user $(id -u):$(id -g) \
+#     --env JOURNAL=joss \
+#     openjournals/inara
+
 # https://github.com/marketplace/actions/open-journals-pdf-generator
 name: JOSS
 on:
