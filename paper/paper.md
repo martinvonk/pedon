@@ -80,8 +80,9 @@ Soil hydraulic parameters determine the shape of a soil model’s SWRC and HCF, 
 
 - Average Mualem-van Genuchten parameter values for twelve major soil textural groups defined by @carsel_dataset_1988, also used in the HYDRUS software for variably saturated flow modeling [@simunek_hydrus_2008];
 - A dataset from the VS2D software [@healy_vs2d_1990] containing both Brooks–Corey and Mualem–van Genuchten parameters;
-- The Staring series from the Netherlands [@wosten_staringreeks_2001; @heinen_staringreeks_2020; @heinen_bofek_2022], which describes soils using the Mualem–van Genuchten model based on hundreds of processed samples [@genuchten_mualem_1980; @wosten_texture_1988].
-- The @clapp_hornberger_1978 dataset, which provides Campbell soil model parameters.
+- The Staring series from the Netherlands [@wosten_staringreeks_2001; @heinen_staringreeks_2020; @heinen_bofek_2022], which describes soils using the Mualem–van Genuchten model based on hundreds of processed samples [@genuchten_mualem_1980; @wosten_texture_1988];
+- The @clapp_hornberger_1978 dataset, which provides Campbell soil model parameters;
+- The @rawls_dataset_1982 dataset, which provides Brooks-Corey soil model parameters.
 
 The parameter databases can be called via the following code:
 ```python
@@ -89,6 +90,7 @@ hydrus = pe.Soil("Sand").from_name(pe.Genuchten, source="HYDRUS")
 vs2d = pe.Soil("Sand").from_name(pe.Brooks, source="VS2D")
 staring = pe.Soil("B05").from_name(pe.Genuchten, source="Staring_2018")
 clapp = pe.Soil("Sand").from_name(pe.Campbell, source="Clapp")
+rawls = pe.Soil("Sand").from_name(pe.Brooks, source="Rawls")
 ```
 
 ## Parameter estimation
