@@ -1002,7 +1002,8 @@ class SoilSample:
 
         References
         ----------
-        Schaap et al., (2001) - Predicting soil water retention from soil.
+        Schaap et al., (2001) - rosetta: a computer program for estimating
+        soil hydraulic parameters with hierarchical pedotransfer functions.
         doi: 10.1016/S0022-1694(01)00466-8
 
         Zhang Y. and Schaap, M. G. (2017) - Weighted recalibration of the

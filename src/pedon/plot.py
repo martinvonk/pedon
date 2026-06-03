@@ -16,7 +16,7 @@ def swrc(
     ax: Axes | None = None,
     **kwargs,
 ) -> Axes:
-    """Plot soil water retention curve."""
+    """Plot the soil water retention curve."""
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=(3.0, 6.0))
 
