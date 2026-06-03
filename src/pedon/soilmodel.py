@@ -887,6 +887,11 @@ class Kool:
         self.m = 1 - 1 / self.n
 
     @property
+    def alpha_d(self) -> float:
+        """Alpha parameter for the drying curve (main curve)."""
+        return self.alpha
+
+    @property
     def alpha_w(self) -> float:
         """Alpha parameter for the water retention curve, which is scaled by xi."""
         return self.alpha * self.xi
