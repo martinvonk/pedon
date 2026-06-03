@@ -1421,10 +1421,14 @@ class Soil:
     ) -> Self:
         """Load soil parameters from a CSV database by soil name and model type.
 
-        Available sources include HYDRUS, VS2D, Staring_2001, Staring_2018 and Clapp.
+        Available sources include HYDRUS, VS2D, Staring_2001, Staring_2018,
+        Rawls and Clapp.
 
         References
         ----------
+        Rawls, W. J., Brakensiek, D. L., & Saxton, K. E. (1982). Estimation of Soil
+        Water Properties. doi: 10.13031/2013.33720
+
         Clapp, R. B., & Hornberger, G. M. (1978). Empirical equations for some soil
         hydraulic properties. doi: 10.1029/WR014i004p00601
 
