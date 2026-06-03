@@ -76,18 +76,15 @@ The object-oriented design and duck typing (relying on object methods rather tha
 Soil hydraulic parameters determine the shape of a soil model’s SWRC and HCF, but are rarely measured directly. To address this, pedon links these parameters to soil models by providing a unified framework to derive them from reference datasets, empirical relationships, or direct (laboratory) measurements.
 
 ## Parameter datasets
-`pedon` includes a dataset of soil model parameters for a wide range of soils, currently compiled from four sources:
+`pedon` includes a large dataset of soil model parameters for a wide range of soils, currently compiled from the following sources:
 
-- Average Mualem-van Genuchten parameter values for twelve major soil textural groups defined by @carsel_dataset_1988, also used in the HYDRUS software for variably saturated flow modeling [@simunek_hydrus_2008];
-- A dataset from the VS2D software [@healy_vs2d_1990] containing both Brooks–Corey and Mualem–van Genuchten parameters;
-- The Staring series from the Netherlands [@wosten_staringreeks_2001; @heinen_staringreeks_2020; @heinen_bofek_2022], which describes soils using the Mualem–van Genuchten model based on hundreds of processed samples [@genuchten_mualem_1980; @wosten_texture_1988];
-- The @clapp_hornberger_1978 dataset, which provides Campbell soil model parameters;
-- The @rawls_dataset_1982 dataset, which provides Brooks-Corey soil model parameters.
+- HYDRUS [@carsel_dataset_1988; @simunek_hydrus_2008] and the Staring series [@wosten_staringreeks_2001; @heinen_staringreeks_2020; @heinen_bofek_2022] for Mualem–van Genuchten parameters. HYDRUS provides standard averages across twelve major soil textural groups, while the Staring series derives its values from hundreds of processed Dutch soil samples.
+- VS2D [@healy_vs2d_1990] and Rawls [@rawls_dataset_1982] for Brooks–Corey parameters.
+- Clapp [@clapp_hornberger_1978] for Campbell parameters.
 
-The parameter databases can be called via the following code:
+For example, a parameter set for a sandy soil (using the "B05" classification for the Staring series) can easily be obtained from any of the databases via the following code:
 ```python
 hydrus = pe.Soil("Sand").from_name(pe.Genuchten, source="HYDRUS")
-vs2d = pe.Soil("Sand").from_name(pe.Brooks, source="VS2D")
 staring = pe.Soil("B05").from_name(pe.Genuchten, source="Staring_2018")
 clapp = pe.Soil("Sand").from_name(pe.Campbell, source="Clapp")
 rawls = pe.Soil("Sand").from_name(pe.Brooks, source="Rawls")
