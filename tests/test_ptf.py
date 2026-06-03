@@ -109,9 +109,41 @@ def test_saxton_density_factor(ss: pe.soil.SoilSample) -> None:
     assert isinstance(sm, pe.Brooks)
     assert sm.k_s == pytest.approx(8.1961, rel=REL)
     assert sm.theta_r == pytest.approx(0.0, rel=REL)
-    assert sm.theta_s == pytest.approx(0.5557, rel=REL)
-    assert sm.h_b == pytest.approx(22.63674, rel=REL)
-    assert sm.l == pytest.approx(0.08942, rel=REL)
+    assert sm.theta_s == pytest.approx(0.3825, rel=REL)
+    assert sm.h_b == pytest.approx(58.91006, rel=REL)
+    assert sm.l == pytest.approx(0.09343, rel=REL)
+
+
+def test_rawls(ss: pe.soil.SoilSample) -> None:
+    """Test Rawls-Braakensiek pedotransfer function with measured bulk density."""
+    sm = ss.rawls()
+    assert isinstance(sm, pe.Brooks)
+    assert sm.k_s == pytest.approx(6.9961132379760835, rel=REL)
+    assert sm.theta_r == pytest.approx(0.1134085532217871, rel=REL)
+    assert sm.theta_s == pytest.approx(0.43396226415094336, rel=REL)
+    assert sm.h_b == pytest.approx(19.767218479230795, rel=REL)
+    assert sm.l == pytest.approx(0.18238934593362763, rel=REL)
+
+
+def test_rawls_with_cecc(ss: pe.soil.SoilSample) -> None:
+    """Test Rawls-Braakensiek pedotransfer function when bulk density is estimated."""
+    ss.rho = None
+    sm = ss.rawls(cecc=20.0)
+
+    assert isinstance(sm, pe.Brooks)
+    assert sm.k_s == pytest.approx(23.56273325252222, rel=REL)
+    assert sm.theta_r == pytest.approx(0.10248398945322691, rel=REL)
+    assert sm.theta_s == pytest.approx(0.48550943396226426, rel=REL)
+    assert sm.h_b == pytest.approx(13.370760200694354, rel=REL)
+    assert sm.l == pytest.approx(0.20448715068488366, rel=REL)
+
+
+def test_rawls_requires_cecc_when_rho_missing(ss: pe.soil.SoilSample) -> None:
+    """Test Rawls-Braakensiek raises when rho is missing and cecc is not provided."""
+    ss.rho = None
+
+    with pytest.raises(AssertionError, match="requires 'cecc' to be provided"):
+        ss.rawls()
 
 
 def test_vereecken(ss: pe.soil.SoilSample) -> None:
