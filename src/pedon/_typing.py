@@ -7,6 +7,7 @@ FloatArray = float | NDArray[float64]
 SoilModelNames = Literal[
     "Genuchten",
     "Brooks",
+    "Brunswick",
     "Panday",
     "Gardner",
     "Rucker",
