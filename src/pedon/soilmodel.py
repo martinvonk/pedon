@@ -321,10 +321,11 @@ class Brunswick:
     Weber, T. K. D., Finkel, M., da Conceição Gonçalves, M., Vereecken, H.,
     & Diamantopoulos, E. (2020). Pedotransfer function for the Brunswick soil
     hydraulic property model and comparison to the van Genuchten-Mualem model.
-    Water Resources Research, 56, e2019WR026820.
-    doi: 10.1029/2019WR026820
+    Water Resources Research, 56, e2019WR026820. doi: 10.1029/2019WR026820
 
-
+    Diamantopoulos, E., Simunek, J., & Weber, T. K. D. (2024). Implementation
+    of the Brunswick model system into the Hydrus software suite. Vadose Zone
+    Journal, 23, Article e20326. doi: 10.1002/vzj2.20326
 
     """
 
