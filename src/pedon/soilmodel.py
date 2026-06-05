@@ -484,38 +484,37 @@ class Brunswick:
 
     def h(self, theta: FloatArray) -> FloatArray:
         """Calculate pressure head via numerical inverse of the water content function.
-
+    
         Uses Brent's method over the bracket [0, 10^6.8 cm] (pF 0 … 6.8).
-
+    
         Parameters
         ----------
         theta : FloatArray
             Volumetric water content [cm³ cm⁻³].
 
         """
-        theta = asarray(theta, dtype=float)
-        scalar = theta.ndim == 0
-        theta = np.atleast_1d(theta)
-        result = np.empty_like(theta)
-
         h_min = 0.0
         h_max = 10.0**6.8  # oven-dry upper limit (pF 6.8)
+        theta_dry = float(self.theta(h_max))
 
-        for i, th in enumerate(theta.flat):
-            th = float(th)
+        def _h_scalar(th: float) -> float:
             if th >= self.theta_s:
-                result.flat[i] = h_min  # saturated
-            elif th <= float(self.theta(h_max)):
-                result.flat[i] = h_max  # at or beyond oven-dry
-            else:
-                result.flat[i] = brentq(
+                return h_min
+            if th <= theta_dry:
+                return h_max
+            return float(
+                brentq(
                     lambda hh: float(self.theta(hh)) - th,
                     h_min,
                     h_max,
                     xtol=1e-6,
                 )
+            )
 
-        return float(result[0]) if scalar else result
+        if isinstance(theta, float):
+            return _h_scalar(theta)
+        theta_arr = asarray(theta, dtype=float)
+        return asarray([_h_scalar(float(th)) for th in theta_arr.flat], dtype=float).reshape(theta_arr.shape)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         """Plot the soil water retention curve."""
