@@ -5,6 +5,7 @@ from typing import Callable, Protocol, runtime_checkable
 from warnings import warn
 
 import matplotlib.pyplot as plt
+import numpy as np
 from numpy import abs as npabs
 from numpy import (
     asarray,
@@ -391,6 +392,7 @@ class Brunswick:
     _snc_fn: Callable = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
+        """Initialize the Brunswick soil model internal parameters."""
         self._m = 1.0 - 1.0 / self.n
         self._snc_fn = _build_snc_interpolator(self.alpha, self.n)
 
@@ -481,7 +483,7 @@ class Brunswick:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        """Pressure head h(θ) [cm] – numerical inverse of theta(h).
+        """Calculate pressure head via numerical inverse of the water content function.
 
         Uses Brent's method over the bracket [0, 10^6.8 cm] (pF 0 … 6.8).
 
