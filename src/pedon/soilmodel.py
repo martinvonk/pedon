@@ -504,15 +504,17 @@ class Brunswick:
         for i, th in enumerate(theta.flat):
             th = float(th)
             if th >= self.theta_s:
-                result.flat[i] = h_min  # saturated
+                result.flat[i] = np.float64(h_min)  # saturated
             elif th <= float(self.theta(h_max)):
-                result.flat[i] = h_max  # at or beyond oven-dry
+                result.flat[i] = np.float64(h_max)  # at or beyond oven-dry
             else:
-                result.flat[i] = brentq(
-                    lambda hh: float(self.theta(hh)) - th,
-                    h_min,
-                    h_max,
-                    xtol=1e-6,
+                result.flat[i] = np.float64(
+                    brentq(
+                        lambda hh: float(self.theta(hh)) - th,
+                        h_min,
+                        h_max,
+                        xtol=1e-6,
+                    )
                 )
 
         return float(result[0]) if scalar else result
