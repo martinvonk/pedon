@@ -500,7 +500,7 @@ class Brunswick:
 
         h_min = 0.0
         h_max = 10.0**6.8  # oven-dry upper limit (pF 6.8)
-        theta_dry: float = float(self.theta(h_max))
+        theta_dry = float(self.theta(h_max))  # type: ignore[assignment]
 
         for i, th in enumerate(theta.flat):
             th = float(th)
