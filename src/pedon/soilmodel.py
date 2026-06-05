@@ -5,7 +5,6 @@ from typing import Callable, Protocol, runtime_checkable
 from warnings import warn
 
 import matplotlib.pyplot as plt
-import numpy as np
 from numpy import abs as npabs
 from numpy import (
     asarray,
@@ -484,9 +483,9 @@ class Brunswick:
 
     def h(self, theta: FloatArray) -> FloatArray:
         """Calculate pressure head via numerical inverse of the water content function.
-    
+
         Uses Brent's method over the bracket [0, 10^6.8 cm] (pF 0 … 6.8).
-    
+
         Parameters
         ----------
         theta : FloatArray
@@ -514,7 +513,9 @@ class Brunswick:
         if isinstance(theta, float):
             return _h_scalar(theta)
         theta_arr = asarray(theta, dtype=float)
-        return asarray([_h_scalar(float(th)) for th in theta_arr.flat], dtype=float).reshape(theta_arr.shape)
+        return asarray(
+            [_h_scalar(float(th)) for th in theta_arr.flat], dtype=float
+        ).reshape(theta_arr.shape)
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
         """Plot the soil water retention curve."""
