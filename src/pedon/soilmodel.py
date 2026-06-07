@@ -389,10 +389,10 @@ class Brunswick:
 
     def snc(self, h: FloatArray) -> FloatArray:
         """Noncapillary effective saturation S_nc(h) [-]."""
-        h = np.abs(np.asarray(h))
-        snc_star = np.array([self._int_snc(v) for v in h.flat]).reshape(h.shape)
+        h_arr = np.abs(np.asarray(h))
+        snc_star = np.array([self._int_snc(float(v)) for v in h_arr.flat]).reshape(h_arr.shape)
         snc_val = 1.0 - (snc_star / self._snc_star_h0)
-        return np.where(h <= 1e-3, 1.0, np.clip(snc_val, 0.0, 1.0))
+        return np.where(h_arr <= 1e-3, 1.0, np.clip(snc_val, 0.0, 1.0))
 
     def theta(self, h: FloatArray) -> FloatArray:
         """Calculate soil moisture content from pressure head."""
@@ -434,7 +434,7 @@ class Brunswick:
 
         return np.where(snc <= 0, 0.0, k_rnc)
 
-    def k_r(self, h: FloatArray, s=None) -> FloatArray:
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         """Total relative hydraulic conductivity K_r(h) [-]."""
         if s is not None:
             h = self.h(s * self.theta_s)
@@ -446,7 +446,7 @@ class Brunswick:
 
         return np.where(h <= 0, 1.0, (k_c + k_nc) / self.k_s)
 
-    def k(self, h: FloatArray, s=None) -> FloatArray:
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         """Calculate hydraulic conductivity from pressure head or saturation."""
         return self.k_s * self.k_r(h=h, s=s)
 
