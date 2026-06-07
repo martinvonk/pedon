@@ -89,3 +89,17 @@ def kool() -> pe.Kool:
         l=0.5,
         xi=2.5,
     )
+
+
+@fixture
+def brunswick() -> pe.Brunswick:
+    """Fixture for a Brunswick soil model with specific parameters for testing."""
+    return pe.Brunswick(
+        k_sc=5.0,
+        k_snc=5.0,
+        theta_sc=0.3,
+        theta_snc=0.13,
+        alpha=0.02,
+        n=1.1,
+        l=0.5,
+    )
