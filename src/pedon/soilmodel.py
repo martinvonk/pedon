@@ -402,27 +402,47 @@ class Brunswick:
         """Calculate effective saturation from pressure head."""
         return self.theta(h) / self.theta_s
 
-    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
-        """Calculate relative hydraulic conductivity from pressure head or saturation."""
+    def k_rsc(self, h: FloatArray) -> FloatArray:
+        """Relative capillary hydraulic conductivity K_rc(h) [-]."""
+        h = np.abs(np.asarray(h))
+
+        sc = self.sc(h)
+        sc = np.where(sc > 0, sc, 1.0)
+
+        k_rc = (sc**self.l) * (
+            (
+                1.0
+                - (
+                    (
+                        (1.0 - self._gamma(h) ** (1 / self.m))
+                        / (1.0 - self._gamma0 ** (1 / self.m))
+                    )
+                    ** self.m
+                )
+            )
+            ** 2.0
+        )
+
+        return np.where(sc <= 0, 0.0, k_rc)
+
+    def k_rsnc(self, h: FloatArray) -> FloatArray:
+        """Relative noncapillary hydraulic conductivity K_rnc(h) [-]."""
+        h = np.abs(np.asarray(h))
+        snc = self.snc(h)
+
+        k_rnc = 10.0 ** (-10.2 * (1.0 - snc))  # Tokunaga film-flow exponential
+
+        return np.where(snc <= 0, 0.0, k_rnc)
+
+    def k_r(self, h: FloatArray, s=None) -> FloatArray:
+        """Total relative hydraulic conductivity K_r(h) [-]."""
         if s is not None:
             h = self.h(s * self.theta_s)
-
         h = np.abs(np.atleast_1d(h))
 
-        sc_val, snc_val = self.sc(h), self.snc(h)
-
-        fraction = (1.0 - self._gamma(h) ** (1 / self.m)) / (
-            1.0 - self._gamma0 ** (1 / self.m)
-        )
-        bracket = 1.0 - (fraction**self.m)
-
-        sc = np.where(sc_val > 0, sc_val, 1.0)
-
-        k_c = self.k_sc * (sc**self.l) * (bracket**2.0)
-        k_nc = self.k_snc * 10.0 ** (-10.2 * (1.0 - snc_val))
-
-        k_c = np.where(sc_val <= 0, 0.0, k_c)
-        k_nc = np.where(snc_val <= 0, 0.0, k_nc)
+        # Scale relative components by their respective saturated conductivities
+        k_c = self.k_sc * self.k_rsc(h)
+        k_nc = self.k_snc * self.k_rsnc(h)
 
         return np.where(h <= 0, 1.0, (k_c + k_nc) / self.k_s)
 
@@ -444,11 +464,11 @@ class Brunswick:
         h_min = 0.0
         h_max = 10.0**6.8  # oven-dry upper limit (pF 6.8)
         theta_dry = float(self.theta(h_max))
-        theta = asarray(theta, dtype=float)
 
-        h_out = full(theta.shape, 0.0)
+        theta_arr = asarray(theta, dtype=float)
+        h_out = full(theta_arr.shape, 0.0)
 
-        for i, th in enumerate(theta):
+        for i, th in np.ndenumerate(theta_arr):
             if th >= self.theta_s:
                 logger.warning(
                     f"Input theta={th} is above the saturated water content "
