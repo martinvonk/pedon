@@ -972,7 +972,7 @@ class Gerke:
     l_m: float
         Pore-connectivity parameter for the matrix pore system [-].
     w_f: float
-        Volumetric weighting factor for the fracture domain (V_f / V_t) [-].
+        Volumetric weighting factor for the fracture domain (V_f / V_m) [-].
 
     References
     ----------

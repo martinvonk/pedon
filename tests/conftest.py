@@ -89,3 +89,21 @@ def kool() -> pe.Kool:
         l=0.5,
         xi=2.5,
     )
+
+
+@fixture
+def gerke() -> pe.Gerke:
+    """Fixture for a Gerke dual-porosity soil model with specific parameters for testing."""
+    return pe.Gerke(
+        k_sf=2e3,
+        theta_rf=0.01,
+        theta_sf=0.5,
+        alpha_f=0.1,
+        n_f=2.0,
+        k_sm=1.0526,
+        theta_rm=0.10526,
+        theta_sm=0.5,
+        alpha_m=0.005,
+        n_m=1.5,
+        w_f=0.05,
+    )

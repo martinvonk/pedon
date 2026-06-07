@@ -14,6 +14,7 @@ from .soilmodel import Fredlund as Fredlund
 from .soilmodel import Gardner as Gardner
 from .soilmodel import Genuchten as Genuchten
 from .soilmodel import GenuchtenGardner as GenuchtenGardner
+from .soilmodel import Gerke as Gerke
 from .soilmodel import Haverkamp as Haverkamp
 from .soilmodel import Kool as Kool
 from .soilmodel import Kosugi as Kosugi
