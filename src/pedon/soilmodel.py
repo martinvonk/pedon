@@ -390,7 +390,9 @@ class Brunswick:
     def snc(self, h: FloatArray) -> FloatArray:
         """Noncapillary effective saturation S_nc(h) [-]."""
         h_arr = np.abs(np.asarray(h))
-        snc_star = np.array([self._int_snc(float(v)) for v in h_arr.flat]).reshape(h_arr.shape)
+        snc_star = np.array([self._int_snc(float(v)) for v in h_arr.flat]).reshape(
+            h_arr.shape
+        )
         snc_val = 1.0 - (snc_star / self._snc_star_h0)
         return np.where(h_arr <= 1e-3, 1.0, np.clip(snc_val, 0.0, 1.0))
 
