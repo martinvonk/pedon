@@ -761,6 +761,68 @@ def test_h_haverkamp_inverse(haverkamp: pe.Haverkamp) -> None:
     assert_close(haverkamp.theta(h=h_out), theta)
 
 
+def test_theta_brunswick(brunswick: pe.Brunswick) -> None:
+    """Test water content calculation for the Brunswick model."""
+    expected = array(
+        [
+            0.4999991703271416,
+            0.4999668602375778,
+            0.4986879600880817,
+            0.4569001652583161,
+            0.2292138441347721,
+            0.1007588362446942,
+            0.05524125928920474,
+            0.03159644072915797,
+            0.013452718105112795,
+        ]
+    )
+    assert_close(brunswick.theta(h=h), expected)
+
+
+def test_s_brunswick(brunswick: pe.Brunswick) -> None:
+    """Test degree of saturation calculation for the Brunswick model."""
+    expected = array(
+        [
+            0.9999983399655377,
+            0.9999337204751556,
+            0.9973759201761635,
+            0.9138003475166322,
+            0.4584276777446077,
+            0.2015176724893884,
+            0.11048251857840948,
+            0.06319288145831595,
+            0.02690543621022558,
+        ]
+    )
+    assert_close(brunswick.s(h=h), expected)
+
+
+def test_k_brunswick(brunswick: pe.Brunswick) -> None:
+    """Test hydraulic conductivity calculation for the Brunswick model."""
+    expected = array(
+        [
+            97.92956247426391,
+            91.85479004815869,
+            69.58948878220202,
+            15.721644887915476,
+            0.04643513652798862,
+            5.159091342945608e-05,
+            3.879127256802016e-07,
+            3.406731262036317e-09,
+            2.890078846460336e-11,
+        ]
+    )
+    assert_close(brunswick.k(h=h), expected)
+
+
+def test_h_brunswick(brunswick: pe.Brunswick) -> None:
+    """Test pressure head calculation for the Brunswick model."""
+    expected = array(
+        [1025.3797500583578, 141.1015529468394, 50.26648558718838, 20.517268056602314]
+    )
+    assert_close(brunswick.h(theta=theta), expected)
+
+
 @pytest.mark.parametrize(
     "fixture_name",
     [
@@ -775,6 +837,7 @@ def test_h_haverkamp_inverse(haverkamp: pe.Haverkamp) -> None:
         "campbell",
         "kool",
         "haverkamp",
+        "brunswick",
     ],
 )
 def test_h_theta_roundtrip(fixture_name: str, request: pytest.FixtureRequest) -> None:
@@ -783,6 +846,100 @@ def test_h_theta_roundtrip(fixture_name: str, request: pytest.FixtureRequest) ->
     h_out = model.h(theta=theta)
     theta_out = model.theta(h=h_out)
     assert_close(theta, theta_out)
+
+
+def test_gerke_properties(gerke: pe.Gerke) -> None:
+    """Test Gerke model properties."""
+    assert gerke.theta_s == 0.5
+    assert gerke.theta_r == pytest.approx(0.100497, rel=1e-6)
+    assert gerke.k_s == pytest.approx(100.99997, rel=1e-6)
+    assert gerke.w_m == 0.95
+
+
+def test_theta_gerke(gerke: pe.Gerke) -> None:
+    """Test water content calculation for the Gerke model."""
+    expected = array(
+        [
+            0.49999994,
+            0.49999738,
+            0.49983423,
+            0.49143689,
+            0.44194258,
+            0.26372723,
+            0.15350503,
+            0.11726959,
+            0.10580058,
+        ]
+    )
+    assert_close(gerke.theta(h=h), expected)
+
+
+def test_s_gerke(gerke: pe.Gerke) -> None:
+    """Test degree of saturation calculation for the Gerke model."""
+    expected = array(
+        [
+            0.99999986,
+            0.99999344,
+            0.99958505,
+            0.97856559,
+            0.85467588,
+            0.40858323,
+            0.13268493,
+            0.04198365,
+            0.01327545,
+        ]
+    )
+    assert_close(gerke.s(h=h), expected)
+
+
+def test_k_gerke(gerke: pe.Gerke) -> None:
+    """Test hydraulic conductivity calculation for the Gerke model."""
+    expected = array(
+        [
+            1.00785953e02,
+            9.89633972e01,
+            8.17514068e01,
+            7.81668588e00,
+            1.24521327e-01,
+            5.22480460e-04,
+            3.32853224e-07,
+            1.87946283e-10,
+            1.05703680e-13,
+        ]
+    )
+    assert_close(gerke.k(h=h), expected)
+
+
+def test_k_r_gerke(gerke: pe.Gerke) -> None:
+    """Test relative permeability calculation for the Gerke model."""
+    expected = array(
+        [
+            9.97881023e-01,
+            9.79835907e-01,
+            8.09420109e-01,
+            7.73929525e-02,
+            1.23288480e-03,
+            5.17307540e-06,
+            3.29557745e-09,
+            1.86085484e-12,
+            1.04657140e-15,
+        ]
+    )
+    assert_close(gerke.k_r(h=h), expected)
+
+
+def test_h_gerke(gerke: pe.Gerke) -> None:
+    """Test pressure head calculation for the Gerke model."""
+    expected = array([1.00000000e10, 2.81023765e03, 6.36685070e02, 1.98312746e02])
+    h_out = gerke.h(theta=theta)
+    assert_close(h_out, expected)
+    # For Gerke, the h-theta roundtrip should work via numerical root finding
+    # Note: theta=0.1 is below theta_r, so it returns h_max (1e10)
+    # For theta values above theta_r, the roundtrip should work
+    theta_valid = array([0.2, 0.3, 0.4])
+    h_valid = gerke.h(theta=theta_valid)
+    theta_out = gerke.theta(h=h_valid)
+    assert_close(theta_valid, theta_out)
 
 
 def test_fit_requires_measurements() -> None:
