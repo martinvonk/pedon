@@ -1175,6 +1175,193 @@ class Kool:
         return plot_swrc(self, ax=ax)
 
 
+@dataclass
+class Gerke:
+    """Gerke and van Genuchten (1993) Dual-Porosity Soil Model.
+
+    Parameters
+    ----------
+    k_sf: float
+        Saturated hydraulic conductivity of the fracture pore system [L/T].
+    theta_rf: float
+        Residual soil water content of the fracture pore system [-].
+    theta_sf: float
+        Saturated soil water content of the fracture pore system [-].
+    alpha_f: float
+        Inverse of the air-entry pressure for the fracture pore system [1/L].
+    n_f: float
+        Pore-size distribution parameter for the fracture pore system [-].
+    l_f: float
+        Pore-connectivity parameter for the fracture pore system [-].
+    k_sm: float
+        Saturated hydraulic conductivity of the matrix pore system [L/T].
+    theta_rm: float
+        Residual soil water content of the matrix pore system [-].
+    theta_sm: float
+        Saturated soil water content of the matrix pore system [-].
+    alpha_m: float
+        Inverse of the air-entry pressure for the matrix pore system [1/L].
+    n_m: float
+        Pore-size distribution parameter for the matrix pore system [-].
+    l_m: float
+        Pore-connectivity parameter for the matrix pore system [-].
+    w_f: float
+        Volumetric weighting factor for the fracture domain (V_f / (V_f + V_m)) [-].
+
+    Notes
+    -----
+    This model does not represent the exchange terms between the fracture and matrix
+    domains because those are time and space dependent. It rather assumes that the
+    two domains are in instantaneous equilibrium with each other.
+
+    References
+    ----------
+    Gerke, H. H., & van Genuchten, M. Th. (1993). A dual-porosity model for simulating the
+    preferential movement of water and solutes in structured porous media. Water Resources
+    Research, 29(2), 305--319. doi: 10.1029/92WR02611
+
+    """
+
+    k_sf: float
+    theta_rf: float
+    theta_sf: float
+    alpha_f: float
+    n_f: float
+    k_sm: float
+    theta_rm: float
+    theta_sm: float
+    alpha_m: float
+    n_m: float
+    w_f: float  # Volumetric weighting factor for the fracture domain
+    l_f: float = 0.5
+    l_m: float = 0.5
+    fracture: Genuchten = field(init=False, repr=False)
+    matrix: Genuchten = field(init=False, repr=False)
+
+    def __post_init__(self):
+        """Construct the sub-domain Genuchten models from raw parameters."""
+        self.fracture = Genuchten(
+            k_s=self.k_sf,
+            theta_r=self.theta_rf,
+            theta_s=self.theta_sf,
+            alpha=self.alpha_f,
+            n=self.n_f,
+            l=self.l_f,
+        )
+        self.matrix = Genuchten(
+            k_s=self.k_sm,
+            theta_r=self.theta_rm,
+            theta_s=self.theta_sm,
+            alpha=self.alpha_m,
+            n=self.n_m,
+            l=self.l_m,
+        )
+
+    @property
+    def w_m(self) -> float:
+        """Volumetric weighting factor for the matrix domain."""
+        return 1.0 - self.w_f
+
+    @property
+    def theta_s(self) -> float:
+        """Bulk saturated water content."""
+        return self.w_f * self.fracture.theta_s + self.w_m * self.matrix.theta_s
+
+    @property
+    def theta_r(self) -> float:
+        """Bulk residual water content."""
+        return self.w_f * self.fracture.theta_r + self.w_m * self.matrix.theta_r
+
+    @property
+    def k_s(self) -> float:
+        """Bulk saturated hydraulic conductivity."""
+        return self.w_f * self.fracture.k_s + self.w_m * self.matrix.k_s
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        """Calculate bulk soil moisture content."""
+        return self.w_f * self.theta_f(h) + self.w_m * self.theta_m(h)
+
+    def theta_f(self, h: FloatArray) -> FloatArray:
+        """Calculate fracture soil moisture content."""
+        return self.fracture.theta(h)
+
+    def theta_m(self, h: FloatArray) -> FloatArray:
+        """Calculate matrix soil moisture content."""
+        return self.matrix.theta(h)
+
+    def s(self, h: FloatArray) -> FloatArray:
+        """Calculate effective saturation of the bulk soil."""
+        return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        """Calculate bulk hydraulic conductivity."""
+        if s is not None:
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            h = self.h(theta)
+
+        return self.w_f * self.k_f(h=h) + self.w_m * self.k_m(h=h)
+
+    def k_f(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        """Calculate hydraulic conductivity of the fracture domain."""
+        if s is not None:
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            h = self.h(theta)
+
+        return self.fracture.k(h)
+
+    def k_m(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        """Calculate hydraulic conductivity of the matrix domain."""
+        if s is not None:
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            h = self.h(theta)
+
+        return self.matrix.k(h)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        """Calculate relative permeability of the bulk soil."""
+        return self.k(h=h, s=s) / self.k_s
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        """Calculate pressure head h from bulk soil moisture content."""
+        theta = asarray(theta, dtype=float)
+
+        h_out = full(theta.shape, 0.0)
+        h_max = 1e10  # A large number to represent the maximum pressure head for dry conditions
+
+        for i, th in np.ndenumerate(theta):
+            if th >= self.theta_s:
+                logger.warning(
+                    f"Input theta={th} is above the saturated water content "
+                    f"theta_s={self.theta_s}. Setting h to 0."
+                )
+                h_out[i] = 0.0
+            elif th <= self.theta_r:
+                logger.warning(
+                    f"Input theta={th} is below the residual water content "
+                    f"theta_r={self.theta_r}. Setting h to {h_max}."
+                )
+                h_out[i] = h_max
+            else:
+
+                def obj(x):
+                    return self.theta(x) - th
+
+                root, res = brentq(obj, a=0.0, b=h_max, full_output=True, disp=False)
+                if res.converged:
+                    h_out[i] = root
+                else:
+                    logger.error(
+                        f"Root finding did not converge for theta={th}. Setting h to {h_max}."
+                    )
+                    h_out[i] = h_max
+
+        return h_out
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        """Plot the soil water retention curve."""
+        return plot_swrc(self, ax=ax)
+
+
 def get_soilmodel(
     soilmodel_name: SoilModelNames,
 ) -> type[SoilModel]:
@@ -1192,6 +1379,7 @@ def get_soilmodel(
         "Campbell": Campbell,
         "GenuchtenGardner": GenuchtenGardner,
         "Kool": Kool,
+        "Gerke": Gerke,
     }
     return sms[soilmodel_name]
 
