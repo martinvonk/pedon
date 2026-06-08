@@ -39,7 +39,7 @@
             
   <section id="Curve-Fitting">
 <h1>Curve Fitting<a class="headerlink" href="#Curve-Fitting" title="Link to this heading">¶</a></h1>
-<p><em>Martin Vonk (2025)</em></p>
+<p><em>Martin Vonk (2026)</em></p>
 <p>It can be usefull to go from one soil model to the other. When the soil parameters are known the soil water retention curve and hydraulic conductivity function can be fitted.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -57,9 +57,10 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">plot_compare</span><span class="p">(</span><span class="n">soilsample</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">SoilSample</span><span class="p">,</span> <span class="n">soilmodel</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">SoilModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot the soil water retention curve (SWRC) and hydraulic conductivity function (HCF) for a given soil sample and fitted soil model.&quot;&quot;&quot;</span>
     <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">4.2</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">))</span>
     <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">soilsample</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">soilsample</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Soil Sample&quot;</span><span class="p">)</span>
-    <span class="n">_</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">soilmodel</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">swrc</span><span class="p">(</span>
         <span class="n">soilmodel</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Fitted Soil Model </span><span class="si">{</span><span class="n">soilmodel</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
     <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
@@ -68,7 +69,7 @@
     <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
 
     <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">soilsample</span><span class="o">.</span><span class="n">k</span><span class="p">,</span> <span class="n">soilsample</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-    <span class="n">_</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">soilmodel</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">soilmodel</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">hcf</span><span class="p">(</span><span class="n">soilmodel</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
     <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
@@ -100,7 +101,7 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sn</span> <span class="o">=</span> <span class="s2">&quot;Sand&quot;</span>
 <span class="n">soil</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="p">(</span><span class="n">sn</span><span class="p">)</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">pe</span><span class="o">.</span><span class="n">Genuchten</span><span class="p">,</span> <span class="s2">&quot;HYDRUS&quot;</span><span class="p">)</span>
-<span class="n">soilm_genuchten</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">soil</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">)</span>
+<span class="n">soilm_genuchten</span> <span class="o">=</span> <span class="n">soil</span><span class="o">.</span><span class="n">model</span>
 <span class="n">soilm_genuchten</span>
 </pre></div>
 </div>
@@ -111,7 +112,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Genuchten(k_s=712.8, theta_r=0.045, theta_s=0.43, alpha=0.145, n=2.68, l=0.5)
+Genuchten(k_s=np.float64(712.8), theta_r=np.float64(0.045), theta_s=np.float64(0.43), alpha=np.float64(0.145), n=np.float64(2.68), l=np.float64(0.5))
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -157,7 +158,7 @@ SoilSample(sand_p=None, silt_p=None, clay_p=None, rho=None, th33=None, th1500=No
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Panday(k_s=np.float64(571.7082734658234), alpha=np.float64(0.1461801619285099), beta=np.float64(2.6526588374857303), brook=np.float64(3.797937441596011), sr=np.float64(0.10452835613889336))
+Panday(k_s=np.float64(571.708265814981), alpha=np.float64(0.1461801617834131), beta=np.float64(2.652658840845942), brook=np.float64(3.7979374333607314), sr=np.float64(0.1045283561554307))
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -201,7 +202,7 @@ Panday(k_s=np.float64(571.7082734658234), alpha=np.float64(0.1461801619285099), 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Panday(k_s=np.float64(712.7999894094452), alpha=np.float64(0.14657623411049972), beta=np.float64(2.6437587979256927), brook=np.float64(3.8328536708431717), sr=np.float64(0.10448683153152591))
+Panday(k_s=np.float64(712.7999894094452), alpha=np.float64(0.1465762339443846), beta=np.float64(2.643758801715091), brook=np.float64(3.8328536624960146), sr=np.float64(0.10448683155085352))
 </pre></div></div>
 </div>
 <p>It is also possible to provide bounds for the parameter space. By default, the bounds argument is <code class="docutils literal notranslate"><span class="pre">None</span></code> which takes the stored parameter bounds per soil model:</p>
@@ -300,7 +301,7 @@ Panday(k_s=np.float64(712.7999894094452), alpha=np.float64(0.14657623411049972),
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Panday(k_s=np.float64(650.0024881306313), alpha=np.float64(0.14641136203923166), beta=np.float64(2.64744674802969), brook=np.float64(3.8182839905828785), sr=np.float64(0.10450412521086855))
+Panday(k_s=np.float64(650.0261621962741), alpha=np.float64(0.14641140248932677), beta=np.float64(2.6474459117538136), brook=np.float64(3.818288565387593), sr=np.float64(0.104504122679695))
 </pre></div></div>
 </div>
 <p>Other available option are to print the optimization result.</p>
@@ -324,15 +325,15 @@ SciPy Optimization Result
          fun: [ 2.220e-05  2.220e-05 ... -8.042e-05 -2.758e-04]
            x: [ 5.717e+02  4.495e-02  4.300e-01  1.462e-01  2.653e+00
                 3.798e+00]
-        cost: 5.556972728926372e-07
-         jac: [[ 0.000e+00  0.000e+00 ...  0.000e+00  0.000e+00]
-               [ 0.000e+00  0.000e+00 ...  0.000e+00  0.000e+00]
+        cost: 5.55697272894851e-07
+         jac: [[ 0.000e+00  9.167e-12 ...  1.728e-12  0.000e+00]
+               [ 0.000e+00  5.042e-11 ...  1.382e-10  0.000e+00]
                ...
                [ 1.946e-06  0.000e+00 ... -4.053e-02 -1.764e-02]
                [ 1.946e-06  0.000e+00 ... -5.026e-02 -2.187e-02]]
-        grad: [ 1.630e-14  3.304e-09 -3.688e-10  5.776e-09  1.076e-09
-                5.679e-11]
-  optimality: 1.777636707528239e-09
+        grad: [ 1.618e-14  3.304e-09 -3.684e-10  5.778e-09  1.076e-09
+                5.678e-11]
+  optimality: 1.7779544758553858e-09
  active_mask: [0 0 0 0 0 0]
         nfev: 10
         njev: 10
@@ -370,13 +371,16 @@ SciPy Optimization Result
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Pedon</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html#examples">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="00_pedon_structure.html">Pedon Package Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="00_pedon_structure.html">Package Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="01_soil_models.html">Soil Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="02_datasets.html">Soil Parameter Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="03_pedotransfer_functions.html">Pedotransfer Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="04_hypags.html">Parameter Estimation via HYPAGS</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Curve Fitting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="06_hypags_curvefitting.html">From k value to Gardner via HYPAGS + Curve Fitting Routine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07_hysteresis.html">Hysteresis Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08_modflow.html">Generating Input for MODFLOW</a></li>
+<li class="toctree-l2"><a class="reference internal" href="09_paper.html">Article for Journal of Open Source Software</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../_api/modules.html">pedon</a></li>
@@ -406,7 +410,7 @@ SciPy Optimization Result
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2025, Martin Vonk.
+      &#169;2026, Martin Vonk.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>

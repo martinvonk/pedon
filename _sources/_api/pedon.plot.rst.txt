@@ -1,0 +1,7 @@
+pedon.plot module
+=================
+
+.. automodule:: pedon.plot
+   :members:
+   :show-inheritance:
+   :undoc-members:

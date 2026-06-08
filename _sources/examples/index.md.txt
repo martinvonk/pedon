@@ -29,4 +29,7 @@ This collection of Jupyter Notebooks demonstrates how to use `pedon` for analyzi
 04_hypags
 05_curve_fitting
 06_hypags_curvefitting
+07_hysteresis
+08_modflow
+09_paper
 ```

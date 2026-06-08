@@ -39,7 +39,7 @@
             
   <section id="Soil-Parameter-Datasets">
 <h1>Soil Parameter Datasets<a class="headerlink" href="#Soil-Parameter-Datasets" title="Link to this heading">¶</a></h1>
-<p><em>Martin Vonk (2025)</em></p>
+<p><em>Martin Vonk (2026)</em></p>
 <section id="Overview">
 <h2>Overview<a class="headerlink" href="#Overview" title="Link to this heading">¶</a></h2>
 <p>When measured data is unavailable, soil hydraulic parameters can be obtained from established parameter databases. These databases contain pre-determined parameter sets for common soils based on hundreds of laboratory measurements and professional judgment.</p>
@@ -51,7 +51,7 @@
 </ol>
 <p>This notebook shows how to access these databases and understand their characteristics.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pedon</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pe</span>
@@ -59,7 +59,7 @@
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># list all soil types for van genuchten</span>
@@ -68,7 +68,7 @@
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -139,7 +139,7 @@
 <h2>Exploring Available Datasets<a class="headerlink" href="#Exploring-Available-Datasets" title="Link to this heading">¶</a></h2>
 <p>First, let’s see what soil types are available. We can list soil names for specific soil models.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get the HYDRUS sand</span>
@@ -151,12 +151,12 @@
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Soil(name=&#39;Sand&#39;, model=Genuchten(k_s=712.8, theta_r=0.045, theta_s=0.43, alpha=0.145, n=2.68, l=0.5), sample=None, source=&#39;HYDRUS&#39;, description=&#39;Sand&#39;)
+Soil(name=&#39;Sand&#39;, model=Genuchten(k_s=np.float64(712.8), theta_r=np.float64(0.045), theta_s=np.float64(0.43), alpha=np.float64(0.145), n=np.float64(2.68), l=np.float64(0.5)), sample=None, source=&#39;HYDRUS&#39;, description=&#39;Sand&#39;)
 </pre></div></div>
 </div>
 <section id="Getting-Parameters-from-the-HYDRUS-Database">
@@ -168,7 +168,7 @@ Soil(name=&#39;Sand&#39;, model=Genuchten(k_s=712.8, theta_r=0.045, theta_s=0.43
 <h3>Getting Parameters from the Dutch Staring Series<a class="headerlink" href="#Getting-Parameters-from-the-Dutch-Staring-Series" title="Link to this heading">¶</a></h3>
 <p>The Staring series provides soil hydraulic parameters for Dutch soils. These are based on extensive laboratory measurements.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get from the Staring series</span>
@@ -177,19 +177,19 @@ Soil(name=&#39;Sand&#39;, model=Genuchten(k_s=712.8, theta_r=0.045, theta_s=0.43
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Soil(name=&#39;O18&#39;, model=Genuchten(k_s=35.95, theta_r=0.01, theta_s=0.58, alpha=0.0127, n=1.32, l=-0.786), sample=SoilSample(sand_p=None, silt_p=np.float64(0.0), clay_p=np.float64(0.0), rho=np.float64(1.1), th33=None, th1500=None, om_p=np.float64(22.5), m50=np.float64(nan), d10=None, d20=None), source=&#39;Staring_2001&#39;, description=&#39;moerige tussenlaag&#39;)
+Soil(name=&#39;O18&#39;, model=Genuchten(k_s=np.float64(35.95), theta_r=np.float64(0.01), theta_s=np.float64(0.58), alpha=np.float64(0.0127), n=np.float64(1.32), l=np.float64(-0.786)), sample=SoilSample(sand_p=None, silt_p=np.float64(0.0), clay_p=np.float64(0.0), rho=np.float64(1.1), th33=None, th1500=None, om_p=np.float64(22.5), m50=np.float64(nan), d10=None, d20=None), source=&#39;Staring_2001&#39;, description=&#39;moerige tussenlaag&#39;)
 </pre></div></div>
 </div>
 </section>
 <section id="Getting-Parameters-from-the-VS2D-database">
 <h3>Getting Parameters from the VS2D database<a class="headerlink" href="#Getting-Parameters-from-the-VS2D-database" title="Link to this heading">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># get for both genuchten and brooks from VS2D dataset</span>
@@ -206,7 +206,7 @@ Soil(name=&#39;O18&#39;, model=Genuchten(k_s=35.95, theta_r=0.01, theta_s=0.58, 
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -258,13 +258,16 @@ Text(0.5, 1.0, &#39;Limon Silt&#39;)
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Pedon</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html#examples">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="00_pedon_structure.html">Pedon Package Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="00_pedon_structure.html">Package Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="01_soil_models.html">Soil Models</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Soil Parameter Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="03_pedotransfer_functions.html">Pedotransfer Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="04_hypags.html">Parameter Estimation via HYPAGS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="05_curve_fitting.html">Curve Fitting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="06_hypags_curvefitting.html">From k value to Gardner via HYPAGS + Curve Fitting Routine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07_hysteresis.html">Hysteresis Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08_modflow.html">Generating Input for MODFLOW</a></li>
+<li class="toctree-l2"><a class="reference internal" href="09_paper.html">Article for Journal of Open Source Software</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../_api/modules.html">pedon</a></li>
@@ -294,7 +297,7 @@ Text(0.5, 1.0, &#39;Limon Silt&#39;)
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2025, Martin Vonk.
+      &#169;2026, Martin Vonk.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>

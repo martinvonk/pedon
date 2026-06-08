@@ -19,7 +19,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Soil Parameter Datasets" href="02_datasets.html" />
-    <link rel="prev" title="Pedon Package Structure" href="00_pedon_structure.html" />
+    <link rel="prev" title="Package Structure" href="00_pedon_structure.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -46,7 +46,7 @@
 <ul class="simple">
 <li><p><strong>Pressure head (h)</strong> - the soil water suction or tension</p></li>
 <li><p><strong>Water content (θ)</strong> - the volumetric water content</p></li>
-<li><p><strong>Hydraulic conductivity (K)</strong> - the ease of water movement through soil</p></li>
+<li><p><strong>Relative hydraulic conductivity (K/Ks)</strong> - describing the ease of water movement through unsaturated soil relative to saturated soil [k_s] [-]</p></li>
 </ul>
 <p>These relationships, known as the soil water retention curve (SWRC) and hydraulic conductivity function (HCF), are essential for modeling variably saturated groundwater flow.</p>
 <p><code class="docutils literal notranslate"><span class="pre">pedon</span></code> provides different soil model formulations from the scientific literature. In this notebook, we’ll demonstrate several of them and show how to compare their behavior.</p>
@@ -57,7 +57,6 @@
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pedon</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pe</span>
@@ -89,11 +88,16 @@
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 [&#39;Brooks&#39;,
+ &#39;Brunswick&#39;,
+ &#39;Campbell&#39;,
  &#39;Fredlund&#39;,
  &#39;Gardner&#39;,
  &#39;Genuchten&#39;,
  &#39;GenuchtenGardner&#39;,
+ &#39;Gerke&#39;,
  &#39;Haverkamp&#39;,
+ &#39;Kool&#39;,
+ &#39;Kosugi&#39;,
  &#39;Panday&#39;,
  &#39;Protocol&#39;,
  &#39;Rucker&#39;,
@@ -175,7 +179,7 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Gardner-Kozeny</span>
-<span class="n">c</span> <span class="o">=</span> <span class="mf">0.005</span>  <span class="c1"># shape parameter k curve</span>
+<span class="n">c</span> <span class="o">=</span> <span class="mf">0.005</span>  <span class="c1"># shape parameter k curve [1/cm]</span>
 <span class="n">m</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c1"># shape parameter theta curve</span>
 <span class="n">gar</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Gardner</span><span class="p">(</span><span class="n">k_s</span><span class="o">=</span><span class="n">k_s</span><span class="p">,</span> <span class="n">theta_s</span><span class="o">=</span><span class="n">theta_s</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">)</span>
 </pre></div>
@@ -199,8 +203,76 @@
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Kosugi</span>
+<span class="n">h_m</span> <span class="o">=</span> <span class="mf">150.0</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="mf">1.2</span>
+<span class="n">kos</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Kosugi</span><span class="p">(</span>
+    <span class="n">k_s</span><span class="o">=</span><span class="n">k_s</span><span class="p">,</span>
+    <span class="n">theta_r</span><span class="o">=</span><span class="n">theta_r</span><span class="p">,</span>
+    <span class="n">theta_s</span><span class="o">=</span><span class="n">theta_s</span><span class="p">,</span>
+    <span class="n">h_m</span><span class="o">=</span><span class="n">h_m</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Campbell</span>
+<span class="n">cam</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Campbell</span><span class="p">(</span>
+    <span class="n">k_s</span><span class="o">=</span><span class="n">k_s</span><span class="p">,</span>
+    <span class="n">theta_s</span><span class="o">=</span><span class="n">theta_s</span><span class="p">,</span>
+    <span class="n">h_b</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+    <span class="n">b</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Brunswick</span>
+<span class="n">bru</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Brunswick</span><span class="p">(</span>
+    <span class="n">theta_snc</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span>
+    <span class="n">theta_sc</span><span class="o">=</span><span class="mf">0.38</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">n</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+    <span class="n">k_sc</span><span class="o">=</span><span class="mf">1e2</span><span class="p">,</span>
+    <span class="n">k_snc</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Gerke</span>
+<span class="n">ger</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Gerke</span><span class="p">(</span>
+    <span class="n">k_sf</span><span class="o">=</span><span class="mf">2e3</span><span class="p">,</span>
+    <span class="n">theta_rf</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">theta_sf</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+    <span class="n">alpha_f</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">n_f</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">k_sm</span><span class="o">=</span><span class="mf">1.0526</span><span class="p">,</span>
+    <span class="n">theta_rm</span><span class="o">=</span><span class="mf">0.10526</span><span class="p">,</span>
+    <span class="n">theta_sm</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">alpha_m</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">n_m</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+    <span class="n">w_f</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Quick plot method</span>
@@ -209,7 +281,12 @@
 <span class="n">gar</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 <span class="n">hav</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 <span class="n">fre</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">kos</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">cam</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">bru</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ger</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">1e-2</span><span class="p">,</span> <span class="mf">1e7</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </pre></div>
 </div>
@@ -218,54 +295,51 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_01_soil_models_11_0.png" src="../_images/examples_01_soil_models_11_0.png" />
+<img alt="../_images/examples_01_soil_models_15_0.png" src="../_images/examples_01_soil_models_15_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># More extensive plot method</span>
-<span class="n">f</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">axes</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">bro</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">gar</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">hav</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">fre</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">kos</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">cam</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">bru</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">ger</span><span class="p">,</span> <span class="n">axes</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Soil Water Retention Curve&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">1e-2</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlabel</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; [-]&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_ylabel</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; [cm]&quot;</span><span class="p">)</span>
 
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">bro</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">gar</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">hav</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">fre</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Soil Water Retention Curve&quot;</span><span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\N{GREEK SMALL LETTER THETA}</span><span class="s2"> [-]&quot;</span><span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
-
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">bro</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">gar</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">hav</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">fre</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Hydraulic Conductivity Function&quot;</span><span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Ks [cm/d]&quot;</span><span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">)</span>
-
-<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;|</span><span class="se">\N{GREEK SMALL LETTER PSI}</span><span class="s2">| [cm]&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Hydraulic Conductivity Function&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlabel</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; [cm/day]&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Text(0, 0.5, &#39;|ψ| [cm]&#39;)
+Text(0.5, 0, &#39;$K$ [cm/day]&#39;)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_01_soil_models_12_1.png" src="../_images/examples_01_soil_models_12_1.png" />
+<img alt="../_images/examples_01_soil_models_16_1.png" src="../_images/examples_01_soil_models_16_1.png" />
 </div>
 </div>
 <p>Other soil models that are available are Panday (combination of Genuchten and Brooks-Corey).</p>
@@ -276,13 +350,14 @@ Text(0, 0.5, &#39;|ψ| [cm]&#39;)
 <p>The built-in models cover most common use cases, but <code class="docutils literal notranslate"><span class="pre">pedon</span></code> also supports creating your own custom soil models.</p>
 <p>Custom models are useful when:</p>
 <ul class="simple">
+<li><p>Existing models are inadequately representing your data</p></li>
 <li><p>You need to implement a proprietary or research-specific formulation</p></li>
 <li><p>You want to combine features from different models</p></li>
 <li><p>You’re testing new hydraulic function formulations</p></li>
 </ul>
 <p>The key requirement is implementing the <code class="docutils literal notranslate"><span class="pre">SoilModel</span></code> protocol, which defines six methods: <code class="docutils literal notranslate"><span class="pre">theta()</span></code>, <code class="docutils literal notranslate"><span class="pre">s()</span></code>, <code class="docutils literal notranslate"><span class="pre">k_r()</span></code>, <code class="docutils literal notranslate"><span class="pre">k()</span></code>, <code class="docutils literal notranslate"><span class="pre">h()</span></code>, and <code class="docutils literal notranslate"><span class="pre">plot()</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>pe.SoilModel<span class="o">?</span>
@@ -296,7 +371,7 @@ Text(0, 0.5, &#39;|ψ| [cm]&#39;)
 <div class="highlight"><pre>
 <span class="ansi-red-fg">Init signature:</span> pe.SoilModel(*args, **kwargs)
 <span class="ansi-red-fg">Docstring:</span>
-Protocol for soil models
+Protocol for soil models.
 
 This protocol defines the interface for custom soil models. To create a custom
 soil model, implement all methods defined below. Your class will automatically
@@ -307,6 +382,7 @@ Example:
     ... class CustomModel:
     ...     k_s: float
     ...     theta_s: float
+    ...     theta_r: float
     ...
     ...     def theta(self, h: FloatArray) -&gt; FloatArray:
     ...         # Calculate soil moisture content from pressure head
@@ -314,7 +390,7 @@ Example:
     ...
     ...     def s(self, h: FloatArray) -&gt; FloatArray:
     ...         # Calculate effective saturation from pressure head
-    ...         return (self.theta(h) - theta_r) / (theta_s - theta_r)
+    ...         return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
     ...
     ...     def k_r(self, h: FloatArray, s: FloatArray | None = None) -&gt; FloatArray:
     ...         # Calculate relative permeability from pressure head or saturation
@@ -329,15 +405,15 @@ Example:
     ...         return ...
     ...
     ...     def plot(self, ax: plt.Axes | None = None) -&gt; plt.Axes:
-    ...         # Plot the soil water retention curve by calling `plot_swrc`
-    ...         return plot_swrc(self, ax=ax)
+    ...         # Plot the soil water retention curve by calling `pe.plot.swrc`
+    ...         return pe.plot.swrc(self, ax=ax)
 <span class="ansi-red-fg">File:</span>           ~/repos/pedon/src/pedon/soilmodel.py
 <span class="ansi-red-fg">Type:</span>           _ProtocolMeta
 <span class="ansi-red-fg">Subclasses:</span>
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
@@ -345,7 +421,7 @@ Example:
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomSoilModel</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Power-law soil model with custom permeability</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Power-law soil model with custom permeability.</span>
 
 <span class="sd">    A more flexible model that uses power-law relationships for both</span>
 <span class="sd">    water retention and relative permeability.</span>
@@ -359,7 +435,7 @@ Example:
     <span class="n">power_conductivity</span><span class="p">:</span> <span class="nb">float</span>  <span class="c1"># Power exponent for conductivity</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Water content using power law&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Water content using power law.&quot;&quot;&quot;</span>
         <span class="c1"># Normalized pressure head</span>
         <span class="n">h_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_ref</span>
 
@@ -367,40 +443,40 @@ Example:
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_r</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_s</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_r</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">s</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Effective saturation&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Effective saturation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_r</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_s</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_r</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">k_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Relative permeability&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Relative permeability.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
         <span class="c1"># Custom power law for conductivity</span>
         <span class="k">return</span> <span class="n">s</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">power_conductivity</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hydraulic conductivity&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hydraulic conductivity.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_s</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_r</span><span class="p">(</span><span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Inverse function&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Inverse function.&quot;&quot;&quot;</span>
         <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_r</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_s</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_r</span><span class="p">)</span>
         <span class="c1"># From: s = 1/(1 + h_norm^power) =&gt; h_norm = (1/s - 1)^(1/power)</span>
         <span class="n">h_norm</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">s</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">power_retention</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">h_norm</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_ref</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the soil water retention curve&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the soil water retention curve.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">swrc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create instances with different exponents</span>
 <span class="n">soil_one</span> <span class="o">=</span> <span class="n">CustomSoilModel</span><span class="p">(</span>
-    <span class="n">k_s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">k_s</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
     <span class="n">theta_r</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
     <span class="n">theta_s</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
     <span class="n">h_ref</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
@@ -409,7 +485,7 @@ Example:
 <span class="p">)</span>
 
 <span class="n">soil_two</span> <span class="o">=</span> <span class="n">CustomSoilModel</span><span class="p">(</span>
-    <span class="n">k_s</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+    <span class="n">k_s</span><span class="o">=</span><span class="mf">200.0</span><span class="p">,</span>
     <span class="n">theta_r</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span>
     <span class="n">theta_s</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span>
     <span class="n">h_ref</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
@@ -421,7 +497,7 @@ Example:
 </div>
 <p>Due to the duck typing the CustomSoilModel is checkable as an instance of the SoilModel protocol. This ensures that the model can also be used for other methods in pedon.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CustomSoilModel (clay) is a SoilModel: </span><span class="si">{</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">soil_one</span><span class="p">,</span><span class="w"> </span><span class="n">pe</span><span class="o">.</span><span class="n">SoilModel</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -440,7 +516,7 @@ CustomSoilModel (sand) is a SoilModel: True
 </div>
 <p>Quick plot to check if it works.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">soil_one</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
@@ -449,19 +525,19 @@ CustomSoilModel (sand) is a SoilModel: True
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;Axes: &gt;
+&lt;Axes: xlabel=&#39;θ&#39;, ylabel=&#39;|ψ|&#39;&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_01_soil_models_21_1.png" src="../_images/examples_01_soil_models_21_1.png" />
+<img alt="../_images/examples_01_soil_models_25_1.png" src="../_images/examples_01_soil_models_25_1.png" />
 </div>
 </div>
 </section>
@@ -496,13 +572,16 @@ CustomSoilModel (sand) is a SoilModel: True
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Pedon</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html#examples">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="00_pedon_structure.html">Pedon Package Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="00_pedon_structure.html">Package Structure</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Soil Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="02_datasets.html">Soil Parameter Datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="03_pedotransfer_functions.html">Pedotransfer Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="04_hypags.html">Parameter Estimation via HYPAGS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="05_curve_fitting.html">Curve Fitting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="06_hypags_curvefitting.html">From k value to Gardner via HYPAGS + Curve Fitting Routine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07_hysteresis.html">Hysteresis Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08_modflow.html">Generating Input for MODFLOW</a></li>
+<li class="toctree-l2"><a class="reference internal" href="09_paper.html">Article for Journal of Open Source Software</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../_api/modules.html">pedon</a></li>
@@ -513,7 +592,7 @@ CustomSoilModel (sand) is a SoilModel: True
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="index.html">Pedon</a><ul>
-      <li>Previous: <a href="00_pedon_structure.html" title="previous chapter">Pedon Package Structure</a></li>
+      <li>Previous: <a href="00_pedon_structure.html" title="previous chapter">Package Structure</a></li>
       <li>Next: <a href="02_datasets.html" title="next chapter">Soil Parameter Datasets</a></li>
   </ul></li>
   </ul></li>
@@ -532,7 +611,7 @@ CustomSoilModel (sand) is a SoilModel: True
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2025, Martin Vonk.
+      &#169;2026, Martin Vonk.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>

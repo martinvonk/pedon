@@ -39,7 +39,7 @@
             
   <section id="Pedotransfer-Functions">
 <h1>Pedotransfer Functions<a class="headerlink" href="#Pedotransfer-Functions" title="Link to this heading">¶</a></h1>
-<p><em>Martin Vonk (2025)</em></p>
+<p><em>Martin Vonk (2026)</em></p>
 <section id="Overview">
 <h2>Overview<a class="headerlink" href="#Overview" title="Link to this heading">¶</a></h2>
 <p>Pedotransfer functions (PTFs) are empirical relationships that estimate soil hydraulic parameters from easily measured soil properties. They solve a practical problem: direct measurement of soil hydraulic properties is expensive and time-consuming, but soil particle size distribution and bulk density are relatively quick to measure.</p>
@@ -54,9 +54,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">pedon</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pe</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pedon</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pe</span>
 </pre></div>
 </div>
 </div>
@@ -73,9 +71,9 @@
 <span class="n">silt_p</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># silt [%]</span>
 <span class="n">clay_p</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># clay [%]</span>
 <span class="n">rho</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c1"># bulk density [g/cm3]</span>
-<span class="n">om_p</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># organic matter [%]</span>
+<span class="n">om_p</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># organic matter [%]</span>
 <span class="n">m50</span> <span class="o">=</span> <span class="mi">150</span>  <span class="c1"># median sand fraction [um]</span>
-<span class="n">ts</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># topsoil boolean</span>
+<span class="n">topsoil</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># topsoil boolean</span>
 
 <span class="n">ss</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">SoilSample</span><span class="p">(</span>
     <span class="n">sand_p</span><span class="o">=</span><span class="n">sand_p</span><span class="p">,</span> <span class="n">silt_p</span><span class="o">=</span><span class="n">silt_p</span><span class="p">,</span> <span class="n">clay_p</span><span class="o">=</span><span class="n">clay_p</span><span class="p">,</span> <span class="n">rho</span><span class="o">=</span><span class="n">rho</span><span class="p">,</span> <span class="n">om_p</span><span class="o">=</span><span class="n">om_p</span><span class="p">,</span> <span class="n">m50</span><span class="o">=</span><span class="n">m50</span>
@@ -87,15 +85,15 @@
 <section id="Available-Pedotransfer-Functions">
 <h2>Available Pedotransfer Functions<a class="headerlink" href="#Available-Pedotransfer-Functions" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">pedon</span></code> provides several PTF options. Each has different input requirements and outputs. Apply one or more PTFs to see predictions.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># wosten pedotransfer function (van Genuchten)</span>
-<span class="n">wos</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">wosten</span><span class="p">(</span><span class="n">ts</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
+<span class="n">wos</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">wosten</span><span class="p">(</span><span class="n">topsoil</span><span class="o">=</span><span class="n">topsoil</span><span class="p">)</span>
 
 <span class="c1"># wosten pedotransfer function for sand (van Genuchten)</span>
-<span class="n">woss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">wosten_sand</span><span class="p">(</span><span class="n">ts</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
+<span class="n">woss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">wosten_sand</span><span class="p">(</span><span class="n">topsoil</span><span class="o">=</span><span class="n">topsoil</span><span class="p">)</span>
 
 <span class="c1"># wosten pedotransfer function for clay (van Genuchten)</span>
 <span class="n">wosc</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">wosten_clay</span><span class="p">()</span>
@@ -105,114 +103,67 @@
 
 <span class="c1"># rosetta database (options between version 1, 2 and 3)</span>
 <span class="n">ros</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">rosetta</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># saxton pedotransfer function (Brooks-Corey)</span>
+<span class="n">sax</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">saxton</span><span class="p">()</span>
+
+<span class="c1"># veerecken pedotransfer function (van Genuchten)</span>
+<span class="n">ver</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">vereecken</span><span class="p">()</span>
+
+<span class="c1"># weynants pedotransfer function (van Genuchten)</span>
+<span class="n">wey</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">weynants</span><span class="p">()</span>
+
+<span class="c1"># toth (van Genuchten)</span>
+<span class="n">toth</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">toth</span><span class="p">(</span><span class="n">topsoil</span><span class="o">=</span><span class="n">topsoil</span><span class="p">)</span>
+
+<span class="c1"># hodnett pedotransfer function for tropical soils (van Genuchten)</span>
+<span class="n">hod</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">hodnett</span><span class="p">()</span>
+
+<span class="c1"># rawls pedotransfer function (Brooks-Corey)</span>
+<span class="n">rawls</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">rawls</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">ModuleNotFoundError</span>                       Traceback (most recent call last)
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/pedon/pedon/.tox/docu/lib/python3.11/site-packages/pedon/soil.py:434</span>, in <span class="ansi-cyan-fg">SoilSample.rosetta</span><span class="ansi-blue-fg">(self, version)</span>
-<span class="ansi-green-fg">    433</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
-<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">434</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">httpx</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,135,0)">import</span> post <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> httpx_post
-<span class="ansi-green-fg">    435</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>:
-
-<span class="ansi-red-fg">ModuleNotFoundError</span>: No module named &#39;httpx&#39;
-
-During handling of the above exception, another exception occurred:
-
-<span class="ansi-red-fg">ImportError</span>                               Traceback (most recent call last)
-<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[3]</span><span class="ansi-green-fg">, line 14</span>
-<span class="ansi-green-fg">     11</span> cosb = ss.cosby()
-<span class="ansi-green-fg">     13</span> <span style="color: rgb(95,135,135)"># rosetta database (options between version 1, 2 and 3)</span>
-<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">14</span> ros = <span class="ansi-yellow-bg">ss</span><span class="ansi-yellow-bg">.</span><span class="ansi-yellow-bg">rosetta</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">version</span><span class="ansi-yellow-bg">=</span><span class="ansi-green-fg ansi-yellow-bg">3</span><span class="ansi-yellow-bg">)</span>
-
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/work/pedon/pedon/.tox/docu/lib/python3.11/site-packages/pedon/soil.py:436</span>, in <span class="ansi-cyan-fg">SoilSample.rosetta</span><span class="ansi-blue-fg">(self, version)</span>
-<span class="ansi-green-fg">    434</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">from</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-blue-intense-fg ansi-bold">httpx</span><span style="color: rgb(188,188,188)"> </span><span class="ansi-bold" style="color: rgb(0,135,0)">import</span> post <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> httpx_post
-<span class="ansi-green-fg">    435</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>:
-<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">436</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ImportError</span>(
-<span class="ansi-green-fg">    437</span>         <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">httpx is required for the rosetta method to make api calls. </span><span class="ansi-yellow-fg">&#34;</span>
-<span class="ansi-green-fg">    438</span>         <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">Please install it with </span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">pip install httpx</span><span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">.</span><span class="ansi-yellow-fg">&#34;</span>
-<span class="ansi-green-fg">    439</span>     )
-<span class="ansi-green-fg">    441</span> soildata = [
-<span class="ansi-green-fg">    442</span>     <span style="color: rgb(0,135,0)">self</span>.sand_p,  <span style="color: rgb(95,135,135)"># %</span>
-<span class="ansi-green-fg">    443</span>     <span style="color: rgb(0,135,0)">self</span>.silt_p,  <span style="color: rgb(95,135,135)"># %</span>
-<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">    447</span>     -<span class="ansi-green-fg">9.9</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span>.th1500 <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span> <span style="color: rgb(0,135,0)">self</span>.th1500,  <span style="color: rgb(95,135,135)"># [-]</span>
-<span class="ansi-green-fg">    448</span> ]
-<span class="ansi-green-fg">    450</span> data = {<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">soildata</span><span class="ansi-yellow-fg">&#34;</span>: [soildata]}
-
-<span class="ansi-red-fg">ImportError</span>: httpx is required for the rosetta method to make api calls. Please install it with &#39;pip install httpx&#39;.
-</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># More extensive plot method</span>
-<span class="n">f</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+<span class="n">axes</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">wos</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wosten&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">woss</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wosten Sand&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">wosc</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wosten Clay&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">cosb</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Cosby&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">ros</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Rosetta&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">sax</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Saxton&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">toth</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Toth&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">ver</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Vereecken&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">wey</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Weynants&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">rawls</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Rawls&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">swrc</span><span class="p">(</span><span class="n">hod</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Hodnett&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Soil Water Retention Curve&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlabel</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; [-]&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_ylabel</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; [cm]&quot;</span><span class="p">)</span>
 
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">wos</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wosten&quot;</span><span class="p">)</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">woss</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wosten Sand&quot;</span><span class="p">)</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">wosc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wosten Clay&quot;</span><span class="p">)</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">cosb</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Cosby&quot;</span><span class="p">)</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_swrc</span><span class="p">(</span><span class="n">ros</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Rosetta&quot;</span><span class="p">)</span>
-
-<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-    <span class="n">yscale</span><span class="o">=</span><span class="s2">&quot;log&quot;</span><span class="p">,</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Soil Water Retention Curve&quot;</span><span class="p">,</span>
-    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\N{GREEK SMALL LETTER THETA}</span><span class="s2"> [-]&quot;</span><span class="p">,</span>
-    <span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
-    <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;|</span><span class="se">\N{GREEK SMALL LETTER PSI}</span><span class="s2">| [cm]&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">)</span>
-
-
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">wos</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wosten&quot;</span><span class="p">)</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">woss</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wosten Sand&quot;</span><span class="p">)</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">wosc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wosten Clay&quot;</span><span class="p">)</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">cosb</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Cosby&quot;</span><span class="p">)</span>
-<span class="n">pe</span><span class="o">.</span><span class="n">plot_hcf</span><span class="p">(</span><span class="n">ros</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Rosetta&quot;</span><span class="p">)</span>
-
-<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-    <span class="n">yscale</span><span class="o">=</span><span class="s2">&quot;log&quot;</span><span class="p">,</span>
-    <span class="n">xscale</span><span class="o">=</span><span class="s2">&quot;log&quot;</span><span class="p">,</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hydraulic Conductivity Function&quot;</span><span class="p">,</span>
-    <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Ks [cm/d]&quot;</span><span class="p">,</span>
-    <span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">),</span>
-<span class="p">)</span>
-<span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Hydraulic Conductivity Function&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">1e-2</span><span class="p">,</span> <span class="mf">1e7</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlabel</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; [cm/day]&quot;</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">set_figwidth</span><span class="p">(</span><span class="mf">7.0</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[4]</span><span class="ansi-green-fg">, line 8</span>
-<span class="ansi-green-fg">      6</span> pe.plot_swrc(wosc, ax=axs[<span class="ansi-green-fg">0</span>], label=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">Wosten Clay</span><span class="ansi-yellow-fg">&#34;</span>)
-<span class="ansi-green-fg">      7</span> pe.plot_swrc(cosb, ax=axs[<span class="ansi-green-fg">0</span>], label=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">Cosby</span><span class="ansi-yellow-fg">&#34;</span>)
-<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">8</span> pe.plot_swrc(<span class="ansi-yellow-bg">ros</span>, ax=axs[<span class="ansi-green-fg">0</span>], label=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">Rosetta</span><span class="ansi-yellow-fg">&#34;</span>)
-<span class="ansi-green-fg">     10</span> axs[<span class="ansi-green-fg">0</span>].set(
-<span class="ansi-green-fg">     11</span>     yscale=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">log</span><span class="ansi-yellow-fg">&#34;</span>,
-<span class="ansi-green-fg">     12</span>     title=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">Soil Water Retention Curve</span><span class="ansi-yellow-fg">&#34;</span>,
-<span class="ansi-green-fg">   (...)</span><span class="ansi-green-fg">     15</span>     ylabel=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">|</span><span class="ansi-bold" style="color: rgb(175,95,0)">\N{GREEK SMALL LETTER PSI}</span><span class="ansi-yellow-fg">| [cm]</span><span class="ansi-yellow-fg">&#34;</span>,
-<span class="ansi-green-fg">     16</span> )
-<span class="ansi-green-fg">     17</span> axs[<span class="ansi-green-fg">0</span>].legend(loc=<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">lower left</span><span class="ansi-yellow-fg">&#34;</span>)
-
-<span class="ansi-red-fg">NameError</span>: name &#39;ros&#39; is not defined
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_03_pedotransfer_functions_6_1.png" src="../_images/examples_03_pedotransfer_functions_6_1.png" />
+<img alt="../_images/examples_03_pedotransfer_functions_6_0.png" src="../_images/examples_03_pedotransfer_functions_6_0.png" />
 </div>
 </div>
 <p>The plots above compare the predictions of different PTFs. Notice how different methods can give quite different results, particularly for the hydraulic conductivity function. This highlights the uncertainty inherent in PTFs and the importance of validating with measured data when possible.</p>
@@ -252,13 +203,16 @@ During handling of the above exception, another exception occurred:
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Pedon</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html#examples">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="00_pedon_structure.html">Pedon Package Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="00_pedon_structure.html">Package Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="01_soil_models.html">Soil Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="02_datasets.html">Soil Parameter Datasets</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Pedotransfer Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="04_hypags.html">Parameter Estimation via HYPAGS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="05_curve_fitting.html">Curve Fitting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="06_hypags_curvefitting.html">From k value to Gardner via HYPAGS + Curve Fitting Routine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07_hysteresis.html">Hysteresis Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08_modflow.html">Generating Input for MODFLOW</a></li>
+<li class="toctree-l2"><a class="reference internal" href="09_paper.html">Article for Journal of Open Source Software</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../_api/modules.html">pedon</a></li>
@@ -288,7 +242,7 @@ During handling of the above exception, another exception occurred:
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2025, Martin Vonk.
+      &#169;2026, Martin Vonk.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>

@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pedon.soilmodel module" href="pedon.soilmodel.html" />
-    <link rel="prev" title="pedon package" href="pedon.html" />
+    <link rel="prev" title="pedon.plot module" href="pedon.plot.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -36,9 +36,10 @@
             
   <section id="module-pedon.soil">
 <span id="pedon-soil-module"></span><h1>pedon.soil module<a class="headerlink" href="#module-pedon.soil" title="Link to this heading">¶</a></h1>
+<p>Soil sample class and pedotransfer functions.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pedon.soil.Soil">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pedon.soil.</span></span><span class="sig-name descname"><span class="pre">Soil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pedon.soil.SoilSample" title="pedon.soil.SoilSample"><span class="pre">SoilSample</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pedon.soil.Soil" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pedon.soil.</span></span><span class="sig-name descname"><span class="pre">Soil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pedon.soil.SoilSample" title="pedon.soil.SoilSample"><span class="pre">SoilSample</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'HYDRUS'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'VS2D'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Staring_2001'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Staring_2018'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Clapp'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Rawls'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pedon.soil.Soil" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class representing soil properties and models.</p>
 <dl class="py attribute">
@@ -103,19 +104,46 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pedon.soil.Soil.from_name">
-<span class="sig-name descname"><span class="pre">from_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#pedon.soil.Soil.from_name" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">from_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Genuchten'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Brooks'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Brunswick'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Panday'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Gardner'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Rucker'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Haverkamp'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Fredlund'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Kosugi'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Campbell'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Kool'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'GenuchtenGardner'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Gerke'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'HYDRUS'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'VS2D'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Staring_2001'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Staring_2018'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Clapp'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Rawls'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#pedon.soil.Soil.from_name" title="Link to this definition">¶</a></dt>
 <dd><p>Load soil parameters from a CSV database by soil name and model type.</p>
+<p>Available sources include HYDRUS, VS2D, Staring_2001, Staring_2018,
+Rawls and Clapp.</p>
+<p class="rubric">References</p>
+<p>Rawls, W. J., Brakensiek, D. L., &amp; Saxton, K. E. (1982). Estimation of Soil
+Water Properties. Transactions of the ASAE, 25(5), 1316–1320.
+doi: 10.13031/2013.33720</p>
+<p>Clapp, R. B., &amp; Hornberger, G. M. (1978). Empirical equations for some soil
+hydraulic properties. Water Resources Research, 14(4), 601–604.
+doi: 10.1029/WR014i004p00601</p>
+<p>Carsel, R. F. and Parrish, R. S. (1988). Developing Joint Probability
+Distributions of Soil Water Retention Characteristics. Water Resources Research,
+24(5), 755–769. doi: 10.1029/WR024i005p00755</p>
+<p>Šimůnek, J., van Genuchten, M. Th., &amp; Šejna, M. (2008). Development and applications
+of the HYDRUS and STANMOD software packages and related codes. Vadose Zone Journal,
+7(2), 587–600. doi: 10.2136/vzj2007.0077</p>
+<p>Healy, R. W. (1990). Simulation of Solute Transport in Variably Saturated Porous Media
+with Supplemental Information on Modifications to the U.S. Geological Survey Computer
+Program VS2D. Water-Resources Investigations Report, U.S. Geological Survey,
+Denver, CO. Report 90-4025. doi: 10.3133/wri904025</p>
+<p>Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., &amp; Stolte, J. (2001).
+Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
+url: <a class="reference external" href="https://edepot.wur.nl/43272">https://edepot.wur.nl/43272</a></p>
+<p>Heinen, M., Bakker, G., &amp; Wösten, J. H. M. (2020). Waterretentie- en
+Doorlatendheidskarakteristieken van Boven- en Ondergronden in Nederland:
+De Staringreeks; (Update 2018). Wageningen Environmental Research, Report 2978,
+Wageningen, The Netherlands. doi: 10.18174/512761</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pedon.soil.Soil.from_staring">
-<span class="sig-name descname"><span class="pre">from_staring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'2018'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#pedon.soil.Soil.from_staring" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">from_staring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'2001'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'2018'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'2018'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#pedon.soil.Soil.from_staring" title="Link to this definition">¶</a></dt>
 <dd><p>Load soil parameters from the Staring series database.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pedon.soil.Soil.list_names">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">list_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pedon.soil.Soil.list_names" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">list_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Genuchten'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Brooks'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Brunswick'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Panday'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Gardner'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Rucker'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Haverkamp'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Fredlund'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Kosugi'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Campbell'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Kool'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'GenuchtenGardner'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Gerke'</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pedon.soil.Soil.list_names" title="Link to this definition">¶</a></dt>
 <dd><p>Return a list of available soil names for a given soil model.</p>
 </dd></dl>
 
@@ -136,7 +164,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id4">
-<span class="sig-name descname"><span class="pre">source</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#id4" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">source</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'HYDRUS'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'VS2D'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Staring_2001'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Staring_2018'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Clapp'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Rawls'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#id4" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -145,9 +173,9 @@
 <dt class="sig sig-object py" id="pedon.soil.SoilSample">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pedon.soil.</span></span><span class="sig-name descname"><span class="pre">SoilSample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sand_p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silt_p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clay_p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">th33</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">th1500</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">om_p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m50</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d10</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d20</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pedon.soil.SoilSample" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A container for measured soil properties and in-situ soil hydraulic data, with
-convenience routines to predict hydraulic parameters using a range of pedo-
-transfer functions and empirical models.</p>
+<p>A container for measured soil properties and in-situ soil hydraulic data.</p>
+<p>Class provides convenience routines to predict hydraulic parameters using
+a range of pedotransfer functions and empirical models.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pedon.soil.SoilSample.sand_p">
 <span class="sig-name descname"><span class="pre">sand_p</span></span><a class="headerlink" href="#pedon.soil.SoilSample.sand_p" title="Link to this definition">¶</a></dt>
@@ -305,8 +333,16 @@ transfer functions and empirical models.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pedon.soil.SoilSample.cosby">
 <span class="sig-name descname"><span class="pre">cosby</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Brooks" title="pedon.soilmodel.Brooks"><span class="pre">Brooks</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.cosby" title="Link to this definition">¶</a></dt>
-<dd><p>Cooper (2021) - Using data assimilation to optimize pedotransfer
-functions using field-scale in situ soil moisture observations</p>
+<dd><p>Pedotransfer function returning Brooks-Corey parameters.</p>
+<p class="rubric">References</p>
+<p>Cooper, E., Blyth, E., Cooper, H., Ellis, R., Pinnington, E., &amp; Dadson, S. J. (2021).
+Using Data Assimilation to Optimize Pedotransfer Functions Using Field-Scale In Situ
+Soil Moisture Observations. Hydrology and Earth System Sciences, 25, 2445–2461.
+doi: 10.5194/hess-25-2445-2021</p>
+<p>Cosby, B. J., Hornberger, G. M., Clapp, R. B., &amp; Ginn, T. R. (1984).
+A Statistical Exploration of the Relationships of Soil Moisture Characteristics to the
+Physical Properties of Soils. Water Resources Research, 20(6), 682–690.
+doi: 10.1029/WR020i006p00682</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -321,31 +357,89 @@ functions using field-scale in situ soil moisture observations</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pedon.soil.SoilSample.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pbounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.fit" title="Link to this definition">¶</a></dt>
-<dd><p>Fit the provided SoilModel (e.g., van Genuchten, Brooks-Corey class) to the
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pbounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><span class="pre">SoilModel</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.fit" title="Link to this definition">¶</a></dt>
+<dd><p>Fit the provided SoilModel to the measurements.</p>
+<p>Fit the provided SoilModel (e.g., van Genuchten, Brooks-Corey class) to the
 stored measurements (theta, k, h) using nonlinear least squares. If
 pbounds is not provided, default parameter bounds are retrieved for the
 requested model name. The objective combines water retention and log10(k)
 errors; weighting terms W1 and W2 control the relative contribution of k.
 Returns a model instance with optimized parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sm</strong> (<em>Type</em><em>[</em><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.SoilModel" title="pedon.soilmodel.SoilModel"><em>SoilModel</em></a><em>]</em>) – The soil model class to fit (e.g., Genuchten, Brooks).</p></li>
+<li><p><strong>pbounds</strong> (<em>DataFrame</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – DataFrame with parameter bounds and initial values. If None, defaults are
+used based on the model name. Expected columns: ‘p_ini’, ‘p_min’, ‘p_max’.</p></li>
+<li><p><strong>weights</strong> (<em>FloatArray</em><em> | </em><em>float</em><em>, </em><em>optional</em>) – Weights for the objective function. Can be a single float (applied to all)
+or an array of length N+M (N for theta, M-N for k). Default is 1.0.</p></li>
+<li><p><strong>W1</strong> (<em>float</em><em>, </em><em>optional</em>) – Scaling factor for the k error in the objective function. Default is 0.1.</p></li>
+<li><p><strong>W2</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Additional scaling factor for the k error. If None, it is computed to balance
+the contributions of theta and k errors based on their magnitudes and weights.</p></li>
+<li><p><strong>k_s</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – If provided, this value of saturated hydraulic conductivity will be fixed during
+optimization. This means that the relative hydraulic conductivity curve will be
+estimated.</p></li>
+<li><p><strong>silent</strong> (<em>bool</em><em>, </em><em>optional</em>) – If False, prints the optimization result. Default is True.</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional keyword arguments to pass to the scipy.optimize.least_squares function.</p></li>
+</ul>
+</dd>
+</dl>
 <p class="rubric">Notes</p>
 <ul class="simple">
 <li><p>Requires theta and k (and optionally h) to be set.</p></li>
 <li><p>If k_s is provided it will be fixed during optimization.</p></li>
 <li><p>Input/outputs and bounds are expected in the units used by the soil model.</p></li>
 </ul>
+<p class="rubric">References</p>
+<p>van Genuchten, M. Th., Leij, F. J., &amp; Yates, S. R. (1991). The RETC Code for
+Quantifying the Hydraulic Functions. Version 1.0. U.S. Salinity Laboratory,
+USDA, ARS, Riverside, CA. EPA Report 600/2-91/065.
+url: <a class="reference external" href="https://cfpub.epa.gov/si/si_public_record_report.cfm?dirEntryId=130162">https://cfpub.epa.gov/si/si_public_record_report.cfm?dirEntryId=130162</a></p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pedon.soil.SoilSample.from_staring">
-<span class="sig-name descname"><span class="pre">from_staring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'2018'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pedon.soil.SoilSample" title="pedon.soil.SoilSample"><span class="pre">SoilSample</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.from_staring" title="Link to this definition">¶</a></dt>
-<dd><p>Get properties and measurements from Staring series</p>
+<span class="sig-name descname"><span class="pre">from_staring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'2018'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#pedon.soil.SoilSample.from_staring" title="Link to this definition">¶</a></dt>
+<dd><p>Get properties and measurements from Staring series.</p>
+<p class="rubric">References</p>
+<p>Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., &amp; Stolte, J. (2001).
+Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
+url: <a class="reference external" href="https://edepot.wur.nl/43272">https://edepot.wur.nl/43272</a></p>
+<p>Heinen, M., Bakker, G., &amp; Wösten, J. H. M. (2020). Waterretentie- en
+Doorlatendheidskarakteristieken van Boven- en Ondergronden in Nederland:
+De Staringreeks; (Update 2018). Wageningen Environmental Research, Report 2978,
+Wageningen, The Netherlands. doi: 10.18174/512761</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id8">
 <span class="sig-name descname"><span class="pre">h</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#id8" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pedon.soil.SoilSample.hodnett">
+<span class="sig-name descname"><span class="pre">hodnett</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">15.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Genuchten" title="pedon.soilmodel.Genuchten"><span class="pre">Genuchten</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.hodnett" title="Link to this definition">¶</a></dt>
+<dd><p>Pedotransfer function for tropical soils.</p>
+<p>Implements the continuous pedotransfer function from Hodnett &amp; Tomasella (2002)
+calibrated exclusively on tropical soils from the IGBP-DIS database. This PTF
+relies on Organic Carbon (OC), not Organic Matter (OM). This method converts
+the <cite>om_p</cite> to OC using a factor 1.724. Note that the k_s is not estimated by this
+PTF and is set to NaN.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ph</strong> (<em>float</em><em>, </em><em>optional</em>) – Soil pH in water. Default is 5.8 (mean of the calibration dataset).</p></li>
+<li><p><strong>cec</strong> (<em>float</em><em>, </em><em>optional</em>) – Cation Exchange Capacity (cmol kg^-1). Default is 15.0 (mean of the calibration dataset).</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Hodnett, M. G., &amp; Tomasella, J. (2002). Marked differences between van Genuchten
+soil water-retention parameters for temperate and tropical soils: a new water-retention
+pedo-transfer functions developed for tropical soils. Geoderma, 108(3-4), 155–180.
+doi: 10.1016/S0016-7061(02)00105-2</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pedon.soil.SoilSample.hypags">
@@ -375,9 +469,11 @@ metrics from hydraulic conductivity and/or grain size inputs.</p>
 </dl>
 <p class="rubric">References</p>
 <p>Peche, A., Houben, G., &amp; Altfelder, S. (2024). Approximation of van Genuchten
-Parameter Ranges from Hydraulic Conductivity Data. Groundwater, 62(3), 469-479.</p>
+Parameter Ranges from Hydraulic Conductivity Data. Groundwater, 62(3), 469-479.
+doi: 10.1111/gwat.13365</p>
 <p>Peche, A., &amp; Houben, G. J. (2023). Estimating characteristic grain sizes and
-effective porosity from hydraulic conductivity data. Groundwater, 61(4), 574-585.</p>
+effective porosity from hydraulic conductivity data. Groundwater, 61(4), 574-585.
+doi: 10.1111/gwat.13266</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -395,6 +491,18 @@ effective porosity from hydraulic conductivity data. Groundwater, 61(4), 574-585
 <span class="sig-name descname"><span class="pre">om_p</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#id11" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pedon.soil.SoilSample.rawls">
+<span class="sig-name descname"><span class="pre">rawls</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cecc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Brooks" title="pedon.soilmodel.Brooks"><span class="pre">Brooks</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.rawls" title="Link to this definition">¶</a></dt>
+<dd><p>Estimate Brooks-Corey parameters using the Rawls &amp; Brakensiek method.</p>
+<p>cecc: Cation Exchange Capacity of clay (cmol kg^-1). Required if <cite>rho</cite> is not provided.</p>
+<p class="rubric">References</p>
+<p>Rawls, W. J., &amp; Brakensiek, D. L. (1989). Estimation of Soil Water Retention and
+Hydraulic Properties. In: Morel-Seytoux, H. J. (eds) Unsaturated Flow in Hydrologic
+Modeling: Theory and Practice. Springer Netherlands, Dordrecht, pp. 275–300.
+doi: 10.1007/978-94-009-2352-2_10</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id12">
 <span class="sig-name descname"><span class="pre">rho</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#id12" title="Link to this definition">¶</a></dt>
@@ -403,13 +511,43 @@ effective porosity from hydraulic conductivity data. Groundwater, 61(4), 574-585
 <dl class="py method">
 <dt class="sig sig-object py" id="pedon.soil.SoilSample.rosetta">
 <span class="sig-name descname"><span class="pre">rosetta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Genuchten" title="pedon.soilmodel.Genuchten"><span class="pre">Genuchten</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.rosetta" title="Link to this definition">¶</a></dt>
-<dd><p>Rosetta (Schaap et al., 2001) - Predicting soil water retention from soil</p>
+<dd><p>Pedotransfer function using the Rosetta API.</p>
+<p class="rubric">References</p>
+<p>Schaap, M. G., Leij, F. J., &amp; van Genuchten, M. Th. (2001). Rosetta: A Computer Program
+for Estimating Soil Hydraulic Parameters with Hierarchical Pedotransfer Functions.
+Journal of Hydrology, 251(3–4), 163–176. doi: 10.1016/S0022-1694(01)00466-8</p>
+<p>Zhang, Y., &amp; Schaap, M. G. (2017). Weighted recalibration of the Rosetta pedotransfer
+model with improved estimates of hydraulic parameter distributions and summary statistics
+(Rosetta3). Journal of Hydrology, 547, 39–53. doi: 10.1016/j.jhydrol.2017.01.004</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id13">
 <span class="sig-name descname"><span class="pre">sand_p</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#id13" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pedon.soil.SoilSample.saxton">
+<span class="sig-name descname"><span class="pre">saxton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Brooks" title="pedon.soilmodel.Brooks"><span class="pre">Brooks</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.saxton" title="Link to this definition">¶</a></dt>
+<dd><p>Pedotransfer function returning Brooks-Corey parameters.</p>
+<p>Implements the equations from Saxton and Rawls (2006) which estimate
+soil water characteristics from soil texture and organic matter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>float</em><em>, </em><em>optional</em>) – Density adjustment factor (normally between 0.9 and 1.3) to account
+for compaction or loosening. Default is 1.0 (normal density).</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Saxton, K. E., Rawls, W. J., Romberger, J. S., &amp; Papendick, R. I. (1986).
+Estimating generalized soil-water characteristics from texture.
+Soil Science Society of America Journal, 50(4), 1031–1036.
+doi: 10.2136/sssaj1986.03615995005000040039x</p>
+<p>Saxton, K. E., &amp; Rawls, W. J. (2006). Soil Water Characteristic Estimates
+by Texture and Organic Matter for Hydrologic Solutions.
+Soil Science Society of America Journal, 70(5), 1569–1578.
+doi: 10.2136/sssaj2005.0117</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="id14">
@@ -432,24 +570,115 @@ effective porosity from hydraulic conductivity data. Groundwater, 61(4), 574-585
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pedon.soil.SoilSample.toth">
+<span class="sig-name descname"><span class="pre">toth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topsoil</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Genuchten" title="pedon.soilmodel.Genuchten"><span class="pre">Genuchten</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.toth" title="Link to this definition">¶</a></dt>
+<dd><p>Pedotransfer function returning Mualem-van Genuchten parameters.</p>
+<p>Implements the continuous pedotransfer functions from Tóth et al. (2015)
+based on the EU-HYDI database. Uses Eq (21) for the Moisture Retention
+Characteristic and Eq (16) for Saturated Hydraulic Conductivity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>topsoil</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, applies the topsoil adjustment to the pedotransfer
+function. Default is False.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Van Genuchten soil model with estimated parameters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Genuchten" title="pedon.soilmodel.Genuchten">Genuchten</a></p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Tóth, B., Weynants, M., Nemes, A., Makó, A., Bilas, G., &amp; Tóth, G. (2015).
+New generation of hydraulic pedotransfer functions for Europe.
+European Journal of Soil Science, 66(1), 226–238.
+doi: 10.1111/ejss.12192</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pedon.soil.SoilSample.vereecken">
+<span class="sig-name descname"><span class="pre">vereecken</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Genuchten" title="pedon.soilmodel.Genuchten"><span class="pre">Genuchten</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.vereecken" title="Link to this definition">¶</a></dt>
+<dd><p>Pedotransfer function returning van Genuchten parameters.</p>
+<p>Implements the classic continuous pedotransfer functions from Vereecken
+et al. (1989) (Table 7) to estimate soil moisture retention parameters
+from texture, bulk density, and carbon content, combined with the saturated
+hydraulic conductivity (k_s) regression from Vereecken et al. (1990).</p>
+<p>The Vereecken PTF relies on Organic Carbon (OC) in %. This method converts
+<cite>om_p</cite> to OC using the standard 1.724 factor.</p>
+<p>Warning: This method brute-forces a Gardner-calibrated k_s into a standard
+Mualem-van Genuchten model framework. The resulting unsaturated conductivity
+curve will follow Mualem-van Genuchten’s format, not Vereecken’s 1990 Gardner
+function. Adjust accordingly when interpreting results or comparing to original
+Vereecken curves.</p>
+<p class="rubric">References</p>
+<p>Vereecken, H., Maes, J., Feyen, J., &amp; Darius, P. (1989). Estimating the
+soil moisture retention characteristic from texture, bulk density, and
+carbon content. Soil Science, 148(6), 389–403.
+doi: 10.1097/00010694-198912000-00001</p>
+<p>Vereecken, H., Maes, J., &amp; Feyen, J. (1990). Estimating Unsaturated
+Hydraulic Conductivity from Easily Measured Soil Properties.
+Soil Science, 149(1), 1–12. doi: 10.1097/00010694-199001000-00001</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pedon.soil.SoilSample.weynants">
+<span class="sig-name descname"><span class="pre">weynants</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Genuchten" title="pedon.soilmodel.Genuchten"><span class="pre">Genuchten</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.weynants" title="Link to this definition">¶</a></dt>
+<dd><p>Pedotransfer function returning Mualem-van Genuchten parameters.</p>
+<p>The Weynants PTF relies on Organic Carbon (OC), not Organic Matter (OM).
+This method converts the <cite>om_p</cite> to OC using a factor 1.724.</p>
+<p class="rubric">References</p>
+<p>Weynants, M., Vereecken, H., &amp; Javaux, M. (2009). Revisiting Vereecken
+Pedotransfer Functions: Introducing a Closed-Form Hydraulic Model.
+Vadose Zone Journal, 8(1), 86–95. doi: 10.2136/vzj2008.0062</p>
+<p>Vereecken, H., Maes, J., Feyen, J., &amp; Darius, P. (1989). Estimating the
+soil moisture retention characteristic from texture, bulk density, and
+carbon content. Soil Science, 148(6), 389–403.
+doi: 10.1097/00010694-198912000-00001</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pedon.soil.SoilSample.wosten">
-<span class="sig-name descname"><span class="pre">wosten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Genuchten" title="pedon.soilmodel.Genuchten"><span class="pre">Genuchten</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.wosten" title="Link to this definition">¶</a></dt>
-<dd><p>Wosten et al (1999) - Development and use of a database of hydraulic
-properties of European soils</p>
+<span class="sig-name descname"><span class="pre">wosten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topsoil</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Genuchten" title="pedon.soilmodel.Genuchten"><span class="pre">Genuchten</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.wosten" title="Link to this definition">¶</a></dt>
+<dd><p>Pedotransfer function for general soils.</p>
+<p>Sometimes also referred to as HYPRES: HYdraulic PRoperties of European Soils</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>topsoil</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, applies the topsoil adjustment to the pedotransfer
+function. Default is False.</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Wösten, J. H. M., Nemes, A., Lilly, A., &amp; Le Bas, C. (1999). Development and
+use of a database of hydraulic properties of European soils. Geoderma, 90, 169–185.
+doi: 10.1016/S0016-7061(98)00132-3</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pedon.soil.SoilSample.wosten_clay">
-<span class="sig-name descname"><span class="pre">wosten_clay</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Brooks" title="pedon.soilmodel.Brooks"><span class="pre">Brooks</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.wosten_clay" title="Link to this definition">¶</a></dt>
-<dd><p>Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
-van boven- en ondergronden in Nederland: de Staringreeks</p>
+<span class="sig-name descname"><span class="pre">wosten_clay</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Genuchten" title="pedon.soilmodel.Genuchten"><span class="pre">Genuchten</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.wosten_clay" title="Link to this definition">¶</a></dt>
+<dd><p>Pedotransfer function for clay soils.</p>
+<p class="rubric">References</p>
+<p>Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., &amp; Stolte, J. (2001).
+Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
+url: <a class="reference external" href="https://edepot.wur.nl/43272">https://edepot.wur.nl/43272</a></p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pedon.soil.SoilSample.wosten_sand">
-<span class="sig-name descname"><span class="pre">wosten_sand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Genuchten" title="pedon.soilmodel.Genuchten"><span class="pre">Genuchten</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.wosten_sand" title="Link to this definition">¶</a></dt>
-<dd><p>Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
-van boven- en ondergronden in Nederland: de Staringreeks</p>
+<span class="sig-name descname"><span class="pre">wosten_sand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topsoil</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pedon.soilmodel.html#pedon.soilmodel.Genuchten" title="pedon.soilmodel.Genuchten"><span class="pre">Genuchten</span></a></span></span><a class="headerlink" href="#pedon.soil.SoilSample.wosten_sand" title="Link to this definition">¶</a></dt>
+<dd><p>Pedotransfer function for sandy soils.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>topsoil</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, applies the topsoil adjustment to the pedotransfer
+function. Default is False.</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., &amp; Stolte, J. (2001).
+Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
+url: <a class="reference external" href="https://edepot.wur.nl/43272">https://edepot.wur.nl/43272</a></p>
 </dd></dl>
 
 </dd></dl>
@@ -497,7 +726,7 @@ van boven- en ondergronden in Nederland: de Staringreeks</p>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="modules.html">pedon</a><ul>
   <li><a href="pedon.html">pedon package</a><ul>
-      <li>Previous: <a href="pedon.html" title="previous chapter">pedon package</a></li>
+      <li>Previous: <a href="pedon.plot.html" title="previous chapter">pedon.plot module</a></li>
       <li>Next: <a href="pedon.soilmodel.html" title="next chapter">pedon.soilmodel module</a></li>
   </ul></li>
   </ul></li>
@@ -517,7 +746,7 @@ van boven- en ondergronden in Nederland: de Staringreeks</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2025, Martin Vonk.
+      &#169;2026, Martin Vonk.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>

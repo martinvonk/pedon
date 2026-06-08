@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Article for Journal of Open Source Software &#8212; pedon 0.0.12 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <script src="../_static/documentation_options.js?v=3bbcec59"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pedon" href="../_api/modules.html" />
+    <link rel="prev" title="Generating Input for MODFLOW" href="08_modflow.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="Article-for-Journal-of-Open-Source-Software">
+<h1>Article for Journal of Open Source Software<a class="headerlink" href="#Article-for-Journal-of-Open-Source-Software" title="Link to this heading">¶</a></h1>
+<p>Martin Vonk &amp; Aaron Peche (2026)</p>
+<p>This notebook replicates the results presented in the article submitted to the Journal of Open Source Software (JOSS). The article can be found here: <a class="reference external" href="https://joss.theoj.org/papers/095927c33334e8ebb4612243ea40fdae">https://joss.theoj.org/papers/095927c33334e8ebb4612243ea40fdae</a> doi.org/…</p>
+<p>JOSS is a developer-friendly, open-access academic journal (ISSN 2475-9066) dedicated to research software packages and features a formal peer-review process. The pre-review and review of the Pedon package are publicly available in issues <a class="reference external" href="https://github.com/openjournals/joss-reviews/issues/9769">https://github.com/openjournals/joss-reviews/issues/9769</a> and <a class="reference external" href="https://github.com/openjournals/joss-reviews/issues/10409">https://github.com/openjournals/joss-reviews/issues/10409</a>, respectively.</p>
+<section id="Setup">
+<h2>Setup<a class="headerlink" href="#Setup" title="Link to this heading">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.ticker</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mplticker</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cycler</span><span class="w"> </span><span class="kn">import</span> <span class="n">cycler</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pedon</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pe</span>
+
+<span class="n">rc_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;axes.prop_cycle&quot;</span><span class="p">:</span> <span class="n">cycler</span><span class="p">(</span>
+        <span class="n">color</span><span class="o">=</span><span class="p">[</span>
+            <span class="s2">&quot;#3f90da&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;#ffa90e&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;#bd1f01&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;#94a4a2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;#832db6&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;#a96b59&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;#e76300&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;#b9ac70&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;#717581&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;#92dadd&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;axes.titlesize&quot;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span>
+    <span class="s2">&quot;axes.grid&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;axes.labelsize&quot;</span><span class="p">:</span> <span class="mf">9.0</span><span class="p">,</span>
+    <span class="s2">&quot;xtick.labelsize&quot;</span><span class="p">:</span> <span class="mf">8.0</span><span class="p">,</span>
+    <span class="s2">&quot;ytick.labelsize&quot;</span><span class="p">:</span> <span class="mf">8.0</span><span class="p">,</span>
+    <span class="s2">&quot;legend.fontsize&quot;</span><span class="p">:</span> <span class="mf">8.0</span><span class="p">,</span>
+    <span class="s2">&quot;legend.framealpha&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="s2">&quot;figure.figsize&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">],</span>
+<span class="p">}</span>
+
+<span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rc_params</span><span class="p">)</span>
+<span class="n">fig_path</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;paper/figures&quot;</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Defining-a-soil-model">
+<h2>Defining a soil model<a class="headerlink" href="#Defining-a-soil-model" title="Link to this heading">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Mualem-van Genuchten parameters for Sandy Loam</span>
+<span class="n">mg</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Genuchten</span><span class="p">(</span>
+    <span class="n">k_s</span><span class="o">=</span><span class="mf">106.1</span><span class="p">,</span>  <span class="c1"># saturated conductivity (cm/d)</span>
+    <span class="n">theta_r</span><span class="o">=</span><span class="mf">0.065</span><span class="p">,</span>  <span class="c1"># residual water content (-)</span>
+    <span class="n">theta_s</span><span class="o">=</span><span class="mf">0.41</span><span class="p">,</span>  <span class="c1"># saturated water content (-)</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.075</span><span class="p">,</span>  <span class="c1"># shape parameter (1/cm)</span>
+    <span class="n">n</span><span class="o">=</span><span class="mf">1.89</span><span class="p">,</span>  <span class="c1"># shape parameter (-)</span>
+<span class="p">)</span>
+
+<span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>  <span class="c1"># pressure head (cm)</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">theta</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>  <span class="c1"># water content (-) at pressure head values</span>
+<span class="n">k</span> <span class="o">=</span> <span class="n">mg</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>  <span class="c1"># hydraulic conductivity (cm/d) at pressure head values</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">k</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([[1.00000000e-01, 4.09984348e-01, 1.03389137e+02],
+       [1.00000000e+00, 4.08791540e-01, 8.59093947e+01],
+       [1.00000000e+01, 3.43096726e-01, 1.34676049e+01],
+       [1.00000000e+02, 1.21823289e-01, 4.55156715e-03],
+       [1.00000000e+03, 7.23953055e-02, 2.81336545e-07],
+       [1.00000000e+04, 6.59528265e-02, 1.67662224e-11],
+       [1.00000000e+05, 6.51227480e-02, 9.98706595e-16],
+       [1.00000000e+06, 6.50158130e-02, 5.94891489e-20]])
+</pre></div></div>
+</div>
+</section>
+<section id="Loading-soil-models-from-dataset">
+<h2>Loading soil models from dataset<a class="headerlink" href="#Loading-soil-models-from-dataset" title="Link to this heading">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hydrus</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="p">(</span><span class="s2">&quot;Sand&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">pe</span><span class="o">.</span><span class="n">Genuchten</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;HYDRUS&quot;</span><span class="p">)</span>
+<span class="n">staring</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="p">(</span><span class="s2">&quot;B05&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">pe</span><span class="o">.</span><span class="n">Genuchten</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;Staring_2018&quot;</span><span class="p">)</span>
+<span class="n">rawls</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="p">(</span><span class="s2">&quot;Sand&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">pe</span><span class="o">.</span><span class="n">Brooks</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;Rawls&quot;</span><span class="p">)</span>
+<span class="n">clapp</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Soil</span><span class="p">(</span><span class="s2">&quot;Sand&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">pe</span><span class="o">.</span><span class="n">Campbell</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;Clapp&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">2.6</span><span class="p">,</span> <span class="mf">3.35</span><span class="p">),</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">swrc</span><span class="p">(</span><span class="n">hydrus</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;HYDRUS&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">swrc</span><span class="p">(</span><span class="n">staring</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Staring&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">swrc</span><span class="p">(</span><span class="n">rawls</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Rawls&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">swrc</span><span class="p">(</span><span class="n">clapp</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Clapp&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">1e-1</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.45</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">),</span> <span class="n">minor</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># ax.set_title(&quot;Sand SWRC from different sources&quot;)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Pressure head |</span><span class="se">\N{GREEK SMALL LETTER PSI}</span><span class="s2">| (cm)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Soil water content </span><span class="se">\N{GREEK SMALL LETTER THETA}</span><span class="s2"> (-)&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">fig_path</span> <span class="o">/</span> <span class="s2">&quot;dataset_swrc.png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_09_paper_7_0.png" src="../_images/examples_09_paper_7_0.png" />
+</div>
+</div>
+</section>
+<section id="Obtaining-a-soil-model-from-pedotransfer-function-and-databases">
+<h2>Obtaining a soil model from pedotransfer function and databases<a class="headerlink" href="#Obtaining-a-soil-model-from-pedotransfer-function-and-databases" title="Link to this heading">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a soil sample with easily measured properties. Note that</span>
+<span class="c1"># not all pedotransfer functions require all of these properties,</span>
+<span class="c1"># but this is a common set that covers most cases.</span>
+<span class="n">ss</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">SoilSample</span><span class="p">(</span>
+    <span class="n">sand_p</span><span class="o">=</span><span class="mf">60.0</span><span class="p">,</span>  <span class="c1"># sand (%)</span>
+    <span class="n">silt_p</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span>  <span class="c1"># silt (%)</span>
+    <span class="n">clay_p</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>  <span class="c1"># clay (%)</span>
+    <span class="n">om_p</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span>  <span class="c1"># organic matter (%)</span>
+    <span class="n">rho</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>  <span class="c1"># bulk density (g/cm3)</span>
+<span class="p">)</span>
+
+<span class="c1"># Estimate van Genuchten parameters using Wösten (HYPRES)</span>
+<span class="n">wosten</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">Genuchten</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">wosten</span><span class="p">()</span>
+
+<span class="c1"># Estimate van Genuchten parameters using Rosetta v3</span>
+<span class="c1"># Optional dependency requiring installation of `httpx`</span>
+<span class="n">rosetta</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">Genuchten</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">rosetta</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># Estimate Brooks-Corey parameters using Saxton</span>
+<span class="n">saxton</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">Brooks</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">saxton</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">2.6</span><span class="p">,</span> <span class="mf">3.35</span><span class="p">),</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;constrained&quot;</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">swrc</span><span class="p">(</span><span class="n">wosten</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Wösten&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">swrc</span><span class="p">(</span><span class="n">saxton</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Saxton&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">swrc</span><span class="p">(</span><span class="n">rosetta</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Rosetta&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">1e-2</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.46</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">mplticker</span><span class="o">.</span><span class="n">MultipleLocator</span><span class="p">(</span><span class="mf">0.05</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">mplticker</span><span class="o">.</span><span class="n">MultipleLocator</span><span class="p">(</span><span class="mf">0.1</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">1e-1</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">)</span>
+<span class="c1"># ax.set_title(&quot;SWRC from pedotransfer functions&quot;)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Pressure head |</span><span class="se">\N{GREEK SMALL LETTER PSI}</span><span class="s2">| (cm)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Soil water content </span><span class="se">\N{GREEK SMALL LETTER THETA}</span><span class="s2"> (-)&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">fig_path</span> <span class="o">/</span> <span class="s2">&quot;ptf_swrc.png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_09_paper_10_0.png" src="../_images/examples_09_paper_10_0.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Estimate parameters using HYPAGS</span>
+<span class="n">ks</span> <span class="o">=</span> <span class="mf">1e-3</span>  <span class="c1"># saturated hydraulic conductivity (m/s)</span>
+<span class="n">hypags</span><span class="p">:</span> <span class="n">pe</span><span class="o">.</span><span class="n">Genuchten</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">SoilSample</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">ks</span><span class="p">)</span><span class="o">.</span><span class="n">hypags</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># pe.plot.curves(hypags, label=&quot;HYPAGS&quot;)</span>
+<span class="n">hypags</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Genuchten(k_s=0.001, theta_r=0.105, theta_s=np.float64(0.30896365527138614), alpha=np.float64(9.439965924107144), n=np.float64(1.3453214358373247), l=0.5)
+</pre></div></div>
+</div>
+</section>
+<section id="Fitting-a-soil-model">
+<h2>Fitting a soil model<a class="headerlink" href="#Fitting-a-soil-model" title="Link to this heading">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fitting a Brooks-Corey soil model to existing Mualem-van Genuchten soil model</span>
+<span class="n">bcf</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">SoilSample</span><span class="p">(</span><span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">pe</span><span class="o">.</span><span class="n">Brooks</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+    <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">5.2</span><span class="p">,</span> <span class="mf">3.35</span><span class="p">),</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">width_ratios</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">axes</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">mg</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Mualem-van Genuchten&quot;</span><span class="p">)</span>
+<span class="n">axes</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">curves</span><span class="p">(</span><span class="n">bcf</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Brooks-Corey fit&quot;</span><span class="p">)</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.46</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">mplticker</span><span class="o">.</span><span class="n">MultipleLocator</span><span class="p">(</span><span class="mf">0.05</span><span class="p">))</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">mplticker</span><span class="o">.</span><span class="n">MultipleLocator</span><span class="p">(</span><span class="mf">0.1</span><span class="p">))</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">h</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">xt1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">19</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xt1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xt1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">log_locator</span> <span class="o">=</span> <span class="n">mplticker</span><span class="o">.</span><span class="n">LogLocator</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">subs</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,),</span> <span class="n">numticks</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_locator</span><span class="p">(</span><span class="n">log_locator</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_minor_formatter</span><span class="p">(</span><span class="n">mplticker</span><span class="o">.</span><span class="n">NullFormatter</span><span class="p">())</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Pressure head |</span><span class="se">\N{GREEK SMALL LETTER PSI}</span><span class="s2">| (cm)&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Soil water content </span><span class="se">\N{GREEK SMALL LETTER THETA}</span><span class="s2"> (-)&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Hydraulic conductivity $K$ (cm/d)&quot;</span><span class="p">)</span>
+
+<span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+    <span class="n">handles</span><span class="p">,</span>
+    <span class="n">labels</span><span class="p">,</span>
+    <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.13</span><span class="p">,</span> <span class="mf">0.92</span><span class="p">),</span>
+    <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">,</span>
+    <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">w_pad</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">align_xlabels</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">fig_path</span> <span class="o">/</span> <span class="s2">&quot;fit_swrc_hcf.png&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_09_paper_15_0.png" src="../_images/examples_09_paper_15_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pedon</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Pedon</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html#examples">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="00_pedon_structure.html">Package Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="01_soil_models.html">Soil Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="02_datasets.html">Soil Parameter Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03_pedotransfer_functions.html">Pedotransfer Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04_hypags.html">Parameter Estimation via HYPAGS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05_curve_fitting.html">Curve Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06_hypags_curvefitting.html">From k value to Gardner via HYPAGS + Curve Fitting Routine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="07_hysteresis.html">Hysteresis Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="08_modflow.html">Generating Input for MODFLOW</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Article for Journal of Open Source Software</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../_api/modules.html">pedon</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Pedon</a><ul>
+      <li>Previous: <a href="08_modflow.html" title="previous chapter">Generating Input for MODFLOW</a></li>
+      <li>Next: <a href="../_api/modules.html" title="next chapter">pedon</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Martin Vonk.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.0.4</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/examples/09_paper.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
