@@ -18,7 +18,7 @@ jobs:
             toxenv: py311
             experimental: false
           - name: Test suite with py312-ubuntu
-            python: "3.12-dev"
+            python: "3.12"
             os: ubuntu-latest
             toxenv: py312
             experimental: false
@@ -33,18 +33,24 @@ jobs:
             toxenv: py314
             experimental: false
           - name: Formatting and linting with ruff
-            python: "3.11"
+            python: "3.13"
             os: ubuntu-latest
             toxenv: ruff
             experimental: false
           - name: Type checking with ty
-            python: "3.11"
+            python: "3.13"
             os: ubuntu-latest
             toxenv: typety
+            experimental: false
+          - name: Type checking with mypy
+            python: "3.13"
+            os: ubuntu-latest
+            toxenv: type
             experimental: false
 
     name: ${{ matrix.name }}
     env:
+      BADGE_GIST_COVERAGE_TOKEN: ${{ secrets.BADGE_GIST_COVERAGE_TOKEN }}
       # Color Output
       # Rich (pip)
       FORCE_COLOR: 1
@@ -57,20 +63,45 @@ jobs:
       # Pytest
       PYTEST_ADDOPTS: "--color=yes"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v6
+      - name: Set up Python ${{ matrix.python }} via uv
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python }}
-          check-latest: true
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install tox
+          uv venv
+          uv pip install tox-uv
+
       - name: Setup tox environment
-        run: tox -e ${{ matrix.toxenv }} --notest
+        run: uv run tox -e ${{ matrix.toxenv }} --notest
 
       - name: Test
-        run: tox -e ${{ matrix.toxenv }} --skip-pkg-install
+        run: uv run tox -e ${{ matrix.toxenv }} --skip-pkg-install
+
+      - name: Export Coverage Percent
+        if: matrix.toxenv == 'py313'
+        id: coverage
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          data = json.loads(Path("coverage.json").read_text())
+          coverage = data["totals"]["percent_covered_display"]
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a") as fh:
+              fh.write(f"coverage={coverage}\n")
+          PY
+
+      - name: Update Coverage Badge
+        if: matrix.toxenv == 'py313' && github.event_name == 'push' && github.ref == 'refs/heads/dev' && env.BADGE_GIST_COVERAGE_TOKEN != ''
+        uses: Schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ env.BADGE_GIST_COVERAGE_TOKEN }}
+          gistID: "a891dd883f258c46826ba657cf9a89cf"
+          filename: coverage.json
+          label: coverage
+          message: ${{ steps.coverage.outputs.coverage }}%

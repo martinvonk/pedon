@@ -6,11 +6,20 @@ from numpy.typing import NDArray
 FloatArray = float | NDArray[float64]
 SoilModelNames = Literal[
     "Genuchten",
-    "GenuchtenGardner",
     "Brooks",
+    "Brunswick",
     "Panday",
     "Gardner",
     "Rucker",
     "Haverkamp",
     "Fredlund",
+    "Kosugi",
+    "Campbell",
+    "Kool",
+    "GenuchtenGardner",
+    "Gerke",
+]
+
+SourceNames = Literal[
+    "HYDRUS", "VS2D", "Staring_2001", "Staring_2018", "Clapp", "Rawls"
 ]

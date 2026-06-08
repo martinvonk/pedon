@@ -30,18 +30,25 @@ repository = "https://github.com/martinvonk/pedon"
 
 [project.optional-dependencies]
 ruffing = ["ruff"]
-typing = ["mypy", "pandas-stubs", "ty"]
+typing = ["mypy", "pandas-stubs", "ty", "pedon[rosetta]"]
 rosetta = ["httpx"]
-pytesting = ["pytest>=7", "pytest-cov", "pytest-sugar", "pedon[rosetta]"]
-coveraging = ["coverage"]
+pytesting = [
+        "pytest>=7",
+        "pytest-cov",
+        "pytest-sugar",
+        "pytest-mpl",
+        "pedon[rosetta]",
+]
 documentation = [
         "sphinx>=8.2",
         "myst-parser",
         "nbsphinx",
         "ipykernel",
         "pandoc",
+        "flopy",
+        "pedon[rosetta]",
 ]
-dev = ["pedon[ruffing,typing,pytesting]", "tox"]
+dev = ["pedon[documentation,rosetta,ruffing,typing,pytesting]", "tox-uv"]
 
 
 [tool.setuptools]
@@ -69,15 +76,18 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+addopts = "--cov=pedon --cov-report=term-missing --cov-report=json --cov-branch"
+
 
 [tool.ruff]
 extend-include = ["*.ipynb"]
-lint.extend-select = ["I"]
+lint.extend-select = ["I", "D"]
+lint.ignore = ["D102", "D203", "D213"]
 show-fixes = true
 fix = true
 
 [tool.tox]
-requires = ["tox>=4"]
+requires = ["tox-uv>=1.0"]
 env_list = ["py311", "py312", "py313", "py314", "type", "ruff", "typety"]
 
 [tool.tox.env_run_base]
@@ -94,7 +104,6 @@ commands = [
                 "check",
                 "--extend-select",
                 "I",
-                "--preview",
         ],
         [
                 "ruff",
@@ -105,7 +114,7 @@ commands = [
 
 
 [tool.tox.env.type]
-description = "run type checks"
+description = "run type checks with mypy"
 extras = ["typing"]
 commands = [["mypy", "src"]]
 

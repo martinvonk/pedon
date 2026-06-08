@@ -1,15 +1,16 @@
-# type: ignore
-import logging
+"""Soil sample class and pedotransfer functions."""
+
 from bisect import bisect_right
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
+from logging import getLogger
 from pathlib import Path
-from typing import Literal, Self, Type
+from typing import Any, Literal, Self, cast
 
 from numpy import abs as npabs
 from numpy import (
     append,
     array,
-    array2string,
+    asarray,
     cos,
     divide,
     exp,
@@ -17,22 +18,25 @@ from numpy import (
     log,
     log10,
     multiply,
+    nan,
     ndarray,
 )
 from pandas import DataFrame, isna, read_csv
 from scipy.optimize import fixed_point, least_squares
 
 from ._params import get_params
-from ._typing import FloatArray
-from .soilmodel import Brooks, Genuchten, SoilModel, get_soilmodel
+from ._typing import FloatArray, SoilModelNames, SourceNames
+from .soilmodel import Brooks, Genuchten, SoilModel, resolve_soilmodel
+
+logger = getLogger(__name__)
 
 
 @dataclass
 class SoilSample:
-    """
-    A container for measured soil properties and in-situ soil hydraulic data, with
-    convenience routines to predict hydraulic parameters using a range of pedo-
-    transfer functions and empirical models.
+    """A container for measured soil properties and in-situ soil hydraulic data.
+
+    Class provides convenience routines to predict hydraulic parameters using
+    a range of pedotransfer functions and empirical models.
 
     Attributes
     ----------
@@ -68,6 +72,7 @@ class SoilSample:
         - Verify units before use as different methods expect specific conventions.
         - Methods return soil hydraulic model instances (e.g., Genuchten, Brooks).
         - Some methods make external API calls (rosetta) or use empirical relationships.
+
     """
 
     sand_p: float | None = None  # sand %
@@ -92,8 +97,22 @@ class SoilSample:
         default=None, repr=False
     )  # moisture content measurement
 
-    def from_staring(self, name: str, year: str = "2018") -> "SoilSample":
-        """Get properties and measurements from Staring series"""
+    def from_staring(self, name: str, year: str = "2018") -> Self:
+        """Get properties and measurements from Staring series.
+
+        References
+        ----------
+        Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., & Stolte, J. (2001).
+        Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+        Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
+        url: https://edepot.wur.nl/43272
+
+        Heinen, M., Bakker, G., & Wösten, J. H. M. (2020). Waterretentie- en
+        Doorlatendheidskarakteristieken van Boven- en Ondergronden in Nederland:
+        De Staringreeks; (Update 2018). Wageningen Environmental Research, Report 2978,
+        Wageningen, The Netherlands. doi: 10.18174/512761
+
+        """
         if year not in ("2001", "2018"):
             raise ValueError(
                 f"No Staring series available for year '{year}'"
@@ -101,29 +120,31 @@ class SoilSample:
             )
         path = Path(__file__).parent / "datasets/soilsamples.csv"
         properties = read_csv(path, delimiter=";")
-        staring_properties = properties[
-            properties["source"] == f"Staring_{year}"
-        ].set_index("name")
+        staring_properties = properties.query(f"source == 'Staring_{year}'").set_index(
+            "name"
+        )
 
-        self.silt_p = staring_properties.loc[name, "silt_p"]
-        self.clay_p = staring_properties.loc[name, "clay_p"]
-        self.om_p = staring_properties.loc[name, "om_p"]
-        self.m50 = staring_properties.loc[name, "m50"]
+        self.silt_p = cast(float, staring_properties.at[name, "silt_p"])
+        self.clay_p = cast(float, staring_properties.at[name, "clay_p"])
+        self.om_p = cast(float, staring_properties.at[name, "om_p"])
+        self.m50 = cast(float, staring_properties.at[name, "m50"])
         if year == "2001":
-            self.rho = staring_properties.loc[name, "rho"]
+            self.rho = cast(float, staring_properties.at[name, "rho"])
         return self
 
     def fit(
         self,
-        sm: Type[SoilModel],
+        sm: type[SoilModel],
         pbounds: DataFrame | None = None,
         weights: FloatArray | float = 1.0,
         W1: float = 0.1,
         W2: float | None = None,
         k_s: float | None = None,
         silent: bool = True,
+        **kwargs,
     ) -> SoilModel:
-        """
+        """Fit the provided SoilModel to the measurements.
+
         Fit the provided SoilModel (e.g., van Genuchten, Brooks-Corey class) to the
         stored measurements (theta, k, h) using nonlinear least squares. If
         pbounds is not provided, default parameter bounds are retrieved for the
@@ -131,19 +152,55 @@ class SoilSample:
         errors; weighting terms W1 and W2 control the relative contribution of k.
         Returns a model instance with optimized parameters.
 
+        Parameters
+        ----------
+        sm : Type[SoilModel]
+            The soil model class to fit (e.g., Genuchten, Brooks).
+        pbounds : DataFrame | None, optional
+            DataFrame with parameter bounds and initial values. If None, defaults are
+            used based on the model name. Expected columns: 'p_ini', 'p_min', 'p_max'.
+        weights : FloatArray | float, optional
+            Weights for the objective function. Can be a single float (applied to all)
+            or an array of length N+M (N for theta, M-N for k). Default is 1.0.
+        W1 : float, optional
+            Scaling factor for the k error in the objective function. Default is 0.1.
+        W2 : float | None, optional
+            Additional scaling factor for the k error. If None, it is computed to balance
+            the contributions of theta and k errors based on their magnitudes and weights.
+        k_s : float | None, optional
+            If provided, this value of saturated hydraulic conductivity will be fixed during
+            optimization. This means that the relative hydraulic conductivity curve will be
+            estimated.
+        silent : bool, optional
+            If False, prints the optimization result. Default is True.
+        kwargs : dict, optional
+            Additional keyword arguments to pass to the scipy.optimize.least_squares function.
+
         Notes
         -----
             - Requires theta and k (and optionally h) to be set.
             - If k_s is provided it will be fixed during optimization.
             - Input/outputs and bounds are expected in the units used by the soil model.
+
+        References
+        ----------
+        van Genuchten, M. Th., Leij, F. J., & Yates, S. R. (1991). The RETC Code for
+        Quantifying the Hydraulic Functions. Version 1.0. U.S. Salinity Laboratory,
+        USDA, ARS, Riverside, CA. EPA Report 600/2-91/065.
+        url: https://cfpub.epa.gov/si/si_public_record_report.cfm?dirEntryId=130162
+
         """
-        theta = self.theta
+        if self.theta is None or self.k is None or self.h is None:
+            raise ValueError("theta, k, and h measurements are required for fitting")
+
+        theta = asarray(self.theta, dtype=float)
+        h = asarray(self.h, dtype=float)
         N = len(theta)
-        k = self.k
+        k = asarray(self.k, dtype=float)
         M = N + len(k)
 
         if pbounds is None:
-            pbounds = get_params(sm.__name__)
+            pbounds = get_params(sm)
             if k_s is not None:
                 pbounds = pbounds.drop("k_s")
             else:
@@ -152,8 +209,11 @@ class SoilSample:
             pbounds.loc["theta_s", "p_ini"] = max(theta)
             pbounds.loc["theta_s", "p_max"] = max(theta) + 0.02
 
-        if isinstance(weights, float):
-            weights = full(M, weights)
+        weights = (
+            full(M, weights)
+            if isinstance(weights, float)
+            else asarray(weights, dtype=float)
+        )
 
         if W2 is None:
             W2 = (
@@ -161,17 +221,26 @@ class SoilSample:
                 * sum(weights[0:N] * theta)
                 / (N * sum(weights[N:M] * npabs(log10(k))))
             )
+            logger.debug(f"Computed W2: {W2}")
 
         def get_diff(p: FloatArray) -> FloatArray:
+            """Objective function for least squares optimization.
+
+            Computes the difference between measured and model-predicted
+            theta and log10(k) values, applying the specified weights and
+            scaling factors.
+            """
+            p = asarray(p, dtype=float)
             est_pars = dict(zip(pbounds.index, p))
             if k_s is not None:
                 est_pars["k_s"] = k_s
             sml = sm(**est_pars)
-            theta_diff = sml.theta(h=self.h) - theta
-            k_diff = log10(sml.k(h=self.h)) - log10(k)
+            theta_diff = sml.theta(h=h) - theta
+            k_diff = log10(sml.k(h=h)) - log10(k)
             diff = append(weights[0:N] * theta_diff, weights[N:M] * W1 * W2 * k_diff)
             return diff
 
+        kwargs_merged: dict = {"jac": "3-point", "x_scale": "jac"} | (kwargs or {})
         res = least_squares(
             get_diff,
             x0=pbounds.loc[:, "p_ini"],
@@ -179,6 +248,7 @@ class SoilSample:
                 pbounds.loc[:, "p_min"],
                 pbounds.loc[:, "p_max"],
             ),
+            **kwargs_merged,
         )
         opt_pars = dict(zip(pbounds.index, res.x))
         if k_s is not None:
@@ -189,11 +259,31 @@ class SoilSample:
 
         return sm(**opt_pars)
 
-    def wosten(self, ts: bool = False) -> Genuchten:
-        """Wosten et al (1999) - Development and use of a database of hydraulic
-        properties of European soils"""
+    def wosten(self, topsoil: bool = False) -> Genuchten:
+        """Pedotransfer function for general soils.
 
-        topsoil = 1.0 * ts
+        Sometimes also referred to as HYPRES: HYdraulic PRoperties of European Soils
+
+        Parameters
+        ----------
+        topsoil : bool, optional
+            If True, applies the topsoil adjustment to the pedotransfer
+            function. Default is False.
+
+        References
+        ----------
+        Wösten, J. H. M., Nemes, A., Lilly, A., & Le Bas, C. (1999). Development and
+        use of a database of hydraulic properties of European soils. Geoderma, 90, 169--185.
+        doi: 10.1016/S0016-7061(98)00132-3
+
+        """
+        assert (
+            self.clay_p is not None
+            and self.rho is not None
+            and self.silt_p is not None
+            and self.om_p is not None
+        )
+        ts = 1.0 * topsoil
 
         theta_s = (
             0.7919
@@ -207,15 +297,15 @@ class SoilSample:
             - 0.0000733 * self.om_p * self.clay_p
             - 0.000619 * self.rho * self.clay_p
             - 0.001183 * self.rho * self.om_p
-            - 0.0001664 * topsoil * self.silt_p
+            - 0.0001664 * ts * self.silt_p
         )
-        alpha_ = (
+        alpha = exp(
             -14.96
             + 0.03135 * self.clay_p
             + 0.0351 * self.silt_p
             + 0.646 * self.om_p
             + 15.29 * self.rho
-            - 0.192 * topsoil
+            - 0.192 * ts
             - 4.671 * self.rho**2
             - 0.000781 * self.clay_p**2
             - 0.00687 * self.om_p**2
@@ -224,26 +314,29 @@ class SoilSample:
             + 0.1482 * log(self.om_p)
             - 0.04546 * self.rho * self.silt_p
             - 0.4852 * self.rho * self.om_p
-            + 0.00673 * topsoil * self.clay_p
+            + 0.00673 * ts * self.clay_p
         )
-        n_ = (
-            -25.23
-            - 0.02195 * self.clay_p
-            + 0.0074 * self.silt_p
-            - 0.1940 * self.om_p
-            + 45.5 * self.rho
-            - 7.24 * self.rho**2
-            + 0.0003658 * self.clay_p**2
-            + 0.002885 * self.om_p**2
-            - 12.81 * self.rho**-1
-            - 0.1524 * self.silt_p**-1
-            - 0.01958 * self.om_p**-1
-            - 0.2876 * log(self.silt_p)
-            - 0.0709 * log(self.om_p)
-            - 44.6 * log(self.rho)
-            - 0.02264 * self.rho * self.clay_p
-            + 0.0896 * self.rho * self.om_p
-            + 0.00718 * topsoil * self.clay_p
+        n = (
+            exp(
+                -25.23
+                - 0.02195 * self.clay_p
+                + 0.0074 * self.silt_p
+                - 0.1940 * self.om_p
+                + 45.5 * self.rho
+                - 7.24 * self.rho**2
+                + 0.0003658 * self.clay_p**2
+                + 0.002885 * self.om_p**2
+                - 12.81 * self.rho**-1
+                - 0.1524 * self.silt_p**-1
+                - 0.01958 * self.om_p**-1
+                - 0.2876 * log(self.silt_p)
+                - 0.0709 * log(self.om_p)
+                - 44.6 * log(self.rho)
+                - 0.02264 * self.rho * self.clay_p
+                + 0.0896 * self.rho * self.om_p
+                + 0.00718 * ts * self.clay_p
+            )
+            + 1
         )
         l_ = (
             0.0202
@@ -254,10 +347,11 @@ class SoilSample:
             + 0.00283 * self.rho * self.silt_p
             + 0.0488 * self.rho * self.om_p
         )
-        ks_ = (
+        lb = (10 * exp(l_) - 10) / (1 + exp(l_))
+        k_s = exp(
             7.755
             + 0.0352 * self.silt_p
-            + 0.93 * topsoil
+            + 0.93 * ts
             - 0.967 * self.rho**2
             - 0.000484 * self.clay_p**2
             - 0.000322 * self.silt_p**2
@@ -266,24 +360,42 @@ class SoilSample:
             - 0.643 * log(self.silt_p)
             - 0.01398 * self.rho * self.clay_p
             - 0.1673 * self.rho * self.om_p
-            + 0.02986 * topsoil * self.clay_p
-            - 0.03305 * topsoil * self.silt_p
+            + 0.02986 * ts * self.clay_p
+            - 0.03305 * ts * self.silt_p
         )
-        theta_r = 0.01
         return Genuchten(
-            k_s=max(exp(ks_), 0),
-            theta_r=theta_r,
+            k_s=k_s,
+            theta_r=0.01,
             theta_s=theta_s,
-            alpha=exp(alpha_),
-            n=exp(n_) + 1,
-            l=(10 * exp(l_) - 10) / (1 + exp(l_)),
+            alpha=alpha,
+            n=n,
+            l=lb,
         )
 
-    def wosten_sand(self, ts: bool = False) -> Genuchten:
-        """Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
-        van boven- en ondergronden in Nederland: de Staringreeks"""
+    def wosten_sand(self, topsoil: bool = False) -> Genuchten:
+        """Pedotransfer function for sandy soils.
 
-        topsoil = 1.0 * ts
+        Parameters
+        ----------
+        topsoil : bool, optional
+            If True, applies the topsoil adjustment to the pedotransfer
+            function. Default is False.
+
+        References
+        ----------
+        Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., & Stolte, J. (2001).
+        Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+        Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
+        url: https://edepot.wur.nl/43272
+
+        """
+        msg = "Wosten sand pedotransfer function requires 'rho', 'm50', 'silt_p' and 'om_p' to be set."
+        assert self.rho is not None, msg
+        assert self.m50 is not None, msg
+        assert self.silt_p is not None, msg
+        assert self.om_p is not None, msg
+
+        ts = 1.0 * topsoil
         theta_s = (
             -35.7
             - 0.1843 * self.rho
@@ -308,7 +420,7 @@ class SoilSample:
         alpha = exp(
             13.66
             - 5.91 * self.rho
-            - 0.172 * topsoil
+            - 0.172 * ts
             + 0.003248 * self.m50
             - 11.89 * self.rho**-1
             - 2.121 * self.silt_p**-1
@@ -343,21 +455,32 @@ class SoilSample:
             + 2.364 * self.silt_p**-1
             + 1.014 * log(self.silt_p)
         )
-        l = min(max(2 * (exp(l_) - 1) / (exp(l_) + 1), -2.0), 2.0)  # noqa: E741
+        lb = min(max(2 * (exp(l_) - 1) / (exp(l_) + 1), -2.0), 2.0)  # noqa: E741
 
         return Genuchten(
-            k_s=round(k_s, 4),
+            k_s=k_s,
             theta_r=0.01,
-            theta_s=round(theta_s, 4),
-            alpha=round(alpha, 7),
-            n=round(n, 4),
-            l=round(l, 4),
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
+            l=lb,
         )
 
-    def wosten_clay(self) -> Brooks:
-        """Wosten et al. (2001) - Waterretentie- en doorlatendheidskarakteristieken
-        van boven- en ondergronden in Nederland: de Staringreeks"""
+    def wosten_clay(self) -> Genuchten:
+        """Pedotransfer function for clay soils.
 
+        References
+        ----------
+        Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., & Stolte, J. (2001).
+        Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+        Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
+        url: https://edepot.wur.nl/43272
+
+        """
+        msg = "Wosten clay pedotransfer function requires 'clay_p', 'rho', and 'om_p' to be set."
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
         theta_s = (
             0.6311
             + 0.003383 * self.clay_p
@@ -398,38 +521,512 @@ class SoilSample:
         )
 
         l_ = 0.102 + 0.0222 * self.clay_p - 0.043 * self.rho * self.clay_p
-        l = min(max(10.0 * (exp(l_) - 1) / (exp(l_) + 1), -10.0), 10.0)  # noqa: E741
+        lb = min(max(10.0 * (exp(l_) - 1) / (exp(l_) + 1), -10.0), 10.0)
         return Genuchten(
-            k_s=round(k_s, 4),
+            k_s=k_s,
             theta_r=0.01,
-            theta_s=round(theta_s, 4),
-            alpha=round(alpha, 7),
-            n=round(n, 4),
-            l=round(l, 4),
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
+            l=lb,
         )
 
     def cosby(self) -> Brooks:
-        """Cooper (2021) - Using data assimilation to optimize pedotransfer
-        functions using field-scale in situ soil moisture observations"""
+        """Pedotransfer function returning Brooks-Corey parameters.
+
+        References
+        ----------
+        Cooper, E., Blyth, E., Cooper, H., Ellis, R., Pinnington, E., & Dadson, S. J. (2021).
+        Using Data Assimilation to Optimize Pedotransfer Functions Using Field-Scale In Situ
+        Soil Moisture Observations. Hydrology and Earth System Sciences, 25, 2445--2461.
+        doi: 10.5194/hess-25-2445-2021
+
+        Cosby, B. J., Hornberger, G. M., Clapp, R. B., & Ginn, T. R. (1984).
+        A Statistical Exploration of the Relationships of Soil Moisture Characteristics to the
+        Physical Properties of Soils. Water Resources Research, 20(6), 682--690.
+        doi: 10.1029/WR020i006p00682
+
+        """
+        msg = "Cosby pedotransfer function requires 'clay_p' and 'sand_p' to be set."
+        assert self.clay_p is not None, msg
+        assert self.sand_p is not None, msg
         c = self.clay_p / 100
         s = self.sand_p / 100
         b = 3.100 + 15.70 * c - 0.300 * s
         theta_s = 0.505 - 0.037 * c - 0.142 * s
         psi_s = 0.01 * 10 ** (2.170 - 0.630 * c - 1.580 * s)
         k_s = 10 ** (-0.600 - 0.640 * c + 1.260 * s) * 25.2 / 3600
-        labda = 1 / b
+        lb = 1 / b
         k_s = k_s * 8640000 / 1000  # kg/m2/s to cm/d
         psi_s = psi_s * 100  # m to cm
         return Brooks(
-            k_s=round(k_s, 4),
+            k_s=k_s,
             theta_r=0.0,
-            theta_s=round(theta_s, 4),
-            h_b=round(psi_s, 5),
-            l=round(labda, 5),
+            theta_s=theta_s,
+            h_b=psi_s,
+            l=lb,
+        )
+
+    def saxton(self, df: float = 1.0) -> Brooks:
+        """Pedotransfer function returning Brooks-Corey parameters.
+
+        Implements the equations from Saxton and Rawls (2006) which estimate
+        soil water characteristics from soil texture and organic matter.
+
+        Parameters
+        ----------
+        df : float, optional
+            Density adjustment factor (normally between 0.9 and 1.3) to account
+            for compaction or loosening. Default is 1.0 (normal density).
+
+        References
+        ----------
+        Saxton, K. E., Rawls, W. J., Romberger, J. S., & Papendick, R. I. (1986).
+        Estimating generalized soil-water characteristics from texture.
+        Soil Science Society of America Journal, 50(4), 1031--1036.
+        doi: 10.2136/sssaj1986.03615995005000040039x
+
+        Saxton, K. E., & Rawls, W. J. (2006). Soil Water Characteristic Estimates
+        by Texture and Organic Matter for Hydrologic Solutions.
+        Soil Science Society of America Journal, 70(5), 1569--1578.
+        doi: 10.2136/sssaj2005.0117
+
+        """
+        msg = "Saxton-Rawls pedotransfer function requires 'sand_p', 'clay_p', and 'om_p' to be set."
+        assert self.sand_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.om_p is not None, msg
+
+        # Sand and Clay are calculated as fractions, OM is kept as a percentage
+        s_f = self.sand_p / 100.0
+        c_f = self.clay_p / 100.0
+
+        # 1500 kPa moisture (Wilting Point)
+        th1500t = (
+            -0.024 * s_f
+            + 0.487 * c_f
+            + 0.006 * self.om_p
+            + 0.005 * (s_f * self.om_p)
+            - 0.013 * (c_f * self.om_p)
+            + 0.068 * (s_f * c_f)
+            + 0.031
+        )
+        th1500 = th1500t + (0.14 * th1500t - 0.02)
+
+        # 33 kPa moisture (Field capacity)
+        th33t = (
+            -0.251 * s_f
+            + 0.195 * c_f
+            + 0.011 * self.om_p
+            + 0.006 * (s_f * self.om_p)
+            - 0.027 * (c_f * self.om_p)
+            + 0.452 * (s_f * c_f)
+            + 0.299
+        )
+        th33 = th33t + (1.283 * th33t**2 - 0.374 * th33t - 0.015)
+
+        # Saturation - 33 kPa moisture
+        ths_33t = (
+            0.278 * s_f
+            + 0.034 * c_f
+            + 0.022 * self.om_p
+            - 0.018 * (s_f * self.om_p)
+            - 0.027 * (c_f * self.om_p)
+            - 0.584 * (s_f * c_f)
+            + 0.078
+        )
+        ths_33 = ths_33t + (0.636 * ths_33t - 0.107)
+
+        # Saturation moisture & density
+        ths = th33 + ths_33 - 0.097 * s_f + 0.043
+        rho_n = (1 - ths) * 2.65
+
+        # Apply density factor adjustment
+        if df != 1.0:
+            rho_df = rho_n * df
+            ths_df = 1 - (rho_df / 2.65)
+            th33_df = th33 - 0.2 * (ths - ths_df)
+            ths_33_df = ths_df - th33_df
+
+            # Update variables with adjusted density
+            ths = ths_df
+            th33 = th33_df
+            ths_33 = ths_33_df
+
+        # Air entry tension (bubbling pressure) in kPa
+        psi_et = (
+            -21.67 * s_f
+            - 27.93 * c_f
+            - 81.97 * ths_33
+            + 71.12 * (s_f * ths_33)
+            + 8.29 * (c_f * ths_33)
+            + 14.05 * (s_f * c_f)
+            + 27.16
+        )
+        # Prevent mathematically negative air-entry tensions in edge-case soil bounds
+        psi_e = max(psi_et + (0.02 * psi_et**2 - 0.113 * psi_et - 0.70), 0.1)
+        # Convert air entry tension from kPa to cm water column (~10.1972)
+        h_b = psi_e * 10.1972
+
+        # Brooks-Corey parameters (Corrected inversion)
+        lp = (log(th33) - log(th1500)) / (log(1500) - log(33))
+
+        # Saturated hydraulic conductivity (cm/d = 2.4 mm/h)
+        k_s = 1930 * (ths - th33) ** (3 - lp) * 2.4
+
+        return Brooks(
+            k_s=k_s,
+            theta_r=0.0,
+            theta_s=ths,
+            h_b=h_b,
+            l=lp,
+        )
+
+    def vereecken(self) -> Genuchten:
+        """Pedotransfer function returning van Genuchten parameters.
+
+        Implements the classic continuous pedotransfer functions from Vereecken
+        et al. (1989) (Table 7) to estimate soil moisture retention parameters
+        from texture, bulk density, and carbon content, combined with the saturated
+        hydraulic conductivity (k_s) regression from Vereecken et al. (1990).
+
+        The Vereecken PTF relies on Organic Carbon (OC) in %. This method converts
+        `om_p` to OC using the standard 1.724 factor.
+
+        Warning: This method brute-forces a Gardner-calibrated k_s into a standard
+        Mualem-van Genuchten model framework. The resulting unsaturated conductivity
+        curve will follow Mualem-van Genuchten's format, not Vereecken's 1990 Gardner
+        function. Adjust accordingly when interpreting results or comparing to original
+        Vereecken curves.
+
+        References
+        ----------
+        Vereecken, H., Maes, J., Feyen, J., & Darius, P. (1989). Estimating the
+        soil moisture retention characteristic from texture, bulk density, and
+        carbon content. Soil Science, 148(6), 389--403.
+        doi: 10.1097/00010694-198912000-00001
+
+        Vereecken, H., Maes, J., & Feyen, J. (1990). Estimating Unsaturated
+        Hydraulic Conductivity from Easily Measured Soil Properties.
+        Soil Science, 149(1), 1--12. doi: 10.1097/00010694-199001000-00001
+
+        """
+        msg = "Vereecken (1989) PTF requires 'sand_p', 'clay_p', 'rho', and 'om_p' to be set."
+        assert self.sand_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        oc_p = self.om_p / 1.724
+        theta_s = 0.81 - 0.283 * self.rho + 0.001 * self.clay_p
+        theta_r = 0.015 + 0.005 * self.clay_p + 0.014 * oc_p
+        alpha = exp(
+            -2.486
+            + 0.025 * self.sand_p
+            - 0.351 * oc_p
+            - 2.617 * self.rho
+            - 0.023 * self.clay_p
+        )
+        n = exp(
+            0.053
+            - 0.009 * self.sand_p
+            - 0.013 * self.clay_p
+            + 0.00015 * (self.sand_p**2)
+        )
+        k_s = exp(
+            20.62
+            - 0.96 * log(self.clay_p)
+            - 0.66 * log(self.sand_p)
+            - 0.46 * log(oc_p)
+            - 8.43 * self.rho
+        )
+
+        gen = Genuchten(
+            k_s=k_s,
+            theta_r=theta_r,
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
+        )
+        gen.m = 1.0
+        return gen
+
+    def weynants(self) -> Genuchten:
+        """Pedotransfer function returning Mualem-van Genuchten parameters.
+
+        The Weynants PTF relies on Organic Carbon (OC), not Organic Matter (OM).
+        This method converts the `om_p` to OC using a factor 1.724.
+
+        References
+        ----------
+        Weynants, M., Vereecken, H., & Javaux, M. (2009). Revisiting Vereecken
+        Pedotransfer Functions: Introducing a Closed-Form Hydraulic Model.
+        Vadose Zone Journal, 8(1), 86--95. doi: 10.2136/vzj2008.0062
+
+        Vereecken, H., Maes, J., Feyen, J., & Darius, P. (1989). Estimating the
+        soil moisture retention characteristic from texture, bulk density, and
+        carbon content. Soil Science, 148(6), 389--403.
+        doi: 10.1097/00010694-198912000-00001
+
+        """
+        msg = "Weynants pedotransfer function requires 'sand_p', 'clay_p', 'rho', and 'om_p' to be set."
+        assert self.sand_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        # Convert organic matter percentage to organic carbon percentage
+        oc_p = self.om_p / 1.724
+
+        theta_s = 0.6355 + 0.0013 * self.clay_p - 0.1631 * self.rho
+        alpha = exp(
+            -4.3003 - 0.0097 * self.clay_p + 0.0138 * self.sand_p - 0.0992 * oc_p
+        )
+        n = (
+            exp(
+                -1.0846
+                - 0.0236 * self.clay_p
+                - 0.0085 * self.sand_p
+                + 0.0001 * (self.sand_p**2)
+            )
+            + 1.0
+        )
+        lb = -1.8642 - 0.1317 * self.clay_p + 0.0067 * self.sand_p
+        k0 = exp(1.9582 + 0.0308 * self.sand_p - 0.6142 * self.rho - 0.1566 * oc_p)
+
+        return Genuchten(
+            k_s=k0,
+            theta_r=0.0,
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
+            l=lb,
+        )
+
+    def toth(self, topsoil: bool = False) -> Genuchten:
+        """Pedotransfer function returning Mualem-van Genuchten parameters.
+
+        Implements the continuous pedotransfer functions from Tóth et al. (2015)
+        based on the EU-HYDI database. Uses Eq (21) for the Moisture Retention
+        Characteristic and Eq (16) for Saturated Hydraulic Conductivity.
+
+        Parameters
+        ----------
+        topsoil : bool, optional
+            If True, applies the topsoil adjustment to the pedotransfer
+            function. Default is False.
+
+        Returns
+        -------
+        Genuchten
+            Van Genuchten soil model with estimated parameters.
+
+        References
+        ----------
+        Tóth, B., Weynants, M., Nemes, A., Makó, A., Bilas, G., & Tóth, G. (2015).
+        New generation of hydraulic pedotransfer functions for Europe.
+        European Journal of Soil Science, 66(1), 226--238.
+        doi: 10.1111/ejss.12192
+
+        """
+        msg = "Tóth 2015 PTF requires 'sand_p', 'silt_p', 'clay_p', 'rho', and 'om_p'."
+        assert self.sand_p is not None, msg
+        assert self.silt_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        oc_p = self.om_p / 1.724  # Converts OM to Organic Carbon
+        ts = 1.0 * topsoil
+
+        theta_r = 0.041 if self.sand_p >= 2.00 else 0.179
+        theta_s = (
+            0.83080
+            - 0.28217 * self.rho
+            + 0.0002728 * self.clay_p
+            + 0.000187 * self.silt_p
+        )
+        alpha = 10 ** (
+            -0.43348
+            - 0.41729 * self.rho
+            - 0.04762 * oc_p
+            + 0.21810 * ts
+            - 0.01581 * self.clay_p
+            - 0.01207 * self.silt_p
+        )
+        n = (
+            10
+            ** (
+                0.22236
+                - 0.30189 * self.rho
+                - 0.05558 * ts
+                - 0.005306 * self.clay_p
+                - 0.003084 * self.silt_p
+                - 0.01072 * oc_p
+            )
+        ) + 1.0
+
+        if oc_p < 0.07:
+            log10_ks = 0.55
+        elif 0.07 <= oc_p < 0.40:
+            if self.sand_p < 5.77:
+                log10_ks = -0.11
+            elif 5.77 <= self.sand_p < 69.72:
+                log10_ks = 1.28
+            else:  # self.sand_p >= 69.72
+                log10_ks = 1.96
+        elif 0.40 <= oc_p < 0.41:
+            if self.silt_p >= 32.11:
+                log10_ks = -1.81
+            else:
+                log10_ks = -0.40
+        elif 0.41 <= oc_p < 0.96:
+            if self.clay_p >= 37.4:
+                log10_ks = 0.67
+            else:
+                log10_ks = 1.53
+        else:  # oc_p >= 0.96
+            if topsoil:
+                if 0.96 <= oc_p < 2.09:
+                    if self.silt_p < 10.85:
+                        log10_ks = 0.01
+                    else:  # self.silt_p >= 10.85
+                        if 0.96 <= oc_p < 1.52:
+                            log10_ks = 1.82
+                        elif 1.52 <= oc_p < 1.54:
+                            log10_ks = -0.46
+                        else:  # 1.54 <= oc_p < 2.09
+                            log10_ks = 1.72
+                elif 2.09 <= oc_p < 2.10:
+                    log10_ks = -0.87
+                else:  # oc_p >= 2.10
+                    if self.sand_p >= 38.95:
+                        log10_ks = 1.44
+                    else:  # self.sand_p < 38.95
+                        if 2.10 <= oc_p < 2.42:
+                            log10_ks = 1.82
+                        else:  # oc_p >= 2.42
+                            log10_ks = -0.22
+            else:
+                if 0.96 <= oc_p < 0.97:
+                    log10_ks = -0.95
+                elif 0.97 <= oc_p < 1.52:
+                    log10_ks = 1.13
+                elif 1.52 <= oc_p < 1.54:
+                    log10_ks = -0.75
+                elif 1.54 <= oc_p < 2.04:
+                    log10_ks = 1.33
+                else:  # oc_p >= 2.04
+                    log10_ks = -0.25
+
+        k_s = 10**log10_ks
+
+        return Genuchten(
+            k_s=k_s,
+            theta_r=theta_r,
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
+            l=0.5,
+        )
+
+    def hodnett(self, ph: float = 5.8, cec: float = 15.0) -> Genuchten:
+        """Pedotransfer function for tropical soils.
+
+        Implements the continuous pedotransfer function from Hodnett & Tomasella (2002)
+        calibrated exclusively on tropical soils from the IGBP-DIS database. This PTF
+        relies on Organic Carbon (OC), not Organic Matter (OM). This method converts
+        the `om_p` to OC using a factor 1.724. Note that the k_s is not estimated by this
+        PTF and is set to NaN.
+
+        Parameters
+        ----------
+        ph : float, optional
+            Soil pH in water. Default is 5.8 (mean of the calibration dataset).
+        cec : float, optional
+            Cation Exchange Capacity (cmol kg^-1). Default is 15.0 (mean of the calibration dataset).
+
+        References
+        ----------
+        Hodnett, M. G., & Tomasella, J. (2002). Marked differences between van Genuchten
+        soil water-retention parameters for temperate and tropical soils: a new water-retention
+        pedo-transfer functions developed for tropical soils. Geoderma, 108(3-4), 155--180.
+        doi: 10.1016/S0016-7061(02)00105-2
+
+        """
+        msg = "Hodnett & Tomasella PTF requires 'sand_p', 'silt_p', 'clay_p', 'rho', and 'om_p'."
+        assert self.sand_p is not None, msg
+        assert self.silt_p is not None, msg
+        assert self.clay_p is not None, msg
+        assert self.rho is not None, msg
+        assert self.om_p is not None, msg
+
+        oc_p = self.om_p / 1.7240
+
+        alpha = (
+            exp(
+                (
+                    -2.294
+                    - 3.526 * self.silt_p
+                    + 2.440 * oc_p
+                    - 0.076 * cec
+                    - 11.331 * ph
+                    + 0.019 * (self.silt_p**2)
+                )
+                / 100.0
+            )
+            / 10.1972  # from kpa to 1/cm
+        )
+        n = exp(
+            (
+                62.986
+                - 0.833 * self.clay_p
+                - 0.529 * oc_p
+                + 0.593 * ph
+                + 0.0070 * (self.clay_p**2)
+                - 0.014 * (self.sand_p * self.silt_p)
+            )
+            / 100.0
+        )
+        theta_s = (
+            81.799
+            + 0.099 * self.clay_p
+            - 31.420 * self.rho
+            + 0.235 * cec
+            - 0.831 * ph
+            + 0.0018 * (self.clay_p**2)
+            + 0.0005 * (self.sand_p * self.clay_p)
+        ) / 100.0
+        theta_r = (
+            22.733
+            - 0.164 * self.silt_p
+            + 0.018 * cec
+            + 0.451 * ph
+            - 0.0026 * (self.sand_p * self.clay_p)
+        ) / 100.0
+
+        return Genuchten(
+            k_s=nan,
+            theta_r=theta_r,
+            theta_s=theta_s,
+            alpha=alpha,
+            n=n,
         )
 
     def rosetta(self, version: Literal[1, 2, 3] = 3) -> Genuchten:
-        """Rosetta (Schaap et al., 2001) - Predicting soil water retention from soil"""
+        """Pedotransfer function using the Rosetta API.
+
+        References
+        ----------
+        Schaap, M. G., Leij, F. J., & van Genuchten, M. Th. (2001). Rosetta: A Computer Program
+        for Estimating Soil Hydraulic Parameters with Hierarchical Pedotransfer Functions.
+        Journal of Hydrology, 251(3--4), 163--176. doi: 10.1016/S0022-1694(01)00466-8
+
+        Zhang, Y., & Schaap, M. G. (2017). Weighted recalibration of the Rosetta pedotransfer
+        model with improved estimates of hydraulic parameter distributions and summary statistics
+        (Rosetta3). Journal of Hydrology, 547, 39--53. doi: 10.1016/j.jhydrol.2017.01.004
+
+        """
         try:
             from httpx import post as httpx_post
         except ImportError:
@@ -468,9 +1065,144 @@ class SoilSample:
             n=10 ** vgpar[3],
         )
 
-    def hypags(self) -> Genuchten:
+    def rawls(self, cecc: float | None = None) -> Brooks:
+        """Estimate Brooks-Corey parameters using the Rawls & Brakensiek method.
+
+        cecc: Cation Exchange Capacity of clay (cmol kg^-1). Required if `rho` is not provided.
+
+        References
+        ----------
+        Rawls, W. J., & Brakensiek, D. L. (1989). Estimation of Soil Water Retention and
+        Hydraulic Properties. In: Morel-Seytoux, H. J. (eds) Unsaturated Flow in Hydrologic
+        Modeling: Theory and Practice. Springer Netherlands, Dordrecht, pp. 275--300.
+        doi: 10.1007/978-94-009-2352-2_10
+
         """
-        Estimate van Genuchten parameters using the HYPAGS method.
+        assert self.sand_p is not None, "Rawls PTF requires 'sand_p' to be set."
+        assert self.clay_p is not None, "Rawls PTF requires 'clay_p' to be set."
+        assert self.om_p is not None, "Rawls PTF requires 'om_p' to be set."
+
+        if self.rho is None:
+            assert cecc is not None, (
+                "Rawls PTF requires 'cecc' to be provided if 'rho' is not set."
+            )
+            cec = cecc / self.clay_p
+            print(cec)
+            assert 0.1 <= cec <= 0.9, (
+                f"Rawls PTF requires 'cecc/clay_p' to be between 0.1 and 0.9. Got {cec:.2f}."
+            )
+            bd = (
+                1.51
+                + 0.0025 * self.sand_p
+                - 0.0013 * self.sand_p * self.om_p
+                - 0.0006 * self.clay_p * self.om_p
+                - 0.0048 * self.clay_p * cec
+            )
+            theta_s = (2.65 - bd) / 2.65
+            eac = (
+                1.0
+                - (
+                    3.8
+                    + 0.00019 * self.clay_p**2
+                    - 0.0337 * self.sand_p  # 0.337 in book, seems like a typod
+                    + 0.126 * cec * self.clay_p
+                    + self.om_p * (self.sand_p / 200.0) ** 2
+                )
+                / 100.0
+            )
+            # Rawls & Baumer 1989
+            theta_r = (
+                (0.2 + 0.1 * self.om_p + 0.25 * self.clay_p * cec**0.45) * bd / 100.0
+            )
+            c1 = (
+                0.17
+                + 0.181 * self.clay_p
+                - 0.00000069 * self.sand_p**2 * self.clay_p**2
+                - 0.00000041 * self.sand_p**2 * (100.0 - self.sand_p - self.clay_p) ** 2
+                + 0.000118 * self.sand_p**2 * bd**2
+                + 0.00069 * self.clay_p**2 * bd**2
+                + 0.000049 * self.sand_p**2 * self.clay_p
+                - 0.000085 * (100.0 - self.sand_p - self.clay_p) * self.clay_p**2
+            )
+            k_s = (
+                0.00035
+                * (theta_s * eac - theta_r) ** 3
+                / (1 - theta_s * eac) ** 2
+                * (bd / theta_r) ** 2
+                * c1**2
+            ) * 24.0  # cm/d
+        else:
+            bd = self.rho
+            theta_s = (2.65 - bd) / 2.65
+            theta_r = (
+                -0.0182482
+                + 0.00087269 * self.sand_p
+                + 0.00513488 * self.clay_p
+                + 0.02939286 * theta_s
+                - 0.00015395 * self.clay_p**2
+                - 0.0010827 * self.sand_p * theta_s
+                - 0.00018233 * self.clay_p**2 * theta_s**2
+                + 0.00030703 * self.clay_p**2 * theta_s
+                - 0.0023584 * theta_s**2 * self.clay_p
+            )
+            k_s = (
+                exp(
+                    19.52348 * theta_s
+                    - 8.96847
+                    - 0.028212 * self.clay_p
+                    + 0.00018107 * self.sand_p**2
+                    - 0.0094125 * self.clay_p**2
+                    - 8.395215 * theta_s**2
+                    + 0.077718 * self.sand_p * theta_s
+                    - 0.00298 * self.sand_p**2 * theta_s**2
+                    - 0.019492 * self.clay_p**2 * theta_s**2
+                    + 0.0000173 * self.sand_p**2 * self.clay_p
+                    + 0.02733 * self.clay_p**2 * theta_s
+                    + 0.001434 * self.sand_p**2 * theta_s
+                    - 0.0000035 * self.clay_p**2 * self.sand_p
+                )
+                * 24.0
+            )  # cm/d
+
+        h_b = exp(
+            5.3396738
+            + 0.1845038 * self.clay_p
+            - 2.48394546 * theta_s
+            - 0.00213853 * self.clay_p**2
+            - 0.04356349 * self.sand_p * theta_s
+            - 0.61745089 * self.clay_p * theta_s
+            + 0.00143598 * self.sand_p**2 * theta_s**2
+            - 0.00855375 * self.clay_p**2 * theta_s**2
+            - 0.00001282 * self.sand_p**2 * self.clay_p
+            + 0.00895359 * self.clay_p**2 * theta_s
+            - 0.00072472 * self.sand_p**2 * theta_s
+            + 0.0000054 * self.clay_p**2 * self.sand_p
+            + 0.50028060 * theta_s**2 * self.clay_p
+        )
+        lb = exp(
+            -0.7842831
+            + 0.0177544 * self.sand_p
+            - 1.062498 * theta_s
+            - 0.00005304 * self.sand_p**2
+            - 0.00273493 * self.clay_p**2
+            + 1.11134946 * theta_s**2
+            - 0.03088295 * self.sand_p * theta_s
+            + 0.00026587 * self.sand_p**2 * theta_s**2
+            - 0.00610522 * self.clay_p**2 * theta_s**2
+            - 0.00000235 * self.sand_p**2 * self.clay_p
+            + 0.00798746 * self.clay_p**2 * theta_s
+            - 0.00674491 * theta_s**2 * self.clay_p
+        )
+        return Brooks(
+            k_s=k_s,
+            theta_r=theta_r,
+            theta_s=theta_s,
+            h_b=h_b,
+            l=lb,
+        )
+
+    def hypags(self) -> Genuchten:
+        """Estimate van Genuchten parameters using the HYPAGS method.
 
         Implements the Kozeny-Carman-based parameterization from Peche & Houben
         (2023, 2024) to derive van Genuchten parameters and characteristic grain-size
@@ -497,9 +1229,12 @@ class SoilSample:
         ----------
         Peche, A., Houben, G., & Altfelder, S. (2024). Approximation of van Genuchten
         Parameter Ranges from Hydraulic Conductivity Data. Groundwater, 62(3), 469-479.
+        doi: 10.1111/gwat.13365
 
         Peche, A., & Houben, G. J. (2023). Estimating characteristic grain sizes and
         effective porosity from hydraulic conductivity data. Groundwater, 61(4), 574-585.
+        doi: 10.1111/gwat.13266
+
         """
         # constants and coefficients
         rho_f = 999.7  # fluid density [kg/m³] (assumed 20°C)
@@ -522,9 +1257,10 @@ class SoilSample:
         def solve_kozeny_carman(
             k: float, ne_i: float, d50_i: float, const: float
         ) -> tuple[float, float]:
-            """
-            Solve for d50 and effective porosity based on Kozeny-Carman equation
-            using scipy's fixed_point for robust successive substitution iteration.
+            """Solve for d50 and effective porosity.
+
+            Based on Kozeny-Carman equation using scipy's fixed_point
+            for robust successive substitution iteration.
 
             Parameters (Parametrization-dependent)
             ----------
@@ -537,12 +1273,13 @@ class SoilSample:
             -------
             ne : effective porosity
             d50 : d50
+
             """
             c = 180 * const
 
             def update_func(vars):
-                """
-                Fixed-point iteration function.
+                """Fixed-point iteration function.
+
                 Computes the next iteration values for [n, d] given current values.
                 """
                 n, d = vars
@@ -558,8 +1295,7 @@ class SoilSample:
             return ne, d50
 
         def get_alpha_errors(k: float) -> tuple[float, float]:
-            """
-            Return bootstrap confidence interval errors for a given k value.
+            """Return bootstrap confidence interval errors for a given k value.
 
             Uses binary search to quickly find the corresponding [+Δα, -Δα] pair
             based on predefined k thresholds.
@@ -573,6 +1309,7 @@ class SoilSample:
             -------
             tuple[float, float]
                 (added_error, subtracted_error)
+
             """
             bounds = [
                 0.00000025,
@@ -590,28 +1327,29 @@ class SoilSample:
                 0.0005,
             ]
             errors = [
-                [3.002, 1.144],
-                [5.364, 1.258],
-                [7.031, 1.366],
-                [6.728, 1.519],
-                [6.758, 2.072],
-                [6.607, 2.393],
-                [5.91, 2.985],
-                [5.643, 3.229],
-                [4.84, 4.0],
-                [4.082, 4.233],
-                [3.182, 4.486],
-                [3.051, 5.03],
-                [3.442, 5.483],
+                (3.002, 1.144),
+                (5.364, 1.258),
+                (7.031, 1.366),
+                (6.728, 1.519),
+                (6.758, 2.072),
+                (6.607, 2.393),
+                (5.91, 2.985),
+                (5.643, 3.229),
+                (4.84, 4.0),
+                (4.082, 4.233),
+                (3.182, 4.486),
+                (3.051, 5.03),
+                (3.442, 5.483),
             ]
             default_error = (1.811, 2.858)
 
             i = bisect_right(bounds, k)
-            return tuple(errors[i - 1]) if i <= len(errors) else default_error
+            sel_error = errors[i - 1] if i <= len(errors) else default_error
+
+            return sel_error
 
         def get_n_errors(alpha: float) -> tuple[float, float]:
-            """
-            Return bootstrap confidence interval errors for a given alpha value.
+            """Return bootstrap confidence interval errors for a given alpha value.
 
             Uses binary search to find the corresponding [+Δn, -Δn] pair
             based on predefined alpha thresholds.
@@ -619,34 +1357,34 @@ class SoilSample:
             Parameters
             ----------
             alpha : float
-            Alpha parameter.
+                Van Genuchten alpha parameter.
 
             Returns
             -------
             tuple[float, float]
             (added_error, subtracted_error)
-            """
 
+            """
             bounds = [1, 2, 3, 4, 5, 6, 7, 8, 9]
             errors = [
-                [2.836, 0.358],
-                [3.061, 0.826],
-                [3.481, 0.828],
-                [3.182, 0.605],
-                [1.905, 0.509],
-                [1.184, 0.297],
-                [4.032, 0.352],
-                [1.385, 0.241],
-                [1.017, 0.155],
+                (2.836, 0.358),
+                (3.061, 0.826),
+                (3.481, 0.828),
+                (3.182, 0.605),
+                (1.905, 0.509),
+                (1.184, 0.297),
+                (4.032, 0.352),
+                (1.385, 0.241),
+                (1.017, 0.155),
             ]
             default_error = (3.006, 0.377)
 
             i = bisect_right(bounds, alpha)
-            return tuple(errors[i - 1]) if i <= len(errors) else default_error
+            sel_error = errors[i - 1] if i <= len(errors) else default_error
+            return sel_error
 
         def get_res_water_content(k: float) -> tuple[float, float, float]:
-            """
-            Return residual water content (θr) with lower and upper bounds for a given k value.
+            """Return residual water content (θr) with lower and upper bounds for a given k value.
 
             Uses binary search to find the corresponding [θr_lower, θr, θr_upper]
             triple based on predefined k thresholds.
@@ -660,6 +1398,7 @@ class SoilSample:
             -------
             tuple[float, float, float]
                 [θr_lower, θr, θr_upper]
+
             """
             bounds = [
                 0.00000025,
@@ -677,24 +1416,25 @@ class SoilSample:
                 0.0005,
             ]
             values = [
-                [0.089, 0.097, 0.198],
-                [0.097, 0.107, 0.207],
-                [0.09, 0.099, 0.227],
-                [0.095, 0.102, 0.221],
-                [0.091, 0.098, 0.216],
-                [0.087, 0.097, 0.227],
-                [0.104, 0.111, 0.212],
-                [0.099, 0.108, 0.219],
-                [0.079, 0.085, 0.233],
-                [0.082, 0.087, 0.226],
-                [0.067, 0.07, 0.223],
-                [0.105, 0.11, 0.23],
-                [0.096, 0.105, 0.23],
+                (0.089, 0.097, 0.198),
+                (0.097, 0.107, 0.207),
+                (0.09, 0.099, 0.227),
+                (0.095, 0.102, 0.221),
+                (0.091, 0.098, 0.216),
+                (0.087, 0.097, 0.227),
+                (0.104, 0.111, 0.212),
+                (0.099, 0.108, 0.219),
+                (0.079, 0.085, 0.233),
+                (0.082, 0.087, 0.226),
+                (0.067, 0.07, 0.223),
+                (0.105, 0.11, 0.23),
+                (0.096, 0.105, 0.23),
             ]
-            default_value = (0.068, 0.111, 0.096)
+            default_water_content = (0.068, 0.111, 0.096)
 
             i = bisect_right(bounds, k)
-            return tuple(values[i - 1]) if i <= len(values) else default_value
+            res = values[i - 1] if i <= len(values) else default_water_content
+            return res
 
         # mathematical model of hypags calculation of k, d10, d20:
         # CONDITION: in HYPAGS, either k, d10 or d20 have to be given
@@ -703,37 +1443,38 @@ class SoilSample:
                 k = self.k
             elif isinstance(self.k, ndarray):
                 if len(self.k) > 1:
-                    logging.warning(
+                    logger.warning(
                         "HYPAGS routine only accepts single k value, choosing the first k value in the array."
                     )
-                k = float(self.k[0])
+                k = float(self.k.item(0))
             else:
                 k = float(self.k)
 
             # case 0: mathematical model where k is given
             # check for non-valid input
             if k > 2.6e-2 or k < 2.87e-7:
-                logging.error("k out of hypags model limits.")
-            logging.debug("Using case 0 of hypags model (k given).")
-            self.d10 = (k / Pi * c) ** (0.5)  # calculation of d10
-            self.d20 = c1 * self.d10  # calculation of d20
+                logger.error("k out of hypags model limits.")
+            logger.debug("Using case 0 of hypags model (k given).")
+            d10 = (k / Pi * c) ** (0.5)  # calculation of d10
+            self.d20 = c1 * d10  # calculation of d20
+            self.d10 = d10
         elif self.d10 is not None:
             # case 1: mathematical model where d10 is given
             if not 5.35e-5 <= self.d10 <= 8.3e-4:
-                logging.error(
+                logger.error(
                     f"d10 ({self.d10:.3e}) out of hypags model limits: 5.35e-5 to 8.3e-4."
                 )
-            logging.debug("Using case 1 of hypags model (d10 given).")
+            logger.debug("Using case 1 of hypags model (d10 given).")
             self.d20 = c1 * self.d10  # calculation of d20
             k = (Pi * rho_f * g * self.d10**2) / mu
             self.k = array([k], dtype=float)  # calculation of k
         elif self.d20 is not None:
             # case 2: mathematical model where d20 is given
             if not 6.25e-5 <= self.d20 <= 1.2e-3:
-                logging.error(
+                logger.error(
                     f"d20 ({self.d20:.3e}) out of hypags model limits: 6.25e-5 to 1.2e-3."
                 )
-            logging.debug("Using case 2 of hypags model (d20 given).")
+            logger.debug("Using case 2 of hypags model (d20 given).")
             self.d10 = self.d20 / c1  # calculation of d10
             k = (Pi * rho_f * g * self.d10**2) / mu
             self.k = array([k], dtype=float)  # calculation of k
@@ -743,6 +1484,9 @@ class SoilSample:
             )
 
         # calculation of d50 and ne
+        assert self.d20 is not None, (
+            "d20 should have been calculated in the previous steps."
+        )
         d50_0 = a3 * self.d20  # starting value for iterative approximation of d50
         ne_0 = a1 * k**a2
         ne, d50 = solve_kozeny_carman(k=k, ne_i=ne_0, d50_i=d50_0, const=c)
@@ -799,8 +1543,7 @@ class SoilSample:
 
 @dataclass
 class Soil:
-    """
-    A class representing soil properties and models.
+    """A class representing soil properties and models.
 
     Attributes
     ----------
@@ -814,95 +1557,108 @@ class Soil:
         The data source for the soil parameters (e.g., 'HYDRUS', 'Staring_2018'), by default None.
     description : str | None, optional
         A text description of the soil type, by default None.
+
     """
 
     name: str
     model: SoilModel | None = None
     sample: SoilSample | None = None
-    source: str | None = None
+    source: SourceNames | None = None
     description: str | None = None
 
     def from_name(
-        self, sm: Type[SoilModel] | SoilModel | str, source: str | None = None
+        self,
+        sm: type[SoilModel] | SoilModel | SoilModelNames,
+        source: SourceNames | None = None,
     ) -> Self:
-        """Load soil parameters from a CSV database by soil name and model type."""
-        if isinstance(sm, SoilModel):
-            if hasattr(sm, "__name__"):
-                smn = sm.__name__
-            else:
-                smn = sm.__class__.__name__
-                sm = type(sm)
-        elif isinstance(sm, str):
-            smn = sm
-            sm = get_soilmodel(smn)
-        else:
-            raise ValueError(
-                f"Argument must either be Type[SoilModel] | SoilModel | str,"
-                f"not {type(sm)}"
-            )
+        """Load soil parameters from a CSV database by soil name and model type.
+
+        Available sources include HYDRUS, VS2D, Staring_2001, Staring_2018,
+        Rawls and Clapp.
+
+        References
+        ----------
+        Rawls, W. J., Brakensiek, D. L., & Saxton, K. E. (1982). Estimation of Soil
+        Water Properties. Transactions of the ASAE, 25(5), 1316--1320.
+        doi: 10.13031/2013.33720
+
+        Clapp, R. B., & Hornberger, G. M. (1978). Empirical equations for some soil
+        hydraulic properties. Water Resources Research, 14(4), 601--604.
+        doi: 10.1029/WR014i004p00601
+
+        Carsel, R. F. and Parrish, R. S. (1988). Developing Joint Probability
+        Distributions of Soil Water Retention Characteristics. Water Resources Research,
+        24(5), 755--769. doi: 10.1029/WR024i005p00755
+
+        Šimůnek, J., van Genuchten, M. Th., & Šejna, M. (2008). Development and applications
+        of the HYDRUS and STANMOD software packages and related codes. Vadose Zone Journal,
+        7(2), 587--600. doi: 10.2136/vzj2007.0077
+
+        Healy, R. W. (1990). Simulation of Solute Transport in Variably Saturated Porous Media
+        with Supplemental Information on Modifications to the U.S. Geological Survey Computer
+        Program VS2D. Water-Resources Investigations Report, U.S. Geological Survey,
+        Denver, CO. Report 90-4025. doi: 10.3133/wri904025
+
+        Wösten, J. H. M., Veerman, G. J., de Groot, W. J. M., & Stolte, J. (2001).
+        Waterretentie- en Doorlatendheidskarakteristieken van Boven- en Ondergronden in
+        Nederland: De Staringreeks. Alterra, Report 153, Wageningen, The Netherlands.
+        url: https://edepot.wur.nl/43272
+
+        Heinen, M., Bakker, G., & Wösten, J. H. M. (2020). Waterretentie- en
+        Doorlatendheidskarakteristieken van Boven- en Ondergronden in Nederland:
+        De Staringreeks; (Update 2018). Wageningen Environmental Research, Report 2978,
+        Wageningen, The Netherlands. doi: 10.18174/512761
+
+        """
+        smn, sm_cls = resolve_soilmodel(sm)
 
         path = Path(__file__).parent / "datasets/soilsamples.csv"
         ser = read_csv(path, delimiter=";", index_col=0)
         if "HYDRUS_" in self.name:
             self.name = self.name.replace("HYDRUS_", "")
             source = "HYDRUS"
-            logging.warning(
+            logger.warning(
                 "Removed 'HYDRUS_' from soil name. For future use"
                 "please provide source='HYDRUS' argument"
             )
-        sersm = ser[ser["soilmodel"] == smn].loc[[self.name], :]
+        sersm = ser.query(f"soilmodel == '{smn}'").loc[[self.name], :]
         if source is None and len(sersm) > 1:
-            raise Exception(
+            raise ValueError(
                 f"Multiple sources for soil {self.name}: "
-                f"{array2string(sersm.loc[:, 'source'].values)}. "
+                f"{sersm.loc[:, 'source'].to_numpy(dtype=str)}. "
                 f"Please provide the source using the source argument"
             )
         elif (source is not None) and len(sersm) > 1:
-            sersm = sersm[sersm["source"] == source]
+            sersm = sersm.query(f"source == '{source}'")
 
-        serd = sersm.squeeze().to_dict()
-        if isna(serd["description"]):
-            serd["description"] = serd["soil type"]
-        self.__setattr__("source", serd.pop("source"))
-        self.__setattr__("description", serd.pop("description"))
-        smserd = {
-            x: serd[x]
-            for x in sm.__dataclass_fields__.keys()
-            if sm.__dataclass_fields__[x].init
-        }
-        self.__setattr__("model", sm(**smserd))
+        sers: Any = sersm.iloc[0].copy()
+        if isna(sers.at["description"]):
+            sers.loc["description"] = sers.at["soil type"]
+        setattr(self, "source", sers.pop("source"))
+        setattr(self, "description", sers.pop("description"))
+        model_fields = [f.name for f in fields(cast(Any, sm_cls)) if f.init]
+        smserd = {x: sers.at[x] for x in model_fields}
+        setattr(self, "model", cast(Any, sm_cls)(**smserd))
         return self
 
     @staticmethod
-    def list_names(sm: Type[SoilModel] | SoilModel | str) -> list[str]:
+    def list_names(sm: type[SoilModel] | SoilModel | SoilModelNames) -> list[str]:
         """Return a list of available soil names for a given soil model."""
-        if isinstance(sm, SoilModel):
-            if hasattr(sm, "__name__"):
-                smn = sm.__name__
-            else:
-                smn = sm.__class__.__name__
-                sm = type(sm)
-        elif isinstance(sm, str):
-            smn = sm
-            sm = get_soilmodel(smn)
-
-        else:
-            raise ValueError(
-                f"Argument must either be Type[SoilModel] | SoilModel | str,"
-                f"not {type(sm)}"
-            )
+        smn, _ = resolve_soilmodel(sm)
 
         path = Path(__file__).parent / "datasets/soilsamples.csv"
         names = read_csv(path, delimiter=";")
 
-        return names[names["soilmodel"] == smn].loc[:, "name"].unique().tolist()
+        return names.query(f"soilmodel == '{smn}'").loc[:, "name"].unique().tolist()
 
-    def from_staring(self, year: str = "2018") -> Self:
+    def from_staring(self, year: Literal["2001", "2018"] = "2018") -> Self:
         """Load soil parameters from the Staring series database."""
         if year not in ("2001", 2001, "2018", 2018):
             raise ValueError(f"Year must either be '2001' or '2018', not {year}")
 
-        self.from_name(sm=Genuchten, source=f"Staring_{year}")
-        ss = SoilSample().from_staring(name=self.name, year=year)
-        self.__setattr__("sample", ss)
+        year_str = str(year)
+        source: SourceNames = "Staring_2001" if year_str == "2001" else "Staring_2018"
+        self.from_name(sm=Genuchten, source=source)
+        ss = SoilSample().from_staring(name=self.name, year=year_str)
+        setattr(self, "sample", ss)
         return self

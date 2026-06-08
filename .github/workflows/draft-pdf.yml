@@ -1,0 +1,34 @@
+# You can also run this locally with docker using:
+
+# docker run --rm \
+#     --volume $PWD/paper:/data \
+#     --user $(id -u):$(id -g) \
+#     --env JOURNAL=joss \
+#     openjournals/inara
+
+# https://github.com/marketplace/actions/open-journals-pdf-generator
+name: JOSS
+on:
+  push:
+    branches:
+      - joss
+
+jobs:
+  paper:
+    runs-on: ubuntu-latest
+    name: Build Paper Draft
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build draft PDF
+        uses: openjournals/openjournals-draft-action@master
+        with:
+          journal: joss
+          paper-path: paper/paper.md
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper
+          path: paper/paper.pdf
