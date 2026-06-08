@@ -39,15 +39,17 @@ A soil hydraulic model (or soil model for short) is a parametric description of 
 
 - `pedon.Genuchten`: @mualem_model_1976 - @genuchten_mualem_1980
 - `pedon.Brooks`: @brooks_corey_1964
-- `pedon.Panday`: van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2026]
-- `pedon.Fredlund`: @fredlund_xing_1994
+- `pedon.Gardner`: @gardner_model_1958 HCF with a @kozeny_soil_1927 based SWRC [@brutsaert_kozeny_1967; @mathias_gardner_2006; @bakker_gardner_2009]
+- `pedon.Campbell`: @campbell_model_1974
 - `pedon.Haverkamp`: @haverkamp_model_1977
 - `pedon.Kosugi`: @kosugi_model_1996
-- `pedon.Campbell`: @campbell_model_1974
-- `pedon.Gardner`: @gardner_model_1958 HCF with a @kozeny_soil_1927 based SWRC [@brutsaert_kozeny_1967; @mathias_gardner_2006; @bakker_gardner_2009]
+- `pedon.Fredlund`: @fredlund_xing_1994
+- `pedon.Brunswick`: @weber_brunswick_2019; @weber_brunswick_2020
+- `pedon.Kool`: hysteresis model with Mualem-van Genuchten SWRC and HCF [@kool_parker_1987]
+- `pedon.Gerke`: dual-porosity model with Mualem-van Genuchten SWRC and HCF [@gerke_dualporosity_1993]
 - `pedon.Rucker`: van Genuchten-like SWRC and Gardner HCF [@rucker_gardner_2005]
 - `pedon.GenuchtenGardner`: van Genuchten SWRC and Gardner HCF [@genuchten_mualem_1980; @gardner_model_1958]
-- `pedon.Kool`: Mualem-van Genuchten SWRC and HCF with hysteresis [@kool_parker_1987]
+- `pedon.Panday`: van Genuchten SWRC and Brooks-Corey HCF [@fuentes_burdine_1992; @panday_mfusgt_2026]
 
 ## Software design
 The soil models are implemented as Python classes with model-specific methods for evaluating the SWRC and HCF. For example, the Mualem–van Genuchten soil model can be used as follows:
