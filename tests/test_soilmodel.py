@@ -761,6 +761,68 @@ def test_h_haverkamp_inverse(haverkamp: pe.Haverkamp) -> None:
     assert_close(haverkamp.theta(h=h_out), theta)
 
 
+def test_theta_brunswick(brunswick: pe.Brunswick) -> None:
+    """Test water content calculation for the Brunswick model."""
+    expected = array(
+        [
+            0.4999991703271416,
+            0.4999668602375778,
+            0.4986879600880817,
+            0.4569001652583161,
+            0.2292138441347721,
+            0.1007588362446942,
+            0.05524125928920474,
+            0.03159644072915797,
+            0.013452718105112795,
+        ]
+    )
+    assert_close(brunswick.theta(h=h), expected)
+
+
+def test_s_brunswick(brunswick: pe.Brunswick) -> None:
+    """Test degree of saturation calculation for the Brunswick model."""
+    expected = array(
+        [
+            0.9999983399655377,
+            0.9999337204751556,
+            0.9973759201761635,
+            0.9138003475166322,
+            0.4584276777446077,
+            0.2015176724893884,
+            0.11048251857840948,
+            0.06319288145831595,
+            0.02690543621022558,
+        ]
+    )
+    assert_close(brunswick.s(h=h), expected)
+
+
+def test_k_brunswick(brunswick: pe.Brunswick) -> None:
+    """Test hydraulic conductivity calculation for the Brunswick model."""
+    expected = array(
+        [
+            97.92956247426391,
+            91.85479004815869,
+            69.58948878220202,
+            15.721644887915476,
+            0.04643513652798862,
+            5.159091342945608e-05,
+            3.879127256802016e-07,
+            3.406731262036317e-09,
+            2.890078846460336e-11,
+        ]
+    )
+    assert_close(brunswick.k(h=h), expected)
+
+
+def test_h_brunswick(brunswick: pe.Brunswick) -> None:
+    """Test pressure head calculation for the Brunswick model."""
+    expected = array(
+        [1025.3797500583578, 141.1015529468394, 50.26648558718838, 20.517268056602314]
+    )
+    assert_close(brunswick.h(theta=theta), expected)
+
+
 @pytest.mark.parametrize(
     "fixture_name",
     [
@@ -775,6 +837,7 @@ def test_h_haverkamp_inverse(haverkamp: pe.Haverkamp) -> None:
         "campbell",
         "kool",
         "haverkamp",
+        "brunswick",
     ],
 )
 def test_h_theta_roundtrip(fixture_name: str, request: pytest.FixtureRequest) -> None:

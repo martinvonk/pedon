@@ -6,9 +6,19 @@ from typing import Protocol, runtime_checkable
 from warnings import warn
 
 import matplotlib.pyplot as plt
+import numpy as np
 from numpy import abs as npabs
-from numpy import asarray, exp, full, linspace, log, log10, maximum, sqrt
-from scipy.integrate import trapezoid
+from numpy import (
+    asarray,
+    exp,
+    full,
+    linspace,
+    log,
+    log10,
+    maximum,
+    sqrt,
+)
+from scipy.integrate import quad, trapezoid
 from scipy.optimize import brentq
 from scipy.special import erfc, erfcinv, lambertw
 
@@ -267,6 +277,230 @@ class Brooks:
             return h
 
     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        return plot_swrc(self, ax=ax)
+
+
+@dataclass
+class Brunswick:
+    """Brunswick soil hydraulic property model.
+
+    Partitions pore space into capillary (c) and noncapillary (nc) fractions,
+    overcoming the inability of the van Genuchten-Mualem (VGM) model to
+    describe hydraulic properties in the dry range.
+
+    Parameters
+    ----------
+    k_sc : float
+        Saturated capillary hydraulic conductivity K_sc [L/T].
+    k_snc : float
+        Saturated noncapillary hydraulic conductivity K_snc [L/T].
+    theta_sc : float
+        Saturated capillary water content θ_sc [-].
+    theta_snc : float
+        Saturated noncapillary water content θ_snc [-].
+    alpha : float
+        van Genuchten alpha parameter [1/cm].
+    n : float
+        van Genuchten n parameter [-].
+    l : float, optional
+        Mualem tortuosity/connectivity exponent τ [-]. Default 0.5.
+
+    Notes
+    -----
+    The noncapillary desaturation head is fixed at h_d = 100/alpha (BW-VGM
+    variant). Units of k_sc and k_snc must be consistent with the calling
+    code; the class does not enforce a particular unit.
+
+    References
+    ----------
+    Weber, T. K. D., Durner, W., Streck, T., & Diamantopoulos, E. (2019).
+    A modular framework for modeling unsaturated soil hydraulic properties
+    over the full moisture range. Water Resources Research, 55, 4994-5011.
+    doi: 10.1029/2018WR024584
+
+    Weber, T. K. D., Finkel, M., da Conceição Gonçalves, M., Vereecken, H.,
+    & Diamantopoulos, E. (2020). Pedotransfer function for the Brunswick soil
+    hydraulic property model and comparison to the van Genuchten-Mualem model.
+    Water Resources Research, 56, e2019WR026820. doi: 10.1029/2019WR026820
+
+    Diamantopoulos, E., Simunek, J., & Weber, T. K. D. (2024). Implementation
+    of the Brunswick model system into the Hydrus software suite. Vadose Zone
+    Journal, 23, Article e20326. doi: 10.1002/vzj2.20326
+
+    """
+
+    k_sc: float
+    k_snc: float
+    theta_sc: float
+    theta_snc: float
+    alpha: float
+    n: float
+    l: float = 0.5  # noqa: E741
+
+    m: float = field(init=False, repr=False)
+    _gamma0: float = field(init=False, repr=False)
+    _snc_star_h0: float = field(init=False, repr=False)
+
+    def __post_init__(self):
+        """Pre-compute parameters for efficiency."""
+        self.m = 1.0 - 1.0 / self.n
+        self._gamma0 = float(self._gamma(10**6.8))  # gamma at oven-dry limit (pF 6.8)
+        self._snc_star_h0 = float(self._int_snc(10**6.8))
+
+    @property
+    def theta_r(self) -> float:
+        """Residual water content."""
+        return 0.0
+
+    @property
+    def theta_s(self) -> float:
+        """Saturated water content."""
+        return self.theta_sc + self.theta_snc
+
+    @property
+    def k_s(self) -> float:
+        """Saturated hydraulic conductivity."""
+        return self.k_sc + self.k_snc
+
+    def _gamma(self, h: FloatArray) -> FloatArray:
+        """Saturation function."""
+        return (1.0 + (self.alpha * h) ** self.n) ** -self.m
+
+    def sc(self, h: FloatArray) -> FloatArray:
+        """Capillary effective saturation S_c(h) [-]."""
+        h = np.abs(np.asarray(h))
+        sc_val = (self._gamma(h) - self._gamma0) / (1.0 - self._gamma0)
+        return np.where(h <= 0, 1.0, np.clip(sc_val, 0.0, 1.0))
+
+    def _int_snc(self, h_val: float) -> float:
+        """Scalar mathematical integration for the noncapillary space."""
+        if h_val <= 1e-3:
+            return 0.0
+
+        # Numerically stable integration over log-space: u = ln(x) -> dx/x = du
+        def integrand_log(log_x):
+            x = np.exp(log_x)
+            sc = (self._gamma(x) - self._gamma0) / (1.0 - self._gamma0)
+            return 1.0 - sc
+
+        # Integrate from ln(1e-3) to ln(h_val)
+        val = quad(integrand_log, np.log(1e-3), np.log(h_val))[0]
+        return val * np.log10(np.e)
+
+    def snc(self, h: FloatArray) -> FloatArray:
+        """Noncapillary effective saturation S_nc(h) [-]."""
+        h_arr = np.abs(np.asarray(h))
+        snc_star = np.array([self._int_snc(float(v)) for v in h_arr.flat]).reshape(
+            h_arr.shape
+        )
+        snc_val = 1.0 - (snc_star / self._snc_star_h0)
+        return np.where(h_arr <= 1e-3, 1.0, np.clip(snc_val, 0.0, 1.0))
+
+    def theta(self, h: FloatArray) -> FloatArray:
+        """Calculate soil moisture content from pressure head."""
+        return self.theta_sc * self.sc(h) + self.theta_snc * self.snc(h)
+
+    def s(self, h: FloatArray) -> FloatArray:
+        """Calculate effective saturation from pressure head."""
+        return self.theta(h) / self.theta_s
+
+    def k_rsc(self, h: FloatArray) -> FloatArray:
+        """Relative capillary hydraulic conductivity K_rc(h) [-]."""
+        h = np.abs(np.asarray(h))
+
+        sc = self.sc(h)
+        sc = np.where(sc > 0, sc, 1.0)
+
+        k_rc = (sc**self.l) * (
+            (
+                1.0
+                - (
+                    (
+                        (1.0 - self._gamma(h) ** (1 / self.m))
+                        / (1.0 - self._gamma0 ** (1 / self.m))
+                    )
+                    ** self.m
+                )
+            )
+            ** 2.0
+        )
+
+        return np.where(sc <= 0, 0.0, k_rc)
+
+    def k_rsnc(self, h: FloatArray) -> FloatArray:
+        """Relative noncapillary hydraulic conductivity K_rnc(h) [-]."""
+        h = np.abs(np.asarray(h))
+        snc = self.snc(h)
+
+        k_rnc = 10.0 ** (-10.2 * (1.0 - snc))  # Tokunaga film-flow exponential
+
+        return np.where(snc <= 0, 0.0, k_rnc)
+
+    def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        """Total relative hydraulic conductivity K_r(h) [-]."""
+        if s is not None:
+            h = self.h(s * self.theta_s)
+        h = np.abs(np.atleast_1d(h))
+
+        # Scale relative components by their respective saturated conductivities
+        k_c = self.k_sc * self.k_rsc(h)
+        k_nc = self.k_snc * self.k_rsnc(h)
+
+        return np.where(h <= 0, 1.0, (k_c + k_nc) / self.k_s)
+
+    def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        """Calculate hydraulic conductivity from pressure head or saturation."""
+        return self.k_s * self.k_r(h=h, s=s)
+
+    def h(self, theta: FloatArray) -> FloatArray:
+        """Calculate pressure head via numerical inverse of the water content function.
+
+        Uses Brent's method over the bracket [0, 10^6.8 cm] (pF 0 … 6.8).
+
+        Parameters
+        ----------
+        theta : FloatArray
+            Volumetric water content [cm³ cm⁻³].
+
+        """
+        h_min = 0.0
+        h_max = 10.0**6.8  # oven-dry upper limit (pF 6.8)
+        theta_dry = float(self.theta(h_max))
+
+        theta_arr = asarray(theta, dtype=float)
+        h_out = full(theta_arr.shape, 0.0)
+
+        for i, th in np.ndenumerate(theta_arr):
+            if th >= self.theta_s:
+                logger.warning(
+                    f"Input theta={th} is above the saturated water content "
+                    f"theta_s={self.theta_s}. Setting h to 0."
+                )
+                h_out[i] = h_min
+            elif th <= theta_dry:
+                logger.warning(
+                    f"Input theta={th} is below the residual water content "
+                    f"theta_r={self.theta_r}. Setting h to {h_max}."
+                )
+                h_out[i] = h_max
+            else:
+
+                def obj(x: float) -> float:
+                    return float(self.theta(x)) - th
+
+                root, res = brentq(obj, a=h_min, b=h_max, full_output=True, disp=False)
+                if res.converged:
+                    h_out[i] = root
+                else:
+                    logger.error(
+                        f"Root finding did not converge for theta={th}. Setting h to {h_max}."
+                    )
+                    h_out[i] = h_max
+
+        return h_out
+
+    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        """Plot the soil water retention curve."""
         return plot_swrc(self, ax=ax)
 
 
@@ -1105,6 +1339,7 @@ def get_soilmodel(
     sms = {
         "Genuchten": Genuchten,
         "Brooks": Brooks,
+        "Brunswick": Brunswick,
         "Haverkamp": Haverkamp,
         "Gardner": Gardner,
         "Rucker": Rucker,
