@@ -1206,7 +1206,7 @@ class Gerke:
     l_m: float
         Pore-connectivity parameter for the matrix pore system [-].
     w_f: float
-        Volumetric weighting factor for the fracture domain (V_f / V_m) [-].
+        Volumetric weighting factor for the fracture domain (V_f / (V_f + V_m)) [-].
 
     Notes
     -----
@@ -1299,7 +1299,7 @@ class Gerke:
             theta = s * (self.theta_s - self.theta_r) + self.theta_r
             h = self.h(theta)
 
-        return self.w_f * self.k_f(h=h, s=s) + self.w_m * self.k_m(h=h, s=s)
+        return self.w_f * self.k_f(h=h) + self.w_m * self.k_m(h=h)
 
     def k_f(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         """Calculate hydraulic conductivity of the fracture domain."""
@@ -1328,7 +1328,7 @@ class Gerke:
         h_out = full(theta.shape, 0.0)
         h_max = 1e10  # A large number to represent the maximum pressure head for dry conditions
 
-        for i, th in enumerate(theta):
+        for i, th in np.ndenumerate(theta):
             if th >= self.theta_s:
                 logger.warning(
                     f"Input theta={th} is above the saturated water content "
