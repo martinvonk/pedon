@@ -930,9 +930,7 @@ def test_k_r_gerke(gerke: pe.Gerke) -> None:
 
 def test_h_gerke(gerke: pe.Gerke) -> None:
     """Test pressure head calculation for the Gerke model."""
-    expected = array(
-        [1.00000000e10, 2.81023765e03, 6.36685070e02, 1.98312746e02]
-    )
+    expected = array([1.00000000e10, 2.81023765e03, 6.36685070e02, 1.98312746e02])
     h_out = gerke.h(theta=theta)
     assert_close(h_out, expected)
     # For Gerke, the h-theta roundtrip should work via numerical root finding

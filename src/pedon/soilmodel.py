@@ -1208,6 +1208,12 @@ class Gerke:
     w_f: float
         Volumetric weighting factor for the fracture domain (V_f / V_m) [-].
 
+    Notes
+    -----
+    This model does not represent the exchange terms between the fracture and matrix
+    domains because those are time and space dependent. It rather assumes that the
+    two domains are in instantaneous equilibrium with each other.
+
     References
     ----------
     Gerke, H. H., & van Genuchten, M. Th. (1993). A dual-porosity model for simulating the
@@ -1272,20 +1278,44 @@ class Gerke:
         return self.w_f * self.fracture.k_s + self.w_m * self.matrix.k_s
 
     def theta(self, h: FloatArray) -> FloatArray:
-        """Calculate bulk soil moisture content assuming equilibrium."""
-        return self.w_f * self.fracture.theta(h) + self.w_m * self.matrix.theta(h)
+        """Calculate bulk soil moisture content."""
+        return self.w_f * self.theta_f(h) + self.w_m * self.theta_m(h)
+
+    def theta_f(self, h: FloatArray) -> FloatArray:
+        """Calculate fracture soil moisture content."""
+        return self.fracture.theta(h)
+
+    def theta_m(self, h: FloatArray) -> FloatArray:
+        """Calculate matrix soil moisture content."""
+        return self.matrix.theta(h)
 
     def s(self, h: FloatArray) -> FloatArray:
         """Calculate effective saturation of the bulk soil."""
         return (self.theta(h) - self.theta_r) / (self.theta_s - self.theta_r)
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
-        """Calculate bulk hydraulic conductivity assuming equilibrium."""
+        """Calculate bulk hydraulic conductivity."""
         if s is not None:
             theta = s * (self.theta_s - self.theta_r) + self.theta_r
             h = self.h(theta)
 
-        return self.w_f * self.fracture.k(h) + self.w_m * self.matrix.k(h)
+        return self.w_f * self.k_f(h=h, s=s) + self.w_m * self.k_m(h=h, s=s)
+
+    def k_f(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        """Calculate hydraulic conductivity of the fracture domain."""
+        if s is not None:
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            h = self.h(theta)
+
+        return self.fracture.k(h)
+
+    def k_m(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
+        """Calculate hydraulic conductivity of the matrix domain."""
+        if s is not None:
+            theta = s * (self.theta_s - self.theta_r) + self.theta_r
+            h = self.h(theta)
+
+        return self.matrix.k(h)
 
     def k_r(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         """Calculate relative permeability of the bulk soil."""

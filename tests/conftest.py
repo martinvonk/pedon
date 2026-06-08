@@ -90,6 +90,7 @@ def kool() -> pe.Kool:
         xi=2.5,
     )
 
+
 @fixture
 def brunswick() -> pe.Brunswick:
     """Fixture for a Brunswick soil model with specific parameters for testing."""
