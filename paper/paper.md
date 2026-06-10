@@ -81,7 +81,7 @@ Soil hydraulic parameters determine the shape of a soil model’s SWRC and HCF, 
 - VS2D [@healy_vs2d_1990] and @rawls_dataset_1982 for Brooks–Corey parameters.
 - @clapp_hornberger_1978 for Campbell parameters.
 
-For example, a parameter set for a sandy soil (classified as "B05" in the Staring series) can easily be obtained from any of the databases via the following code, enabling direct comparison of the resulting SWRC's (Figure \ref{fig:dataset_swrc}).
+For example, a parameter set for a sandy soil (classified as "B05" in the Staring series) can easily be obtained from any of the databases via the following code, enabling direct comparison of the resulting SWRCs (Figure \ref{fig:dataset_swrc}).
 
 ```python
 hydrus = pe.Soil("Sand").from_name(pe.Genuchten, source="HYDRUS")
@@ -90,13 +90,13 @@ rawls = pe.Soil("Sand").from_name(pe.Brooks, source="Rawls")
 clapp = pe.Soil("Sand").from_name(pe.Campbell, source="Clapp")
 ```
 
-![Comparison of SWRC's for a generic sandy soil using parameters retrieved from four different soil databases. \label{fig:dataset_swrc}](figures/dataset_swrc.png)
+![Comparison of SWRCs for a generic sandy soil using parameters retrieved from four different soil databases. \label{fig:dataset_swrc}](figures/dataset_swrc.png)
 
 ## Parameter estimation
 `pedon` provides two approaches for obtaining soil model parameters from soil measurements. The first uses pedotransfer functions based on easily measured soil properties. The second relies on direct measurements of soil water content and hydraulic conductivity.
 
 ### Pedotransfer functions
-Pedotransfer functions relate easily measured soil properties (e.g. sand, silt, clay or organic matter content and bulk density) to soil model parameters [@bouma_pedotransfer_1989; @looy_pedotransfer_2017]. `pedon` implements a comprehensive suite of pedotransfer functions from the literature, including those of @cosby_pedotransfer_1984, @cooper_pedotransfer_2021, @saxton_pedotransfer_1986, @saxton_pedotransfer_2006, @rawls_pedotransfer_1989, @vereecken_pedotransfer_1989,  @vereecken_pedotransfer_1990, @wosten_pedotransfer_1999, Rosetta [@schaap_rosetta_2001; @zhang_rosetta3_2017], @wosten_staringreeks_2001, @hodnett_pedotransfer_2002, @weynants_pedotransfer_2009, @toth_pedotransfer_2015. The code snippet below shows how to apply three different pedotransfer functions to the same soil sample, resulting in different parameter estimates and thus SWRCs' (Figure \ref{fig:ptf_swrc}).
+Pedotransfer functions relate easily measured soil properties (e.g. sand, silt, clay or organic matter content and bulk density) to soil model parameters [@bouma_pedotransfer_1989; @looy_pedotransfer_2017]. `pedon` implements a comprehensive suite of pedotransfer functions from the literature, including those of @cosby_pedotransfer_1984, @cooper_pedotransfer_2021, @saxton_pedotransfer_1986, @saxton_pedotransfer_2006, @rawls_pedotransfer_1989, @vereecken_pedotransfer_1989,  @vereecken_pedotransfer_1990, @wosten_pedotransfer_1999, Rosetta [@schaap_rosetta_2001; @zhang_rosetta3_2017], @wosten_staringreeks_2001, @hodnett_pedotransfer_2002, @weynants_pedotransfer_2009, @toth_pedotransfer_2015. The code snippet below shows how to apply three different pedotransfer functions to the same soil sample, resulting in different parameter estimates and thus SWRCs (Figure \ref{fig:ptf_swrc}).
 
 ```python
 # Create a soil sample with easily measured properties. Note that
@@ -121,7 +121,7 @@ rosetta: pe.Genuchten = ss.rosetta(version=3)
 saxton: pe.Brooks = ss.saxton()
 ```
 
-![Estimated SWRC's for a single user-defined soil sample using three different pedotransfer functions \label{fig:ptf_swrc}](figures/ptf_swrc.png)
+![Estimated SWRCs for a single user-defined soil sample using three different pedotransfer functions \label{fig:ptf_swrc}](figures/ptf_swrc.png)
 
 Furthermore, `pedon` provides access to specialized tools such as HYPAGS [@peche_hypags_2023; @peche_genuchten_2024] which enables parameter estimation from a single value of saturated hydraulic conductivity or representative grain diameters.
 
