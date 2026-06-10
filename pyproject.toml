@@ -30,7 +30,7 @@ repository = "https://github.com/martinvonk/pedon"
 
 [project.optional-dependencies]
 ruffing = ["ruff"]
-typing = ["mypy", "pandas-stubs", "ty", "pedon[rosetta]"]
+typing = ["mypy", "pandas-stubs", "ty", "httpx"]
 rosetta = ["httpx"]
 pytesting = [
         "pytest>=7",

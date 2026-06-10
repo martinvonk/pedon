@@ -1446,7 +1446,7 @@ class SoilSample:
                     logger.warning(
                         "HYPAGS routine only accepts single k value, choosing the first k value in the array."
                     )
-                k = float(self.k.item(0))
+                k = float(self.k.flat[0])
             else:
                 k = float(self.k)
 
