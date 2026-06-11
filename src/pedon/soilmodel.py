@@ -5,7 +5,6 @@ from logging import getLogger
 from typing import Protocol, runtime_checkable
 from warnings import warn
 
-import matplotlib.pyplot as plt
 import numpy as np
 from numpy import abs as npabs
 from numpy import (
@@ -22,7 +21,7 @@ from scipy.integrate import quad, trapezoid
 from scipy.optimize import brentq
 from scipy.special import erfc, erfcinv, lambertw
 
-from ._typing import FloatArray, SoilModelNames
+from ._typing import FloatArray, MatplotlibAxes, SoilModelNames
 from .plot import hcf
 from .plot import swrc as plot_swrc
 
@@ -77,7 +76,7 @@ class SoilModel(Protocol):
         ...         # Inverse of theta method
         ...         return ...
         ...
-        ...     def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+        ...     def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         ...         # Plot the soil water retention curve by calling `pe.plot.swrc`
         ...         return pe.plot.swrc(self, ax=ax)
 
@@ -110,7 +109,7 @@ class SoilModel(Protocol):
         """Calculate pressure head h from soil moisture content (inverse of theta)."""
         ...
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         """Plot the soil water retention curve by calling `plot_swrc`."""
         ...
 
@@ -189,7 +188,7 @@ class Genuchten:
         h = 1 / self.alpha * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
         return h
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
 
 
@@ -276,7 +275,7 @@ class Brooks:
             ) ** (-1 / self.l)
             return h
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
 
 
@@ -499,7 +498,7 @@ class Brunswick:
 
         return h_out
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         """Plot the soil water retention curve."""
         return plot_swrc(self, ax=ax)
 
@@ -565,7 +564,7 @@ class Haverkamp:
         s = (theta - self.theta_r) / (self.theta_s - self.theta_r)
         return (self.alpha * ((1.0 / s) - 1.0)) ** (1.0 / self.beta)
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
 
 
@@ -631,7 +630,7 @@ class Gardner:
     def h(self, theta: FloatArray) -> FloatArray:
         return -(1.0 / self.m) * log(theta / self.theta_s)
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
 
 
@@ -696,7 +695,7 @@ class Rucker:
         x = -lambertw(-y / exp(1.0), k=-1).real - 1.0
         return (2.0 / self.c) * x
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
 
 
@@ -789,7 +788,7 @@ class Panday:
         ) ** (1.0 / self.beta)
         return h
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
 
 
@@ -885,7 +884,7 @@ class Fredlund:
             1.0 / self.n
         )
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
 
 
@@ -940,7 +939,7 @@ class Kosugi:
         se = (theta - self.theta_r) / (self.theta_s - self.theta_r)
         return self.h_m * exp(sqrt(2.0) * self.sigma * erfcinv(2.0 * se))
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
 
 
@@ -992,7 +991,7 @@ class Campbell:
     def h(self, theta: FloatArray) -> FloatArray:
         return self.h_b * (theta / self.theta_s) ** -self.b
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
 
 
@@ -1075,7 +1074,7 @@ class GenuchtenGardner:
         h = 1 / self.alpha * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
         return h
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
 
 
@@ -1171,7 +1170,7 @@ class Kool:
         h = 1 / self.alpha_w * ((1 / se) ** (1 / self.m) - 1) ** (1 / self.n)
         return h
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
 
 
@@ -1357,7 +1356,7 @@ class Gerke:
 
         return h_out
 
-    def plot(self, ax: plt.Axes | None = None) -> plt.Axes:
+    def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         """Plot the soil water retention curve."""
         return plot_swrc(self, ax=ax)
 
