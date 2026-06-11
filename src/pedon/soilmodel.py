@@ -583,6 +583,8 @@ class Gardner:
     c: float
         Empirical exponent parameter for the hydraulic conductivity curve [1/L]
         (Often denoted as alpha in the classic Gardner exponential model)
+    h_b: float, optional
+        Bubbling pressure or air-entry offset [L] (default: 0.0)
 
     References
     ----------
@@ -611,9 +613,11 @@ class Gardner:
     theta_s: float
     m: float
     c: float
+    h_b: float = 0.0
 
     def theta(self, h: FloatArray) -> FloatArray:
-        return self.theta_s * exp(-self.m * npabs(h))
+        h_abs = maximum(npabs(h) - self.h_b, 0.0)
+        return self.theta_s * exp(-self.m * h_abs)
 
     def s(self, h: FloatArray) -> FloatArray:
         return self.theta(h) / self.theta_s
@@ -622,13 +626,14 @@ class Gardner:
         if s is not None:
             theta = s * self.theta_s
             h = self.h(theta)
-        return exp(-self.c * npabs(h))
+        h_abs = maximum(npabs(h) - self.h_b, 0.0)
+        return exp(-self.c * h_abs)
 
     def k(self, h: FloatArray, s: FloatArray | None = None) -> FloatArray:
         return self.k_s * self.k_r(h=h, s=s)
 
     def h(self, theta: FloatArray) -> FloatArray:
-        return -(1.0 / self.m) * log(theta / self.theta_s)
+        return self.h_b - (1.0 / self.m) * log(theta / self.theta_s)
 
     def plot(self, ax: MatplotlibAxes | None = None) -> MatplotlibAxes:
         return plot_swrc(self, ax=ax)
