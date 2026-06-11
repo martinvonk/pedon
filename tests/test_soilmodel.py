@@ -27,6 +27,13 @@ def test_get_soilmodel(
     assert smt.__name__ == soilmodel_name
 
 
+@pytest.mark.parametrize("soilmodel_name", get_args(SoilModelNames))
+def test_protocol_conformance(soilmodel_name: SoilModelNames) -> None:
+    """Test that all supported soil models conform to the SoilModel protocol."""
+    sm = pe.soilmodel.get_soilmodel(soilmodel_name)
+    assert isinstance(sm, pe.SoilModel)
+
+
 def test_plot_hcf_wrapper(genuchten: pe.Genuchten) -> None:
     """Legacy plot_hcf wrapper should return an axis."""
     ax = pe.soilmodel.plot_hcf(genuchten)
