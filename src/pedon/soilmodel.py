@@ -1403,3 +1403,286 @@ def resolve_soilmodel(
     raise TypeError(
         f"Argument must either be Type[SoilModel] | SoilModel | str, not {type(sm)}"
     )
+
+
+class SoilModelConverter:
+    """Namespace class for soil hydraulic model conversion methods.
+
+    All conversion methods are static and take a SoilModel instance as their
+    first argument ``sm``. Use :meth:`list_methods` to discover which conversions
+    are available for a given model type — it reads the ``sm`` type annotation of
+    each static method directly, so no extra registration is needed.
+
+    Example:
+    -------
+    >>> vg = Genuchten(k_s=1e-5, alpha=2.0, n=2.5, theta_s=0.45, theta_r=0.05)
+    >>> SoilModelConverter.list_methods(vg)
+    ['ghezzehei', 'morel', 'peche']
+    >>> gardner = SoilModelConverter.peche(vg)
+    >>> print(gardner.c)  # Output: 4.4
+
+    """
+
+    @classmethod
+    def list_methods(cls, sm: SoilModel) -> list[str]:
+        """Get all available conversion methods for the given SoilModel instance.
+
+        Inspects the ``sm`` parameter type annotation of every static method on
+        this class and returns those where ``isinstance(sm, annotation)`` is True.
+
+        Parameters
+        ----------
+        sm : SoilModel
+            The soil model instance to check conversions for.
+
+        Returns
+        -------
+        list[str]
+            Sorted list of method names applicable for the given model type.
+
+        Example
+        --------
+        >>> vg = Genuchten(k_s=1e-5, alpha=2.0, n=2.5, theta_s=0.45, theta_r=0.05)
+        >>> SoilModelConverter.list_methods(vg)
+        ['ghezzehei', 'morel', 'peche']
+
+        """
+        from inspect import getmembers_static
+        from typing import get_type_hints
+
+        return sorted(
+            name
+            for name, obj in getmembers_static(cls)
+            if isinstance(obj, staticmethod)
+            and not name.startswith("_")
+            and isinstance(sm, get_type_hints(obj.__func__).get("sm", ()))
+        )
+
+    @staticmethod
+    def morel(sm: Genuchten | Brooks | Panday) -> Panday | Brooks | Genuchten:
+        """Convert between van Genuchten and Brooks-Corey models using the Morel-Seytoux
+        equivalence method, which preserves the effective capillary drive.
+
+        This method implements the parameter equivalence from Morel-Seytoux et al. (1996),
+        providing conversion between Brooks-Corey (BC) and van Genuchten (vG) parameters
+        while preserving the maximum value of the effective capillary drive Hc.M,
+        defined as the integral of relative permeability over capillary pressure.
+
+        The conversion is based on two criteria:
+        1. Preserve the effective capillary drive (primary criterion)
+        2. Preserve asymptotic behavior at low water contents (secondary criterion)
+
+        Parameters
+        ----------
+        sm : Genuchten or Brooks
+            The soil model instance to convert.
+
+        Returns
+        -------
+        Brooks or Genuchten
+            Converted soil model instance:
+            - If input is Genuchten, returns Brooks model
+            - If input is Brooks, returns Genuchten model
+
+        References
+        ----------
+        Morel-Seytoux, H. J., Meyer, P. D., Nachabe, M., Touma, J., van Genuchten, M. T.,
+        & Lenhard, R. J. (1996). Parameter equivalence for the Brooks-Corey and van
+        Genuchten soil characteristics: Preserving the effective capillary drive.
+        Water Resources Research, 32(5), 1251-1258.
+        https://doi.org/10.1029/96WR00069
+
+        """
+        if isinstance(sm, Genuchten):
+            # Convert van Genuchten to Brooks-Corey
+            # Calculate p from m (relationship 16a in Morel-Seytoux et al. 1996)
+            # p = 1 + (2/m)
+            m = sm.m
+            p = 1 + (2 / m)
+
+            # Calculate h_ce (entry/bubble pressure) using formula (17)
+            # hce = (1/a) * 2p(p-1)/(p+3) * (147.8 + 8.1p + 0.092p^2) / (55.6 + 7.4p + p^2)
+            a_inv = (
+                (1 / sm.alpha)
+                * (2 * p * (p - 1))
+                / (p + 3)
+                * (147.8 + 8.1 * p + 0.092 * p**2)
+                / (55.6 + 7.4 * p + p**2)
+            )
+
+            # Calculate lambda (l) from p using Corey relationship (8b)
+            # M = (p - 3) / 2, where M is lambda
+            lamb = (p - 3) / 2
+
+            return Brooks(
+                k_s=sm.k_s,
+                theta_r=sm.theta_r,
+                theta_s=sm.theta_s,
+                h_b=a_inv,  # h_ce maps to h_b
+                l=lamb,  # lambda maps to l
+            )
+        elif isinstance(sm, Brooks):  # noqa: RET505
+            # Convert Brooks-Corey to van Genuchten
+            # Calculate p from l using Corey relationship (8a)
+            # p = 3 + 2*M, where M is lambda (l)
+            p = 3 + 2 * sm.l
+
+            # Calculate m from p using relationship (16a)
+            # m = 2 / (p - 1)
+            m = 2 / (p - 1)
+
+            # Calculate n from m using relationship (10b)
+            # n = 1 / (1 - m)
+            n = 1 / (1 - m)
+
+            # Calculate alpha (1/a) from h_b using formula (18), rearranged
+            # 1/a = hce * [2p(p-1)/(p+3)] * [(55.6 + 7.4p + p^2) / (147.8 + 8.1p + 0.092p^2)]
+            # Therefore: a = hce / {[2p(p-1)/(p+3)] * [(55.6 + 7.4p + p^2) / (147.8 + 8.1p + 0.092p^2)]}
+            # Or: alpha = 1/a = 1 / {hce * [2p(p-1)/(p+3)] * [(55.6 + 7.4p + p^2) / (147.8 + 8.1p + 0.092p^2)]}
+            alpha = 1 / (
+                sm.h_b
+                * (2 * p * (p - 1))
+                / (p + 3)
+                * (55.6 + 7.4 * p + p**2)
+                / (147.8 + 8.1 * p + 0.092 * p**2)
+            )
+
+            return Genuchten(
+                k_s=sm.k_s,
+                theta_r=sm.theta_r,
+                theta_s=sm.theta_s,
+                alpha=alpha,
+                n=n,
+            )
+
+        else:
+            raise TypeError(
+                f"Unsupported model type: {type(sm).__name__}. "
+                "Only Genuchten and Brooks soil models are supported by `morel` method."
+            )
+
+    @staticmethod
+    def ghezzehei(sm: Genuchten) -> Gardner:
+        """Converts van Genuchten model to Gardner model using Ghezzehei et al. (2007).
+
+        Estimates the Gardner sorptive number c (= alpha_G) from van Genuchten's n
+        and alpha parameters using eq. (17): c = 1.3 * n * alpha. The air entry
+        pressure h_b is computed from the point of maximum downward concavity of
+        the vGM retention curve using eq. (13).
+
+        Parameters
+        ----------
+        sm : Genuchten
+            The van Genuchten soil model instance to convert.
+
+        Returns
+        -------
+        Gardner
+            Gardner model instance with converted parameters, including h_b.
+
+        Raises
+        ------
+        TypeError
+            If sm is not a Genuchten model instance.
+        ValueError
+            If n < 2 (outside model validity range; eq. 13 requires m > 0.5).
+
+        Notes
+        -----
+        Units: unit-agnostic. alpha and h_b share the same length unit;
+        c has units of 1/[length]. k_s retains its original units.
+
+        References
+        ----------
+        Ghezzehei, T. A., Kneafsey, T. J., & Su, G. W. (2007). Correspondence of
+        the Gardner and van Genuchten-Mualem relative permeability function
+        parameters. Water Resources Research, 43(10). https://doi.org/10.1029/2006WR005339
+
+        Examples
+        --------
+        >>> vg = Genuchten(k_s=1e-5, alpha=2.0, n=2.5, theta_s=0.45, theta_r=0.05)
+        >>> gardner = SoilModelConverter.ghezzehei(vg)
+        >>> print(gardner.c) # Output: 6.5
+        >>> print(round(gardner.h_b, 3)) # Output: 0.668
+
+        """
+        if not isinstance(sm, Genuchten):
+            raise TypeError(
+                f"Unsupported model type: {type(sm).__name__}. "
+                "Only Genuchten soil models are supported by `ghezzehei` method."
+            )
+
+        # Validate n parameter — eq. (13) requires m > 0.5, i.e. n > 2
+        if sm.n < 2:
+            raise ValueError(
+                f"n = {sm.n} is outside model validity range for Ghezzehei et al. (2007). "
+                f"Method requires n >= 2 such that m > 0.5 (m = 1-1/n)."
+            )
+
+        m = sm.m  # m = 1 - 1/n
+
+        # Calculate Gardner sorptive number c = alpha_G using eq. (17)
+        c = 1.3 * sm.n * sm.alpha
+
+        # Calculate air entry pressure h_b using eq. (13)
+        # Derived from d^3 Theta / d psi^3 = 0 on the vGM retention curve
+        inner = (5 * m - m**2 + (8 * m + 5 * m**2 - 2 * m**3 + m**4) ** 0.5) / (
+            4 * m**2 - 2 * m
+        )
+        h_b = (1 / sm.alpha) * inner ** (m - 1)
+
+        return Gardner(k_s=sm.k_s, theta_s=sm.theta_s, m=c, c=c, h_b=h_b)
+
+    @staticmethod
+    def peche(sm: Genuchten) -> Gardner:
+        """Converts van Genuchten model to Gardner model using Peche et al. (in prep.).
+
+        Estimates the Gardner c parameter from van Genuchten's alpha parameter
+        using the empirical relationship c = 2.2 * alpha.
+
+        Parameters
+        ----------
+        sm : Genuchten
+            The van Genuchten soil model instance to convert.
+
+        Returns
+        -------
+        Gardner
+            Gardner model instance with converted parameters.
+
+        RaisesExpand commentComment on line R936
+        ------
+        TypeError
+            If sm is not a Genuchten model instance.
+        ValueError
+            If n < 1.8 (outside model validity range).
+
+        References
+        ----------
+        Peche, A., Vonk, M.A., Altfelder, S., Houben, G. & Bakker, M. (in preparation).
+        A new model for the approximation of the Gardner relative
+        conductivity curve parameter based on van Genuchten's alpha.
+
+        Examples
+        --------
+        >>> vg = Genuchten(k_s=1e-5, alpha=2.0, n=2.5, theta_s=0.45, theta_r=0.05)
+        >>> gardner = SoilModelConverter.peche(vg)
+        >>> print(gardner.c)
+        4.4
+
+        """
+        if not isinstance(sm, Genuchten):
+            raise TypeError(
+                f"Unsupported model type: {type(sm).__name__}. "
+                "Only Genuchten soil models are supported by `peche` method."
+            )
+
+        if sm.n < 1.8:
+            raise ValueError(
+                f"n = {sm.n} is outside model validity range for Peche et al. (in prep.). "
+                f"Method requires n >= 1.8."
+            )
+
+        c = 2.2 * sm.alpha
+
+        return Gardner(k_s=sm.k_s, theta_s=sm.theta_s, m=c, c=c)
