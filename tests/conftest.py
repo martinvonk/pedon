@@ -52,19 +52,19 @@ def fredlund() -> pe.SoilModel:
 
 
 @fixture
-def kosugi() -> pe.Kosugi:
+def kosugi() -> pe.SoilModel:
     """Fixture for a Kosugi soil model with specific parameters for testing."""
     return pe.Kosugi(k_s=10.0, theta_r=0.01, theta_s=0.43, h_m=100.0, sigma=1.2)
 
 
 @fixture
-def campbell() -> pe.Campbell:
+def campbell() -> pe.SoilModel:
     """Fixture for a Campbell soil model with specific parameters for testing."""
     return pe.Campbell(k_s=10.0, theta_s=0.43, h_b=10.0, b=4.0)
 
 
 @fixture
-def haverkamp() -> pe.Haverkamp:
+def haverkamp() -> pe.SoilModel:
     """Fixture for a Haverkamp soil model with specific parameters for testing."""
     # Example parameters similar in style to other model tests
     return pe.Haverkamp(
@@ -78,7 +78,7 @@ def haverkamp() -> pe.Haverkamp:
 
 
 @fixture
-def kool() -> pe.Kool:
+def kool() -> pe.SoilModel:
     """Fixture for a Kool soil model with specific parameters for testing."""
     return pe.Kool(
         k_s=10.0,
@@ -92,7 +92,7 @@ def kool() -> pe.Kool:
 
 
 @fixture
-def brunswick() -> pe.Brunswick:
+def brunswick() -> pe.SoilModel:
     """Fixture for a Brunswick soil model with specific parameters for testing."""
     return pe.Brunswick(
         theta_snc=0.08,
@@ -106,7 +106,7 @@ def brunswick() -> pe.Brunswick:
 
 
 @fixture
-def gerke() -> pe.Gerke:
+def gerke() -> pe.SoilModel:
     """Fixture for a Gerke dual-porosity soil model with specific parameters for testing."""
     return pe.Gerke(
         k_sf=2e3,
