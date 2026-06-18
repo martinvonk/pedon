@@ -15,7 +15,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Pedon" href="examples/index.html" />
+    <link rel="next" title="pedon" href="examples/index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -35,32 +35,32 @@
             
   <section id="pedon-documentation">
 <h1>pedon documentation<a class="headerlink" href="#pedon-documentation" title="Link to this heading">¶</a></h1>
-<p>Pedon (<em>from Greek: πέδον, pedon -&gt; soil</em>) is a Python package for working with unsaturated soil hydraulic properties. It provides an object-oriented framework for soils, soil samples, and soil hydraulic models, making it easy to describe, analyze, and parameterize soil water retention and hydraulic conductivity behavior. At its core, Pedon treats each soil model as a Python class that defines a soil water retention curve and an unsaturated hydraulic conductivity function. The package currently includes implementations of several widely used models:
+<p><code class="docutils literal notranslate"><span class="pre">pedon</span></code> (<em>from Greek: πέδον, pedon -&gt; soil</em>) is a Python package for working with unsaturated soil hydraulic properties. It provides an object-oriented framework for soils, soil samples, and soil hydraulic models, making it easy to describe, analyze, and parameterize soil water retention and hydraulic conductivity behavior. At its core, <code class="docutils literal notranslate"><span class="pre">pedon</span></code> treats each soil model as a Python class that defines a soil water retention curve and an unsaturated hydraulic conductivity function. The package currently includes implementations of several widely used models:
 - Mualem-Van Genuchten
 - Brooks-Corey
 - Fredlund &amp; Xing
 - Haverkamp
 - Gardner
 - Panday (MODFLOW USG-Transport)</p>
-<p>Pedon allows these models to be evaluated directly and fitted to data. When laboratory measurements of soil water retention and/or unsaturated hydraulic conductivity are available, model parameters can be estimated by fitting analytical curves to the data using nonlinear least squares, following the same methodology as the widely used RETC.</p>
-<p>To support parameterization without direct measurements, Pedon includes access to several established soil hydraulic parameter datasets:
+<p><code class="docutils literal notranslate"><span class="pre">pedon</span></code> allows these models to be evaluated directly and fitted to data. When laboratory measurements of soil water retention and/or unsaturated hydraulic conductivity are available, model parameters can be estimated by fitting analytical curves to the data using nonlinear least squares, following the same methodology as the widely used RETC.</p>
+<p>To support parameterization without direct measurements, <code class="docutils literal notranslate"><span class="pre">pedon</span></code> includes access to several established soil hydraulic parameter datasets:
 - HYDRUS
 - VS2D
 - Staring Series (2001 &amp; 2018)</p>
-<p>In addition, Pedon implements multiple pedotransfer functions that estimate soil hydraulic parameters from easily measured soil properties:
+<p>In addition, <code class="docutils literal notranslate"><span class="pre">pedon</span></code> implements multiple pedotransfer functions that estimate soil hydraulic parameters from easily measured soil properties:
 - Van Genuchten: Wösten
 - Van Genuchten: Staring Series
 - Van Genuchten: Rosetta v1, 2 &amp; 3 (Schaap et al. 2001)
 - Brooks-Corey: Cosby
 - van Genuchten: HYPAGS</p>
-<p>By combining soil hydraulic models, reference datasets, pedotransfer functions, and fitting routines in a single, consistent framework, Pedon makes it straightforward to move from soil information—whether coarse texture data or detailed laboratory measurements—to parameterized soil models ready for use in variably saturated flow simulations.</p>
-<p>The pedon package is open-source and hosted on <a class="reference external" href="https://github.com/martinvonk/pedon">GitHub</a>, where you can find more information about the ongoing developments. The package is published on <a class="reference external" href="https://pypi.org/project/pedon/">PyPi</a> from which it can be installed using <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pedon</span></code>. If you use this software in your research or analyses, please cite the package via its Zenodo archive:</p>
+<p>By combining soil hydraulic models, reference datasets, pedotransfer functions, and fitting routines in a single, consistent framework, <code class="docutils literal notranslate"><span class="pre">pedon</span></code> makes it straightforward to move from soil information—whether coarse texture data or detailed laboratory measurements—to parameterized soil models ready for use in variably saturated flow simulations.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pedon</span></code> package is open-source and hosted on <a class="reference external" href="https://github.com/martinvonk/pedon">GitHub</a>, where you can find more information about the ongoing developments. The package is published on <a class="reference external" href="https://pypi.org/project/pedon/">PyPi</a> from which it can be installed using <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pedon</span></code>. If you use this software in your research or analyses, please cite the package via its Zenodo archive:</p>
 <blockquote>
-<div><p>Vonk, M. A. &amp; Peche, A. (XXXX). Pedon: A Python package for analyzing unsaturated soil hydraulic properties (vX.X.X). Zenodo. <a class="reference external" href="https://doi.org/10.5281/zenodo.18222514">doi.org/10.5281/zenodo.18222514</a>.</p>
+<div><p>Vonk, M. A. &amp; Peche, A. (XXXX). <code class="docutils literal notranslate"><span class="pre">pedon</span></code>: A Python package for analyzing unsaturated soil hydraulic properties (vX.X.X). Zenodo. <a class="reference external" href="https://doi.org/10.5281/zenodo.18222514">doi.org/10.5281/zenodo.18222514</a>.</p>
 </div></blockquote>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Pedon</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">pedon</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="examples/index.html#key-concepts">Key Concepts</a></li>
 </ul>
 </li>
@@ -112,7 +112,7 @@
 </search>
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Pedon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">pedon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/index.html#examples">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_api/modules.html">pedon</a></li>
 </ul>
@@ -121,7 +121,7 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="examples/index.html" title="next chapter">Pedon</a></li>
+      <li>Next: <a href="examples/index.html" title="next chapter">pedon</a></li>
   </ul></li>
 </ul>
 </div>
