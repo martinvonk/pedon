@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pedon documentation &#8212; pedon 0.1.0 documentation</title>
+    <title>Documentation &#8212; pedon 0.1.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
@@ -15,7 +15,7 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="pedon" href="examples/index.html" />
+    <link rel="next" title="Package structure" href="examples/index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -33,15 +33,22 @@
 
           <div class="body" role="main">
             
-  <section id="pedon-documentation">
-<h1>pedon documentation<a class="headerlink" href="#pedon-documentation" title="Link to this heading">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">pedon</span></code> (<em>from Greek: πέδον, pedon -&gt; soil</em>) is a Python package for working with unsaturated soil hydraulic properties. It provides an object-oriented framework for soils, soil samples, and soil hydraulic models, making it easy to describe, analyze, and parameterize soil water retention and hydraulic conductivity behavior. At its core, <code class="docutils literal notranslate"><span class="pre">pedon</span></code> treats each soil model as a Python class that defines a soil water retention curve and an unsaturated hydraulic conductivity function. The package currently includes implementations of several widely used models:
-- Mualem-Van Genuchten
-- Brooks-Corey
-- Fredlund &amp; Xing
-- Haverkamp
-- Gardner
-- Panday (MODFLOW USG-Transport)</p>
+  <section id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">pedon</span></code> (<em>from Greek: πέδον, pedon -&gt; soil</em>) is a Python package for working with unsaturated soil hydraulic properties. It provides an object-oriented framework for soils, soil samples, and soil hydraulic models, making it easy to describe, analyze, and parameterize soil water retention and hydraulic conductivity behavior. At its core, <code class="docutils literal notranslate"><span class="pre">pedon</span></code> treats each soil model as a Python class that defines a soil water retention curve and an unsaturated hydraulic conductivity function. The package currently includes implementations of several widely used models:</p>
+<ul class="simple">
+<li><p>Mualem-Van Genuchten</p></li>
+<li><p>Brooks-Corey</p></li>
+<li><p>Gardner</p></li>
+<li><p>Campbell</p></li>
+<li><p>Haverkamp</p></li>
+<li><p>Kosugi</p></li>
+<li><p>Fredlund &amp; Xing</p></li>
+<li><p>Brunswick</p></li>
+<li><p>Kool &amp; Parker’s hysteresis model</p></li>
+<li><p>Gerke &amp; van Genuchten’s dual-porosity model</p></li>
+<li><p>Panday’s MODFLOW USG-Transport model using van Genuchten SWRC and Brooks-Corey HCF</p></li>
+</ul>
 <p><code class="docutils literal notranslate"><span class="pre">pedon</span></code> allows these models to be evaluated directly and fitted to data. When laboratory measurements of soil water retention and/or unsaturated hydraulic conductivity are available, model parameters can be estimated by fitting analytical curves to the data using nonlinear least squares, following the same methodology as the widely used RETC.</p>
 <p>To support parameterization without direct measurements, <code class="docutils literal notranslate"><span class="pre">pedon</span></code> includes access to several established soil hydraulic parameter datasets:
 - HYDRUS
@@ -64,21 +71,9 @@
 </div></blockquote>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="examples/index.html">pedon</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Package structure</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="examples/index.html#key-concepts">Key Concepts</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="examples/index.html#examples">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples/00_pedon_structure.html">Package Structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/01_soil_models.html">Soil Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/02_datasets.html">Soil Parameter Datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/03_pedotransfer_functions.html">Pedotransfer Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/04_hypags.html">Parameter Estimation via HYPAGS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/05_curve_fitting.html">Curve Fitting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/06_hypags_curvefitting.html">From k value to Gardner via HYPAGS + Curve Fitting Routine</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/07_hysteresis.html">Hysteresis Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/08_modflow.html">Generating Input for MODFLOW</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/09_paper.html">Article for Journal of Open Source Software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/index.html#examples">Examples</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="_api/modules.html">pedon</a><ul>
@@ -116,8 +111,7 @@
 </search>
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="examples/index.html">pedon</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/index.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Package structure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_api/modules.html">pedon</a></li>
 </ul>
 
@@ -125,7 +119,7 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="examples/index.html" title="next chapter">pedon</a></li>
+      <li>Next: <a href="examples/index.html" title="next chapter">Package structure</a></li>
   </ul></li>
 </ul>
 </div>

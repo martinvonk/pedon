@@ -1,12 +1,17 @@
-# pedon documentation
+# Documentation
 
 `pedon` (*from Greek: πέδον, pedon -> soil*) is a Python package for working with unsaturated soil hydraulic properties. It provides an object-oriented framework for soils, soil samples, and soil hydraulic models, making it easy to describe, analyze, and parameterize soil water retention and hydraulic conductivity behavior. At its core, `pedon` treats each soil model as a Python class that defines a soil water retention curve and an unsaturated hydraulic conductivity function. The package currently includes implementations of several widely used models:
-    - Mualem-Van Genuchten
-    - Brooks-Corey
-    - Fredlund & Xing
-    - Haverkamp
-    - Gardner
-    - Panday (MODFLOW USG-Transport)
+  - Mualem-Van Genuchten
+  - Brooks-Corey
+  - Gardner
+  - Campbell
+  - Haverkamp
+  - Kosugi
+  - Fredlund & Xing
+  - Brunswick
+  - Kool & Parker's hysteresis model
+  - Gerke & van Genuchten's dual-porosity model
+  - Panday's MODFLOW USG-Transport model using van Genuchten SWRC and Brooks-Corey HCF
 
 `pedon` allows these models to be evaluated directly and fitted to data. When laboratory measurements of soil water retention and/or unsaturated hydraulic conductivity are available, model parameters can be estimated by fitting analytical curves to the data using nonlinear least squares, following the same methodology as the widely used RETC.
 
@@ -30,7 +35,6 @@ The `pedon` package is open-source and hosted on [GitHub](https://github.com/mar
 
 You can also cite a specific version of the package via its Zenodo archive:
 > Vonk, M. A. & Peche, A. (XXXX). `pedon`: A Python package for analyzing unsaturated soil hydraulic properties (vX.X.X). Zenodo. [doi.org/10.5281/zenodo.18222514](https://doi.org/10.5281/zenodo.18222514).
-
 
 
 ```{toctree}
