@@ -1,4 +1,4 @@
-"""Pedon is a Python package for analyzing unsaturated soil hydraulic properties."""
+"""pedon is a Python package for analyzing unsaturated soil hydraulic properties."""
 
 from . import plot as plot
 from . import soil as soil

@@ -1,6 +1,6 @@
-# Contributing to the Pedon Python Package
+# Contributing to the `pedon` Python Package
 
-Thank you for your interest in contributing to the **Pedon Python package**! We welcome contributions from everyone — whether you want to report an issue, improve the documentation, or submit code enhancements. This document outlines guidelines to help you get started.
+Thank you for your interest in contributing to the **`pedon` Python package**! We welcome contributions from everyone — whether you want to report an issue, improve the documentation, or submit code enhancements. This document outlines guidelines to help you get started.
 
 ## How to Contribute
 
@@ -28,6 +28,6 @@ To submit a pull request:
 7. Submit a pull request (PR) with a clear description of what was changed and why.
 
 ## Useful Links
-- Pedon GitHub Repository: [github.com/martinvonk/pedon](https://github.com/martinvonk/pedon)
+- `pedon` GitHub Repository: [github.com/martinvonk/pedon](https://github.com/martinvonk/pedon)
 - Documentation and examples: [notebooks folder](https://github.com/martinvonk/pedon/tree/main/docs/examples)
 - Code of Conduct: [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct/)
