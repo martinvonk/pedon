@@ -1,4 +1,4 @@
-# Pedon
+# pedon
 
 In variably saturated groundwater flow modeling, soil hydraulic functions and their parameters are essential for accurate simulations. However, obtaining these parameters experimentally is difficult, time-consuming, and uncertain. `pedon` integrates soil hydraulic models, parameter databases, and parameter estimation methods into a single reproducible framework.
 

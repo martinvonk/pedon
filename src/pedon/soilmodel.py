@@ -470,13 +470,13 @@ class Brunswick:
         h_out = full(theta_arr.shape, 0.0)
 
         for i, th in np.ndenumerate(theta_arr):
-            if th >= self.theta_s:
+            if float(th) >= self.theta_s:
                 logger.warning(
                     f"Input theta={th} is above the saturated water content "
                     f"theta_s={self.theta_s}. Setting h to 0."
                 )
                 h_out[i] = h_min
-            elif th <= theta_dry:
+            elif float(th) <= float(theta_dry):
                 logger.warning(
                     f"Input theta={th} is below the residual water content "
                     f"theta_r={self.theta_r}. Setting h to {h_max}."
@@ -485,7 +485,7 @@ class Brunswick:
             else:
 
                 def obj(x: float) -> float:
-                    return float(self.theta(x)) - th
+                    return float(self.theta(x)) - float(th)
 
                 root, res = brentq(obj, a=h_min, b=h_max, full_output=True, disp=False)
                 if res.converged:
@@ -1333,13 +1333,13 @@ class Gerke:
         h_max = 1e10  # A large number to represent the maximum pressure head for dry conditions
 
         for i, th in np.ndenumerate(theta):
-            if th >= self.theta_s:
+            if float(th) >= self.theta_s:
                 logger.warning(
                     f"Input theta={th} is above the saturated water content "
                     f"theta_s={self.theta_s}. Setting h to 0."
                 )
                 h_out[i] = 0.0
-            elif th <= self.theta_r:
+            elif float(th) <= self.theta_r:
                 logger.warning(
                     f"Input theta={th} is below the residual water content "
                     f"theta_r={self.theta_r}. Setting h to {h_max}."
@@ -1348,7 +1348,7 @@ class Gerke:
             else:
 
                 def obj(x):
-                    return self.theta(x) - th
+                    return self.theta(x) - float(th)
 
                 root, res = brentq(obj, a=0.0, b=h_max, full_output=True, disp=False)
                 if res.converged:
