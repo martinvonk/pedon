@@ -6,9 +6,8 @@
 [![PyPi Downloads](https://img.shields.io/pypi/dm/pedon?style=flat-square&color=0a3d62)](https://pypi.org/project/pedon/)
 [![License](https://img.shields.io/pypi/l/pedon?style=flat-square&color=0a3d62&logo=open-source-initiative&logoColor=white)](https://pypi.org/project/pedon/)
 
-[![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.18222514-ff6600?style=flat-square)](https://doi.org/10.5281/zenodo.18222514)
-[![JOSS](https://joss.theoj.org/papers/095927c33334e8ebb4612243ea40fdae/status.svg?style=flat-square)](https://joss.theoj.org/papers/095927c33334e8ebb4612243ea40fdae)
-
+[![JOSS](https://img.shields.io/badge/JOSS-10.21105/joss.10409-ff6600?style=flat-square)](https://doi.org/10.21105/joss.10409)
+[![Zenodo](https://img.shields.io/badge/Zenodo-10.5281/zenodo.18222514-ff6600?style=flat-square)](https://doi.org/10.5281/zenodo.18222514)
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/martinvonk/pedon/tests.yml?style=flat-square&color=green)](https://github.com/martinvonk/pedon/actions/workflows/tests.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/martinvonk/a891dd883f258c46826ba657cf9a89cf/raw/coverage.json&style=flat-square&color=green)](https://github.com/martinvonk/pedon/actions/workflows/tests.yml)
@@ -49,7 +48,10 @@ In addition, `pedon` implements multiple pedotransfer functions that estimate so
 
 By combining soil hydraulic models, reference datasets, pedotransfer functions, and fitting routines in a single, consistent framework, `pedon` makes it straightforward to move from soil information—whether coarse texture data or detailed laboratory measurements—to parameterized soil models ready for use in variably saturated flow simulations.
 
-If you use this software in your research or analyses, please cite the package via its Zenodo archive:
+If you use this software in your research or analyses, you can cite the package the Journal of Open Source Software
+> Vonk, M. A. & Peche, A. (2026). `pedon`: A Python package for analyzing unsaturated soil hydraulic properties. Journal of Open Source Software, 11(122), 10409. [doi.org/10.21105/joss.10409](https://doi.org/10.21105/joss.10409).
+
+You can also cite a specific version of the package via its Zenodo archive:
 > Vonk, M. A. & Peche, A. (XXXX). `pedon`: A Python package for analyzing unsaturated soil hydraulic properties (vX.X.X). Zenodo. [doi.org/10.5281/zenodo.18222514](https://doi.org/10.5281/zenodo.18222514).
 
 ## Installation
