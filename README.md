@@ -18,13 +18,17 @@
 `pedon` (*from Greek: πέδον, pedon -> soil*) is a Python package for working with unsaturated soil hydraulic properties. It provides an object-oriented framework for soils, soil samples, and soil hydraulic models, making it easy to describe, analyze, and parameterize soil water retention and hydraulic conductivity behavior. At its core, `pedon` treats each soil model as a Python class that defines a soil water retention curve and an unsaturated hydraulic conductivity function. The package currently includes implementations of several widely used models:
   - [Mualem-Van Genuchten](https://doi.org/10.2136/sssaj1980.03615995004400050002x)
   - [Brooks-Corey](https://mountainscholar.org/items/3c7b98df-13e3-486c-9d1e-949a7a869f76)
-  - [Fredlund & Xing](https://doi.org/10.1139/t94-061)
-  - [Haverkamp](https://doi.org/10.2136/sssaj1977.03615995004100020024x)
   - [Gardner](https://doi.org/10.1097/00010694-195804000-00006)
-  - [Rucker](https://doi.org/10.1016/j.advwatres.2005.01.004)
-  - [Kosugi](https://doi.org/10.1029/96WR01776)
   - [Campbell](https://doi.org/10.1097/00010694-197406000-00001)
-  - Panday ([MODFLOW USG-Transport](https://www.gsienv.com/software/modflow-usg/modflow-usg/))
+  - [Haverkamp](https://doi.org/10.2136/sssaj1977.03615995004100020024x)
+  - [Kosugi](https://doi.org/10.1029/96WR01776)
+  - [Fredlund & Xing](https://doi.org/10.1139/t94-061)
+  - [Brunswick](https://doi.org/10.1029/2018WR024584)
+  - Hysteresis model from [Kool & Parker](https://doi.org/10.1029/WR023i001p00105)
+  - Dual-porosity model from [Gerke & van Genuchten](https://doi.org/10.1029/92WR02339)
+  - van Genuchten-like SWRC and Gardner HCF [Rucker](https://doi.org/10.1016/j.advwatres.2005.01.004)
+  - van Genuchten SWRC and Gardner HCF [Genuchten-Gardner](https://doi.org/10.2136/sssaj1980.03615995004400050002x)
+  - van Genuchten SWRC and Brooks-Corey HCF [Panday (MODFLOW USG-Transport)](https://www.gsienv.com/software/modflow-usg/modflow-usg/)
 
 `pedon` allows these models to be evaluated directly and fitted to data. When laboratory measurements of soil water retention and/or unsaturated hydraulic conductivity are available, model parameters can be estimated by fitting analytical curves to the data using nonlinear least squares, following the same methodology as the widely used [RETC](https://www.pc-progress.com/Documents/programs/retc.pdf).
 

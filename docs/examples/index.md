@@ -1,4 +1,4 @@
-# pedon
+# Package structure
 
 In variably saturated groundwater flow modeling, soil hydraulic functions and their parameters are essential for accurate simulations. However, obtaining these parameters experimentally is difficult, time-consuming, and uncertain. `pedon` integrates soil hydraulic models, parameter databases, and parameter estimation methods into a single reproducible framework.
 
@@ -14,7 +14,7 @@ In variably saturated groundwater flow modeling, soil hydraulic functions and th
 
 **Model Conversion:** Translate between different soil model formulations to enable comparison and integration with external tools.
 
-# Examples
+## Examples
 
 This collection of Jupyter Notebooks demonstrates how to use `pedon` for analyzing and modeling unsaturated soil hydraulic properties. These notebooks show practical workflows for obtaining soil hydraulic parameters from various data sources and integrating them into groundwater flow modeling studies.
 
