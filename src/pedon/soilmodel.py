@@ -157,7 +157,7 @@ class Genuchten:
     theta_s: float
     alpha: float
     n: float
-    l: float = 0.5  # noqa: E741
+    l: float = 0.5
     m: float = field(init=False, repr=False)
 
     def __post_init__(self):
@@ -221,7 +221,7 @@ class Brooks:
     theta_r: float
     theta_s: float
     h_b: float
-    l: float  # noqa: E741
+    l: float
 
     def theta(self, h: FloatArray) -> FloatArray:
         h = npabs(h)
@@ -334,7 +334,7 @@ class Brunswick:
     theta_snc: float
     alpha: float
     n: float
-    l: float = 0.5  # noqa: E741
+    l: float = 0.5
 
     m: float = field(init=False, repr=False)
     _gamma0: float = field(init=False, repr=False)
@@ -1133,7 +1133,7 @@ class Kool:
     theta_s: float
     alpha: float
     n: float
-    l: float = 0.5  # noqa: E741
+    l: float = 0.5
     m: float = field(init=False, repr=False)
     xi: float = field(default=2.0, repr=True)
 
@@ -1521,7 +1521,7 @@ class SoilModelConverter:
                 h_b=a_inv,  # h_ce maps to h_b
                 l=lamb,  # lambda maps to l
             )
-        elif isinstance(sm, Brooks):  # noqa: RET505
+        elif isinstance(sm, Brooks):
             # Convert Brooks-Corey to van Genuchten
             # Calculate p from l using Corey relationship (8a)
             # p = 3 + 2*M, where M is lambda (l)
@@ -1635,10 +1635,10 @@ class SoilModelConverter:
 
     @staticmethod
     def peche(sm: Genuchten) -> Gardner:
-        """Converts van Genuchten model to Gardner model using Peche et al. (in prep.).
+        """Converts van Genuchten model to Gardner model using Peche et al.
 
-        Estimates the Gardner c parameter from van Genuchten's alpha parameter
-        using the empirical relationship c = 2.2 * alpha.
+        Estimates the Gardner c parameter and m parameter (exponential retention curve model) from van Genuchten's
+        alpha, n, and m parameters.
 
         Parameters
         ----------
@@ -1650,25 +1650,16 @@ class SoilModelConverter:
         Gardner
             Gardner model instance with converted parameters.
 
-        RaisesExpand commentComment on line R936
+        Raises
         ------
         TypeError
             If sm is not a Genuchten model instance.
-        ValueError
-            If n < 1.8 (outside model validity range).
 
         References
         ----------
-        Peche, A., Vonk, M.A., Altfelder, S., Houben, G. & Bakker, M. (in preparation).
-        A new model for the approximation of the Gardner relative
-        conductivity curve parameter based on van Genuchten's alpha.
-
-        Examples
-        --------
-        >>> vg = Genuchten(k_s=1e-5, alpha=2.0, n=2.5, theta_s=0.45, theta_r=0.05)
-        >>> gardner = SoilModelConverter.peche(vg)
-        >>> print(gardner.c)
-        4.4
+        Peche, A., Vonk, M.A., Altfelder, S., Houben, G. & Bakker, M.
+        Analytical conversion from van Genuchten parameters to Gardner
+        relative conductivity and exponential retention functions. In preparation.
 
         """
         if not isinstance(sm, Genuchten):
@@ -1677,12 +1668,30 @@ class SoilModelConverter:
                 "Only Genuchten soil models are supported by `peche` method."
             )
 
-        if sm.n < 1.8:
-            raise ValueError(
-                f"n = {sm.n} is outside model validity range for Peche et al. (in prep.). "
-                f"Method requires n >= 1.8."
-            )
+        # Extract van Genuchten parameters
+        n = sm.n
+        m = sm.m
+        alpha = sm.alpha
 
-        c = 2.2 * sm.alpha
+        # Calculate x_i
+        x_i = 1.0 - 1.168 / (n**2)
 
-        return Gardner(k_s=sm.k_s, theta_s=sm.theta_s, m=c, c=c)
+        # Term A: (1 + x_i^n)^(-m)
+        term_a = (1.0 + x_i**n) ** (-m)
+
+        # Inner expression for c calculation
+        inner_c = np.sqrt(term_a) * (1.0 - (1.0 - term_a ** (1.0 / m)) ** m) ** 2
+
+        # Calculate Gardner c parameter
+        c = (-np.log(inner_c) / x_i) * alpha
+
+        # Calculate m parameter
+        m = (-np.log((1.0 / (1.0 + x_i**n)) ** m) / x_i) * alpha
+
+        return Gardner(
+            k_s=sm.k_s,
+            theta_s=sm.theta_s,
+            m=m,
+            c=c,
+            h_b=0.0,
+        )
