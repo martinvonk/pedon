@@ -455,7 +455,7 @@ class SoilSample:
             + 2.364 * self.silt_p**-1
             + 1.014 * log(self.silt_p)
         )
-        lb = min(max(2 * (exp(l_) - 1) / (exp(l_) + 1), -2.0), 2.0)  # noqa: E741
+        lb = min(max(2 * (exp(l_) - 1) / (exp(l_) + 1), -2.0), 2.0)
 
         return Genuchten(
             k_s=k_s,
@@ -1634,11 +1634,11 @@ class Soil:
         sers: Any = sersm.iloc[0].copy()
         if isna(sers.at["description"]):
             sers.loc["description"] = sers.at["soil type"]
-        setattr(self, "source", sers.pop("source"))
-        setattr(self, "description", sers.pop("description"))
+        self.source = sers.pop("source")
+        self.description = sers.pop("description")
         model_fields = [f.name for f in fields(cast(Any, sm_cls)) if f.init]
         smserd = {x: sers.at[x] for x in model_fields}
-        setattr(self, "model", cast(Any, sm_cls)(**smserd))
+        self.model = cast(Any, sm_cls)(**smserd)
         return self
 
     @staticmethod
@@ -1660,5 +1660,5 @@ class Soil:
         source: SourceNames = "Staring_2001" if year_str == "2001" else "Staring_2018"
         self.from_name(sm=Genuchten, source=source)
         ss = SoilSample().from_staring(name=self.name, year=year_str)
-        setattr(self, "sample", ss)
+        self.sample = ss
         return self

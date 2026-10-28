@@ -1,6 +1,6 @@
 from dataclasses import MISSING, fields
 from logging import getLogger
-from typing import Any, Type, cast
+from typing import Any, cast
 
 from numpy import inf, nan
 from pandas import DataFrame
@@ -11,7 +11,7 @@ from pedon.soilmodel import SoilModel, resolve_soilmodel
 logger = getLogger(__name__)
 
 
-def _get_default_params(sm: Type[SoilModel]) -> DataFrame:
+def _get_default_params(sm: type[SoilModel]) -> DataFrame:
     """Return an empty DataFrame with the same structure as parameter DataFrames."""
     index = [
         f.name
@@ -28,7 +28,7 @@ def _get_default_params(sm: Type[SoilModel]) -> DataFrame:
 
 
 def get_params(
-    sm: Type[SoilModel] | SoilModel | SoilModelNames,
+    sm: type[SoilModel] | SoilModel | SoilModelNames,
 ) -> DataFrame:
     """Get the parameter bounds for a specific soil model."""
     smn, sm_cls = resolve_soilmodel(sm)
