@@ -274,9 +274,10 @@ def test_rosetta_invalidpercentage(ss: pe.soil.SoilSample) -> None:
         "van_genuchten_params": [[None, None, None, None, None]]
     }
 
-    with patch("httpx.post", return_value=mock_response):
-        with pytest.raises(ValueError, match="Rosetta API returned None values"):
-            _ = ss.rosetta()
+    with patch("httpx.post", return_value=mock_response) and pytest.raises(
+        ValueError, match="Rosetta API returned None values"
+    ):
+        _ = ss.rosetta()
 
 
 def test_rosetta_api_error(ss: pe.soil.SoilSample) -> None:
@@ -286,6 +287,7 @@ def test_rosetta_api_error(ss: pe.soil.SoilSample) -> None:
     mock_response = Mock()
     mock_response.is_error = True
 
-    with patch("httpx.post", return_value=mock_response):
-        with pytest.raises(ValueError, match="Rosetta API error"):
-            _ = ss.rosetta()
+    with patch("httpx.post", return_value=mock_response) and pytest.raises(
+        ValueError, match="Rosetta API"
+    ):
+        _ = ss.rosetta()

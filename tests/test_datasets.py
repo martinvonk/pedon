@@ -152,7 +152,7 @@ def test_soil_list_genuchten() -> None:
         "Limon Silt",
         "Yolo Light Clay",
     ]
-    assert all([s in gen_soils for s in gen_soils_current])
+    assert all(s in gen_soils for s in gen_soils_current)
 
 
 def test_soilsample_from_staring_invalid_year() -> None:

@@ -484,7 +484,7 @@ class Brunswick:
                 h_out[i] = h_max
             else:
 
-                def obj(x: float) -> float:
+                def obj(x: float, th: float = th) -> float:
                     return float(self.theta(x)) - float(th)
 
                 root, res = brentq(obj, a=h_min, b=h_max, full_output=True, disp=False)
@@ -1347,7 +1347,7 @@ class Gerke:
                 h_out[i] = h_max
             else:
 
-                def obj(x):
+                def obj(x: float, th: float = th):
                     return self.theta(x) - float(th)
 
                 root, res = brentq(obj, a=0.0, b=h_max, full_output=True, disp=False)
@@ -1392,7 +1392,7 @@ def resolve_soilmodel(
     sm: type[SoilModel] | SoilModel | SoilModelNames,
 ) -> tuple[str, type[SoilModel]]:
     """Normalize a soilmodel input to a `(name, class)` pair."""
-    if isinstance(sm, type):
+    if isinstance(sm, type) and issubclass(sm, SoilModel):
         return sm.__name__, sm
     if isinstance(sm, SoilModel):
         sm_cls = type(sm)
