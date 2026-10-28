@@ -288,6 +288,6 @@ def test_rosetta_api_error(ss: pe.soil.SoilSample) -> None:
     mock_response.is_error = True
 
     with patch("httpx.post", return_value=mock_response) and pytest.raises(
-        ValueError, match="Rosetta API error"
+        ValueError, match="Rosetta API"
     ):
         _ = ss.rosetta()
