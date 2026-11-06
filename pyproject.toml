@@ -98,19 +98,7 @@ commands = [["pytest", "tests"]]
 [tool.tox.env.ruff]
 description = "run ruff checks"
 extras = ["ruffing"]
-commands = [
-        [
-                "ruff",
-                "check",
-                "--extend-select",
-                "I",
-        ],
-        [
-                "ruff",
-                "format",
-                "--check",
-        ],
-]
+commands = [["ruff", "check"], ["ruff", "format", "--check"]]
 
 
 [tool.tox.env.type]
