@@ -1521,7 +1521,7 @@ class SoilModelConverter:
                 h_b=a_inv,  # h_ce maps to h_b
                 l=lamb,  # lambda maps to l
             )
-        elif isinstance(sm, Brooks):  # noqa: RET505
+        elif isinstance(sm, Brooks):
             # Convert Brooks-Corey to van Genuchten
             # Calculate p from l using Corey relationship (8a)
             # p = 3 + 2*M, where M is lambda (l)
