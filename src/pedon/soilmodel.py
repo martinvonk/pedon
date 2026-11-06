@@ -1460,8 +1460,7 @@ class SoilModelConverter:
 
     @staticmethod
     def morel(sm: Genuchten | Brooks | Panday) -> Panday | Brooks | Genuchten:
-        """Convert between van Genuchten and Brooks-Corey models using the Morel-Seytoux
-        equivalence method, which preserves the effective capillary drive.
+        """Convert between van Genuchten and Brooks-Corey models.
 
         This method implements the parameter equivalence from Morel-Seytoux et al. (1996),
         providing conversion between Brooks-Corey (BC) and van Genuchten (vG) parameters
@@ -1563,7 +1562,7 @@ class SoilModelConverter:
 
     @staticmethod
     def ghezzehei(sm: Genuchten) -> Gardner:
-        """Converts van Genuchten model to Gardner model using Ghezzehei et al. (2007).
+        """Convert van Genuchten model to Gardner model using Ghezzehei et al. (2007).
 
         Estimates the Gardner sorptive number c (= alpha_G) from van Genuchten's n
         and alpha parameters using eq. (17): c = 1.3 * n * alpha. The air entry
@@ -1635,7 +1634,7 @@ class SoilModelConverter:
 
     @staticmethod
     def peche(sm: Genuchten) -> Gardner:
-        """Converts van Genuchten model to Gardner model using Peche et al.
+        """Convert van Genuchten model to Gardner model using Peche et al.
 
         Estimates the Gardner c parameter and m parameter (exponential retention curve model) from van Genuchten's
         alpha, n, and m parameters.
