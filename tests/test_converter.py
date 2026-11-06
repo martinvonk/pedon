@@ -1,3 +1,5 @@
+"""Test the SoilModelConverter class."""
+
 import pytest
 
 import pedon as pe
@@ -69,6 +71,7 @@ def test_morel_invalid_type_raises() -> None:
 
 def test_ghezzehei_returns_gardner(genuchten: pe.Genuchten) -> None:
     """Test converting a Genuchten soil model to a Gardner soil model using the Ghezzehei method."""
+    genuchten.n = 2.1
     result = SoilModelConverter.ghezzehei(genuchten)
     assert isinstance(result, pe.Gardner)
     assert result.k_s == genuchten.k_s
@@ -89,6 +92,7 @@ def test_ghezzehei_low_n_raises(genuchten: pe.Genuchten) -> None:
 
 def test_ghezzehei_c_value(genuchten: pe.Genuchten) -> None:
     """Test that the c value of the Gardner model returned by the Ghezzehei method is approximately 1.3 * n * alpha."""
+    genuchten.n = 2.1
     result = SoilModelConverter.ghezzehei(genuchten)
     assert result.c == pytest.approx(1.3 * genuchten.n * genuchten.alpha)
 
