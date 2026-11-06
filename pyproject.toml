@@ -12,13 +12,14 @@ license = { file = "LICENSE" }
 requires-python = ">=3.11"
 dependencies = ["numpy", "matplotlib", "pandas", "scipy"]
 classifiers = [
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.11',
-        'Programming Language :: Python :: 3.12',
-        'Programming Language :: Python :: 3.13',
-        'Programming Language :: Python :: 3.14',
-        'Topic :: Scientific/Engineering :: Hydrology',
-        'Intended Audience :: Science/Research',
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+        "Programming Language :: Python :: 3.15",
+        "Topic :: Scientific/Engineering :: Hydrology",
+        "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Typing :: Typed",
@@ -88,7 +89,16 @@ fix = true
 
 [tool.tox]
 requires = ["tox-uv>=1.0"]
-env_list = ["py311", "py312", "py313", "py314", "type", "ruff", "typety"]
+env_list = [
+        "py311",
+        "py312",
+        "py313",
+        "py314",
+        "py315",
+        "type",
+        "ruff",
+        "typety",
+]
 
 [tool.tox.env_run_base]
 description = "run unit tests"
@@ -98,19 +108,7 @@ commands = [["pytest", "tests"]]
 [tool.tox.env.ruff]
 description = "run ruff checks"
 extras = ["ruffing"]
-commands = [
-        [
-                "ruff",
-                "check",
-                "--extend-select",
-                "I",
-        ],
-        [
-                "ruff",
-                "format",
-                "--check",
-        ],
-]
+commands = [["ruff", "check"], ["ruff", "format", "--check"]]
 
 
 [tool.tox.env.type]
